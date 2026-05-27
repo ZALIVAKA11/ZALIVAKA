@@ -244,6 +244,8 @@
     let tgUser = null;
     try { if (window.Telegram?.WebApp?.initDataUnsafe?.user) tgUser = window.Telegram.WebApp.initDataUnsafe.user; } catch(e) {}
     const username = tgUser ? (tgUser.first_name || 'Vaper') : 'Vaper_Dimasta';
+    const tgId = tgUser ? tgUser.id : 'неизвестен';
+    const tgUsername = tgUser ? (tgUser.username ? '@' + tgUser.username : 'нет юзернейма') : 'неизвестен';
     document.getElementById('welcomeUsername').textContent = username;
     document.getElementById('profileUsername').textContent = username;
     if (tgUser?.photo_url) document.getElementById('avatarContainer').innerHTML = `<img src="${tgUser.photo_url}" alt="avatar">`;
@@ -376,7 +378,9 @@
       if (point === 'Выберите точку') return alert('Выберите точку заливки');
       if (volume === 'Выберите объём') return alert('Выберите объём');
       const priceText = document.getElementById('priceDisplay').querySelector('span').textContent;
-      const confirmText = `Точка: ${point}${point==='Другое место доставки'&&address?' ('+address+')':''}\nБак: ${tankSize} мл\nОбъём: ${volume}${customVolume?` (${customVolume} мл)`:''}\nОплата: ${payment}\n${comment?`Комментарий: ${comment}\n`:''}${priceText}`;
+      const userInfo = `👤 Заказчик: ${username}\n🆔 ID: ${tgId}\n📛 Username: ${tgUsername}`;
+      const orderInfo = `📍 Точка: ${point}${point==='Другое место доставки'&&address?' ('+address+')':''}\n🧪 Бак: ${tankSize} мл\n💧 Объём: ${volume}${customVolume?` (${customVolume} мл)`:''}\n💳 Оплата: ${payment}\n${comment?`💬 Комментарий: ${comment}\n`:''}${priceText}`;
+      const confirmText = `${userInfo}\n\n${orderInfo}`;
       document.getElementById('confirmText').innerText = confirmText;
       document.getElementById('confirmModal').classList.add('open');
       document.getElementById('confirmYesBtn').onclick = async function() {
