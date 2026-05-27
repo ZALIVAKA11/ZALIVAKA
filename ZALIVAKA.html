@@ -8,58 +8,13 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      position: fixed;
-      top: 0;
-      left: 0;
-      touch-action: manipulation;
-      -webkit-user-select: none;
-      user-select: none;
-      background: #030711;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #f0f4ff;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* Скрываем стандартный скроллбар */
-    ::-webkit-scrollbar {
-      display: none;
-    }
-    * {
-      scrollbar-width: none;
-    }
-
-    .bg-decoration {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .bg-circle {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(90px);
-      opacity: 0.06;
-      animation: float 20s infinite ease-in-out;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; position: fixed; top: 0; left: 0; touch-action: manipulation; -webkit-user-select: none; user-select: none; background: #030711; }
+    body { font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; color: #f0f4ff; -webkit-tap-highlight-color: transparent; }
+    ::-webkit-scrollbar { display: none; }
+    * { scrollbar-width: none; }
+    .bg-decoration { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+    .bg-circle { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.06; animation: float 20s infinite ease-in-out; }
     .bg-circle.c1 { width: 450px; height: 450px; background: #0088ff; top: -15%; left: -10%; }
     .bg-circle.c2 { width: 350px; height: 350px; background: #00aaff; bottom: -10%; right: -5%; animation-delay: -7s; }
     .bg-circle.c3 { width: 200px; height: 200px; background: #66ccff; top: 40%; left: 60%; opacity: 0.04; }
@@ -71,63 +26,18 @@
     .float-icon:nth-child(4) { top: 55%; left: 75%; animation-duration: 22s; animation-delay: -3s; }
     .float-icon:nth-child(5) { top: 85%; left: 50%; animation-duration: 26s; animation-delay: -8s; }
     .float-icon:nth-child(6) { top: 40%; left: 40%; animation-duration: 20s; animation-delay: -12s; }
-
-    @keyframes drift {
-      0% { transform: translate(0, 0) rotate(0deg); }
-      25% { transform: translate(30px, -25px) rotate(5deg); }
-      50% { transform: translate(-15px, 35px) rotate(-3deg); }
-      75% { transform: translate(-35px, -15px) rotate(2deg); }
-      100% { transform: translate(0, 0) rotate(0deg); }
-    }
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      25% { transform: translate(45px, -35px) scale(1.1); }
-      50% { transform: translate(-25px, 30px) scale(0.92); }
-      75% { transform: translate(-40px, -20px) scale(1.04); }
-    }
-    @keyframes floatIcon {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-    @keyframes softPulse {
-      0%, 100% { box-shadow: 0 10px 25px rgba(0,136,255,0.25); }
-      50% { box-shadow: 0 15px 35px rgba(0,170,255,0.4); }
-    }
-    @keyframes rotate {
-      100% { transform: rotate(360deg); }
-    }
-
-    .app-container {
-      width: 100vw;
-      height: 100vh;
-      max-width: 100vw;
-      max-height: 100vh;
-      background: rgba(10, 15, 27, 0.75);
-      backdrop-filter: blur(50px);
-      -webkit-backdrop-filter: blur(50px);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-      z-index: 1;
-    }
-
-    .screen {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      overflow-x: hidden;
-      position: relative;
-      padding-bottom: 75px;
-    }
+    @keyframes drift { 0% { transform: translate(0, 0) rotate(0deg); } 25% { transform: translate(30px, -25px) rotate(5deg); } 50% { transform: translate(-15px, 35px) rotate(-3deg); } 75% { transform: translate(-35px, -15px) rotate(2deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+    @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 25% { transform: translate(45px, -35px) scale(1.1); } 50% { transform: translate(-25px, 30px) scale(0.92); } 75% { transform: translate(-40px, -20px) scale(1.04); } }
+    @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    @keyframes softPulse { 0%, 100% { box-shadow: 0 10px 25px rgba(0,136,255,0.25); } 50% { box-shadow: 0 15px 35px rgba(0,170,255,0.4); } }
+    @keyframes rotate { 100% { transform: rotate(360deg); } }
+    .app-container { width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; background: rgba(10, 15, 27, 0.75); backdrop-filter: blur(50px); -webkit-backdrop-filter: blur(50px); display: flex; flex-direction: column; overflow: hidden; position: relative; z-index: 1; }
+    .screen { flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; position: relative; padding-bottom: 75px; }
     .screen.hidden { display: none !important; }
-
     .welcome-screen { justify-content: center; align-items: center; text-align: center; padding: 40px 24px; background: radial-gradient(circle at 30% 30%, rgba(0,136,255,0.05), transparent 70%); }
     .morning-icon { font-size: 72px; color: #00aaff; text-shadow: 0 0 30px rgba(0,170,255,0.5); animation: floatIcon 3s infinite ease-in-out; margin-bottom: 20px; }
     .welcome-title { font-family: 'Playfair Display', serif; font-size: clamp(28px, 7vw, 36px); font-weight: 600; background: linear-gradient(135deg, #ffffff, #99ccff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px; }
     .welcome-subtitle { font-size: clamp(16px, 4vw, 18px); color: #a0b9d9; }
-
     .profile-screen { justify-content: center; align-items: center; padding: 44px 24px 24px; }
     .avatar-frame { width: 105px; height: 105px; border-radius: 50%; background: linear-gradient(135deg, #0088ff, #00aaff); padding: 3px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,136,255,0.3); animation: softPulse 3s infinite; position: relative; }
     .avatar-frame::after { content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px; border-radius: 50%; border: 1px dashed rgba(255,255,255,0.2); animation: rotate 12s linear infinite; pointer-events: none; }
@@ -140,7 +50,6 @@
     .stat-value { font-weight: 700; font-size: 20px; color: #00aaff; }
     .stat-label { font-size: 10px; color: #7b8ca8; text-transform: uppercase; margin-top: 4px; }
     .balance-badge { background: rgba(0,136,255,0.06); backdrop-filter: blur(25px); border-radius: 34px; padding: 14px 32px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(0,170,255,0.25); margin-top: 10px; }
-
     .flavor-screen { background: rgba(10, 15, 27, 0.95); backdrop-filter: blur(30px); padding: 20px 16px; }
     .flavor-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
     .flavor-header h2 { font-weight: 600; font-size: 20px; color: #e0f0ff; flex: 1; }
@@ -153,7 +62,6 @@
     .flavor-info { flex: 1; }
     .flavor-name { font-weight: 600; color: #e0f0ff; }
     .flavor-prefix { font-size: 13px; color: #7b8ca8; }
-
     .order-screen { background: rgba(10, 15, 27, 0.95); backdrop-filter: blur(30px); padding: 20px 16px; }
     .order-section { margin-bottom: 20px; }
     .order-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 10px; color: #e0f0ff; }
@@ -165,19 +73,18 @@
     .order-select-option { padding: 14px 18px; cursor: pointer; color: #ccc; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .order-select-option:last-child { border-bottom: none; }
     .order-select-option:active { background: rgba(0,136,255,0.2); }
-    .order-input { width: 100%; background: rgba(20, 26, 36, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 14px 18px; color: white; font-family: 'Inter', sans-serif; font-size: 15px; outline: none; margin-top: 8px; }
+    .order-input { width: 100%; background: rgba(20, 26, 36, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 14px 18px; color: white; font-family: 'Inter', sans-serif; font-size: 15px; outline: none; margin-top: 8px; display: none; }
+    .order-input.visible { display: block; }
     .order-input::placeholder { color: #6b7c9e; }
-    .order-btn { background: linear-gradient(135deg, #0088ff, #0066cc); border: none; color: white; font-weight: 600; padding: 16px 36px; border-radius: 36px; font-size: 16px; cursor: pointer; box-shadow: 0 8px 22px rgba(0,136,255,0.35); width: 100%; margin-top: 10px; }
+    .order-btn { background: linear-gradient(135deg, #0088ff, #0066cc); border: none; color: white; font-weight: 700; padding: 18px 36px; border-radius: 36px; font-size: 17px; cursor: pointer; box-shadow: 0 10px 28px rgba(0,136,255,0.45); width: 100%; margin-top: 10px; }
     .order-btn:active { transform: scale(0.97); }
-    .price-display { text-align: center; font-size: 18px; font-weight: 700; color: #00aaff; margin: 16px 0; }
-
+    .price-display { text-align: center; font-size: 20px; font-weight: 700; color: #00aaff; margin: 18px 0; }
     .map-screen { flex-direction: column; background: #030711; padding-bottom: 0; }
     .map-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: rgba(10, 15, 27, 0.85); backdrop-filter: blur(20px); position: relative; z-index: 10; }
     .map-title { font-weight: 600; font-size: 15px; color: #f0f4ff; }
     .map-close { background: rgba(255,255,255,0.06); border: none; color: #ccc; font-size: 18px; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
     .map-close:active { background: rgba(255,255,255,0.2); }
     #map { flex: 1; width: 100%; background: #030711; }
-
     .bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; align-items: center; gap: clamp(16px, 5vw, 24px); padding: 10px 20px 16px; background: rgba(8, 12, 20, 0.7); backdrop-filter: blur(45px); border-top: 1px solid rgba(255,255,255,0.05); z-index: 100; }
     .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border: none; color: #7b8ca8; font-family: 'Inter', sans-serif; cursor: pointer; padding: 6px 10px; border-radius: 16px; }
     .nav-btn i { font-size: clamp(20px, 5vw, 22px); }
@@ -188,13 +95,17 @@
     .center-btn span { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #b0c8e0; }
     .center-btn:active { transform: scale(0.95); border-color: rgba(0,170,255,0.7); }
     .custom-marker { background: none !important; border: none !important; }
-
-    @media (max-width: 380px) {
-      .center-btn { width: 64px; height: 64px; }
-      .center-btn i { font-size: 24px; }
-      .screen { padding-bottom: 65px; }
-      .screen.map-screen { padding-bottom: 0; }
-    }
+    /* Модальное окно подтверждения */
+    .confirm-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .confirm-modal.open { opacity: 1; pointer-events: auto; }
+    .confirm-box { background: rgba(20, 26, 38, 0.95); border-radius: 36px; padding: 28px 22px; width: 90%; max-width: 360px; text-align: center; border: 1px solid rgba(0,170,255,0.2); }
+    .confirm-box h3 { margin-bottom: 12px; }
+    .confirm-box p { color: #b0c7e0; margin-bottom: 20px; font-size: 14px; }
+    .confirm-actions { display: flex; gap: 12px; justify-content: center; }
+    .confirm-btn { padding: 12px 28px; border-radius: 30px; font-weight: 600; border: none; cursor: pointer; font-size: 15px; }
+    .confirm-yes { background: linear-gradient(135deg, #0088ff, #0066cc); color: white; }
+    .confirm-no { background: rgba(255,255,255,0.08); color: #ccc; }
+    @media (max-width: 380px) { .center-btn { width: 64px; height: 64px; } .center-btn i { font-size: 24px; } .screen { padding-bottom: 65px; } .screen.map-screen { padding-bottom: 0; } }
   </style>
 </head>
 <body>
@@ -226,68 +137,38 @@
   </div>
 
   <div class="screen flavor-screen hidden" id="flavorScreen">
-    <div class="flavor-header">
-      <button class="back-btn" id="backFromFlavorBtn"><i class="fas fa-arrow-left"></i></button>
-      <h2>Выбери жижу</h2>
-    </div>
+    <div class="flavor-header"><button class="back-btn" id="backFromFlavorBtn"><i class="fas fa-arrow-left"></i></button><h2>Выбери жижу</h2></div>
     <div class="flavor-list" id="flavorList"></div>
   </div>
 
   <div class="screen flavor-screen hidden" id="tasteScreen">
-    <div class="flavor-header">
-      <button class="back-btn" id="backFromTasteBtn"><i class="fas fa-arrow-left"></i></button>
-      <h2 id="tasteScreenTitle">Выбери вкус</h2>
-    </div>
+    <div class="flavor-header"><button class="back-btn" id="backFromTasteBtn"><i class="fas fa-arrow-left"></i></button><h2 id="tasteScreenTitle">Выбери вкус</h2></div>
     <div class="flavor-list" id="tasteList"></div>
   </div>
 
   <div class="screen order-screen hidden" id="orderScreen">
-    <div class="flavor-header">
-      <button class="back-btn" id="backFromOrderBtn"><i class="fas fa-arrow-left"></i></button>
-      <h2>Оформление заказа</h2>
-    </div>
+    <div class="flavor-header"><button class="back-btn" id="backFromOrderBtn"><i class="fas fa-arrow-left"></i></button><h2>Оформление заказа</h2></div>
     <div style="flex:1; overflow-y:auto;">
-      <div class="order-section">
-        <h3>1. Выберите точку для заливки</h3>
-        <div class="order-select" id="pointSelect">
-          <div class="order-select-trigger" id="pointTrigger"><span>Выберите точку</span> <i class="fas fa-chevron-down"></i></div>
-          <div class="order-select-options" id="pointOptions"></div>
-        </div>
-        <input type="text" class="order-input hidden" id="customAddressInput" placeholder="Введите адрес...">
+      <div class="order-section"><h3>1. Выберите точку для заливки</h3>
+        <div class="order-select" id="pointSelect"><div class="order-select-trigger" id="pointTrigger"><span>Выберите точку</span> <i class="fas fa-chevron-down"></i></div><div class="order-select-options" id="pointOptions"></div></div>
+        <input type="text" class="order-input" id="customAddressInput" placeholder="Введите адрес...">
       </div>
-      <div class="order-section">
-        <h3>2. Размер вашего бака (мл)</h3>
-        <input type="number" class="order-input" id="tankSizeInput" placeholder="Например: 4" min="0.5" step="0.5" inputmode="decimal">
-      </div>
-      <div class="order-section">
-        <h3>3. Сколько вам надо мл?</h3>
-        <div class="order-select" id="volumeSelect">
-          <div class="order-select-trigger" id="volumeTrigger"><span>Выберите объём</span> <i class="fas fa-chevron-down"></i></div>
-          <div class="order-select-options" id="volumeOptions"></div>
-        </div>
-        <input type="number" class="order-input hidden" id="customVolumeInput" placeholder="Введите количество мл..." min="0.5" step="0.5" inputmode="decimal">
+      <div class="order-section"><h3>2. Размер вашего бака (мл)</h3><input type="number" class="order-input visible" id="tankSizeInput" placeholder="Например: 4" min="0.5" step="0.5" inputmode="decimal"></div>
+      <div class="order-section"><h3>3. Сколько вам надо мл?</h3>
+        <div class="order-select" id="volumeSelect"><div class="order-select-trigger" id="volumeTrigger"><span>Выберите объём</span> <i class="fas fa-chevron-down"></i></div><div class="order-select-options" id="volumeOptions"></div></div>
+        <input type="number" class="order-input" id="customVolumeInput" placeholder="Введите количество мл..." min="0.5" step="0.5" inputmode="decimal">
       </div>
       <div class="price-display" id="priceDisplay">Цена: 0 BYN</div>
-      <div class="order-section">
-        <h3>4. Способ оплаты</h3>
-        <div class="order-select" id="paymentSelect">
-          <div class="order-select-trigger" id="paymentTrigger"><span>Выберите способ</span> <i class="fas fa-chevron-down"></i></div>
-          <div class="order-select-options" id="paymentOptions"></div>
-        </div>
+      <div class="order-section"><h3>4. Способ оплаты</h3>
+        <div class="order-select" id="paymentSelect"><div class="order-select-trigger" id="paymentTrigger"><span>Выберите способ</span> <i class="fas fa-chevron-down"></i></div><div class="order-select-options" id="paymentOptions"></div></div>
       </div>
-      <div class="order-section">
-        <h3>5. Комментарий к заказу</h3>
-        <input type="text" class="order-input" id="commentInput" placeholder="Ваш комментарий...">
-      </div>
+      <div class="order-section"><h3>5. Комментарий к заказу</h3><input type="text" class="order-input visible" id="commentInput" placeholder="Ваш комментарий..."></div>
       <button class="order-btn" id="submitOrderBtn"><i class="fas fa-check-circle"></i> Оформить заказ</button>
     </div>
   </div>
 
   <div class="screen map-screen hidden" id="mapScreen">
-    <div class="map-header">
-      <span class="map-title"><i class="fas fa-map-pin"></i> Точки быстрой заливки</span>
-      <button class="map-close" id="closeMapBtn"><i class="fas fa-times"></i></button>
-    </div>
+    <div class="map-header"><span class="map-title"><i class="fas fa-map-pin"></i> Точки быстрой заливки</span><button class="map-close" id="closeMapBtn"><i class="fas fa-times"></i></button></div>
     <div id="map"></div>
   </div>
 
@@ -295,6 +176,17 @@
     <button class="nav-btn active" id="profileNavBtn"><i class="fas fa-user-circle"></i><span>Профиль</span></button>
     <button class="center-btn" id="juiceNavBtn"><i class="fas fa-syringe"></i><span>Залить</span></button>
     <button class="nav-btn" id="mapNavBtn"><i class="fas fa-map-location-dot"></i><span>Точки</span></button>
+  </div>
+</div>
+
+<div class="confirm-modal" id="confirmModal">
+  <div class="confirm-box">
+    <h3>Подтверждение заказа</h3>
+    <p id="confirmText"></p>
+    <div class="confirm-actions">
+      <button class="confirm-btn confirm-yes" id="confirmYesBtn">Да, подтверждаю</button>
+      <button class="confirm-btn confirm-no" id="confirmNoBtn">Отмена</button>
+    </div>
   </div>
 </div>
 
@@ -307,10 +199,7 @@
       ['welcomeScreen','profileScreen','flavorScreen','tasteScreen','orderScreen','mapScreen'].forEach(id => document.getElementById(id).classList.add('hidden'));
       document.querySelectorAll('.order-select-options').forEach(o => o.classList.remove('open'));
     };
-    window.setActiveNav = function(btn) {
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-    };
+    window.setActiveNav = function(btn) { document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); if (btn) btn.classList.add('active'); };
     window.showWelcome = function() { window.hideAllScreens(); document.getElementById('welcomeScreen').classList.remove('hidden'); window.setActiveNav(null); };
     window.showProfile = function() { window.hideAllScreens(); document.getElementById('profileScreen').classList.remove('hidden'); window.setActiveNav(document.getElementById('profileNavBtn')); if (typeof window.updateStreak==='function') window.updateStreak(); };
     window.showFlavorSelection = function() { window.hideAllScreens(); document.getElementById('flavorScreen').classList.remove('hidden'); window.setActiveNav(null); if (typeof window.loadFlavors==='function' && document.getElementById('flavorList').children.length===0) window.loadFlavors(); };
@@ -322,10 +211,7 @@
     document.getElementById('closeMapBtn').onclick = window.showProfile;
     document.getElementById('backFromFlavorBtn').onclick = window.showProfile;
     document.getElementById('backFromTasteBtn').onclick = window.showFlavorSelection;
-    document.getElementById('backFromOrderBtn').onclick = function() {
-      window.hideAllScreens();
-      document.getElementById('tasteScreen').classList.remove('hidden');
-    };
+    document.getElementById('backFromOrderBtn').onclick = function() { window.hideAllScreens(); document.getElementById('tasteScreen').classList.remove('hidden'); };
 
     // ========== TELEGRAM ==========
     let tgUser = null;
@@ -362,7 +248,6 @@
       el.innerHTML = `<span class="stat-value">${streak}🔥</span><span class="stat-label">дней подряд</span>`;
     };
 
-    // ========== КАТЕГОРИИ ==========
     window.loadFlavors = async function() {
       const c = document.getElementById('flavorList');
       try {
@@ -390,56 +275,39 @@
     };
 
     // ========== ВСПЛЫВАЮЩИЕ СЕЛЕКТЫ ==========
-    function toggleSelect(trigger, optionsDiv) {
-      const isOpen = optionsDiv.classList.contains('open');
-      document.querySelectorAll('.order-select-options').forEach(o => o.classList.remove('open'));
-      if (!isOpen) optionsDiv.classList.add('open');
-    }
-
     function initSelect(triggerId, optionsId, onSelect) {
       const trigger = document.getElementById(triggerId);
       const options = document.getElementById(optionsId);
-      trigger.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleSelect(trigger, options);
-      });
+      trigger.addEventListener('click', (e) => { e.stopPropagation(); const isOpen = options.classList.contains('open'); document.querySelectorAll('.order-select-options').forEach(o => o.classList.remove('open')); if (!isOpen) options.classList.add('open'); });
       options.addEventListener('click', (e) => {
         const option = e.target.closest('.order-select-option');
-        if (option) {
-          trigger.querySelector('span').textContent = option.dataset.value;
-          options.classList.remove('open');
-          if (onSelect) onSelect(option.dataset.value);
-        }
+        if (option) { trigger.querySelector('span').textContent = option.dataset.value; options.classList.remove('open'); if (onSelect) onSelect(option.dataset.value); }
       });
       document.addEventListener('click', () => options.classList.remove('open'));
     }
 
-    // ========== ОФОРМЛЕНИЕ ЗАКАЗА ==========
     window.showOrderScreen = function(taste, fullName) {
       window.hideAllScreens();
       document.getElementById('orderScreen').classList.remove('hidden');
       document.getElementById('orderScreen').querySelector('h2').textContent = `Заказ: ${fullName || taste}`;
 
-      // Точки
       const points = ['Западный','Черепки','Киселевичи','Ж/Д вокзал','Держинка','Другое место доставки'];
       document.getElementById('pointOptions').innerHTML = points.map(p => `<div class="order-select-option" data-value="${p}">${p}</div>`).join('');
       document.getElementById('pointTrigger').querySelector('span').textContent = 'Выберите точку';
-      document.getElementById('customAddressInput').classList.add('hidden');
+      document.getElementById('customAddressInput').classList.remove('visible');
       initSelect('pointTrigger', 'pointOptions', function(value) {
-        document.getElementById('customAddressInput').classList.toggle('hidden', value !== 'Другое место доставки');
+        document.getElementById('customAddressInput').classList.toggle('visible', value === 'Другое место доставки');
       });
 
-      // Объём
       const volumes = ['До ватки','Полбака','Фулл бак','Другое количество'];
       document.getElementById('volumeOptions').innerHTML = volumes.map(v => `<div class="order-select-option" data-value="${v}">${v}</div>`).join('');
       document.getElementById('volumeTrigger').querySelector('span').textContent = 'Выберите объём';
-      document.getElementById('customVolumeInput').classList.add('hidden');
+      document.getElementById('customVolumeInput').classList.remove('visible');
       initSelect('volumeTrigger', 'volumeOptions', function(value) {
-        document.getElementById('customVolumeInput').classList.toggle('hidden', value !== 'Другое количество');
+        document.getElementById('customVolumeInput').classList.toggle('visible', value === 'Другое количество');
         updatePrice();
       });
 
-      // Оплата
       document.getElementById('paymentOptions').innerHTML = ['Наличными','Картой'].map(p => `<div class="order-select-option" data-value="${p}">${p}</div>`).join('');
       document.getElementById('paymentTrigger').querySelector('span').textContent = 'Выберите способ';
       initSelect('paymentTrigger', 'paymentOptions', null);
@@ -462,6 +330,16 @@
       document.getElementById('priceDisplay').textContent = `Цена: ${ml} BYN`;
     }
 
+    // ========== ОТПРАВКА В ДИСКОРД ==========
+    const webhooks = {
+      'Киселевичи': 'https://discord.com/api/webhooks/1508956035619098857/zePPerF2NfzuaHiae9I0o_ssCDdC9rRAl07SFNO6DmBqgnhAYmOERpwHZAsKoa_kfppK',
+      'Западный': 'https://discord.com/api/webhooks/1508956040761184336/zATQDtXD_-qIM48t-DIPTvfBptxg_Y4SdlSs6noHC4UtR3Gi-sBrlS1EZUsIpwrJSUUj',
+      'Черепки': 'https://discord.com/api/webhooks/1508956039339577486/N801vXVcKQPgqNVcjkxWyEr_5MGcJtnxBf5H7IXYI0IuBs6x4XvCiRsEyRXvGA4lRpoQ',
+      'Ж/Д вокзал': 'https://discord.com/api/webhooks/1508956041487056937/oNvGPEqIk5FKLUmfARlWkW3u1zDOK1EXpsmAJGhJ8BuidHHHtYRiutswXmK-YxWAIIzy',
+      'Держинка': 'https://discord.com/api/webhooks/1508956042367598734/xpPUAWjd2VVyOGOGcvUisTdxlUYLm-RWF7PgdZatOkR34ahaEL2oyHG8D4QUyn2YcWWj',
+      'Другое место доставки': 'https://discord.com/api/webhooks/1508956053172392147/8A7bUKzFHUAyqbpmsyYNBETHqGOG_E2xc2ZoVezfg1Cmjen9r6SJoGDUCXvqLbghenT5'
+    };
+
     document.getElementById('submitOrderBtn').onclick = function() {
       const point = document.getElementById('pointTrigger').querySelector('span').textContent;
       const address = document.getElementById('customAddressInput').value;
@@ -473,9 +351,21 @@
       if (point === 'Выберите точку') return alert('Выберите точку заливки');
       if (!tankSize || parseFloat(tankSize)<=0) return alert('Введите размер бака');
       if (volume === 'Выберите объём') return alert('Выберите объём');
+
       const priceText = document.getElementById('priceDisplay').textContent;
-      alert(`Заказ оформлен!\nТочка: ${point}${point==='Другое место доставки'&&address?' ('+address+')':''}\nБак: ${tankSize} мл\nОбъём: ${volume}${customVolume?` (${customVolume} мл)`:''}\nОплата: ${payment}\n${comment?`Комментарий: ${comment}\n`:''}${priceText}`);
-      window.showProfile();
+      const confirmText = `Точка: ${point}${point==='Другое место доставки'&&address?' ('+address+')':''}\nБак: ${tankSize} мл\nОбъём: ${volume}${customVolume?` (${customVolume} мл)`:''}\nОплата: ${payment}\n${comment?`Комментарий: ${comment}\n`:''}${priceText}`;
+      document.getElementById('confirmText').innerText = confirmText;
+      document.getElementById('confirmModal').classList.add('open');
+
+      document.getElementById('confirmYesBtn').onclick = async function() {
+        document.getElementById('confirmModal').classList.remove('open');
+        const webhookUrl = webhooks[point] || webhooks['Другое место доставки'];
+        const payload = { content: `**Новый заказ!**\n${confirmText}` };
+        try { await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); } catch(e) {}
+        alert('Заказ отправлен!');
+        window.showProfile();
+      };
+      document.getElementById('confirmNoBtn').onclick = function() { document.getElementById('confirmModal').classList.remove('open'); };
     };
 
     // ========== КАРТА ==========
@@ -483,26 +373,18 @@
       const el = document.getElementById('map');
       if (!el || el.offsetWidth===0 || el.offsetHeight===0) { setTimeout(window.initMap,200); return; }
       if (window.mapInstance) { window.mapInstance.invalidateSize(); return; }
-      window.mapInstance = L.map('map', {
-        center: [53.15,29.20], zoom:13, zoomControl:true, dragging:true, scrollWheelZoom:true, doubleClickZoom:true, touchZoom:true, attributionControl:false
-      });
+      window.mapInstance = L.map('map', { center: [53.15,29.20], zoom:13, zoomControl:true, dragging:true, scrollWheelZoom:true, doubleClickZoom:true, touchZoom:true, attributionControl:false });
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution:'', maxZoom:19 }).addTo(window.mapInstance);
       const pts = [
-        [53.141822,29.160164,'Киселевичи','10:00–03:00'],
-        [53.163148,29.176973,'Западный','12:00–23:00'],
-        [53.154420,29.160507,'Черепки','12:00–23:00'],
-        [53.139830,29.195309,'ЖД вокзал','15:00–21:00'],
-        [53.133610,29.227515,'Держинка','15:00–21:00']
+        [53.141822,29.160164,'Киселевичи','24/7','Бесплатная доставка в радиусе 1 км, дальше по тарифу.'],
+        [53.163148,29.176973,'Западный','12:00–23:00','Бесплатная доставка в радиусе 1 км, дальше по тарифу. После закрытия — переплата.'],
+        [53.154420,29.160507,'Черепки','12:00–23:00','Бесплатная доставка в радиусе 1 км, дальше по тарифу. После закрытия — переплата.'],
+        [53.139830,29.195309,'ЖД вокзал','15:00–21:00','Бесплатная доставка в радиусе 1 км, дальше по тарифу. После закрытия — переплата.'],
+        [53.133610,29.227515,'Держинка','15:00–21:00','Бесплатная доставка в радиусе 1 км, дальше по тарифу. После закрытия — переплата.']
       ];
-      pts.forEach(([lat,lng,name,time]) => {
-        L.marker([lat,lng], {
-          icon: L.divIcon({
-            html: `<i class="fas fa-map-pin" style="font-size:28px;color:#00aaff;filter:drop-shadow(0 0 8px #00aaff);background:none;"></i>`,
-            className: 'custom-marker',
-            iconSize:[28,28],
-            iconAnchor:[14,28]
-          })
-        }).addTo(window.mapInstance).bindPopup(`<div style="font-family:Inter,sans-serif;color:#111;padding:4px;"><b>${name}</b><br>🕒 ${time}</div>`);
+      pts.forEach(([lat,lng,name,time,desc]) => {
+        L.marker([lat,lng], { icon: L.divIcon({ html: `<i class="fas fa-map-pin" style="font-size:28px;color:#00aaff;filter:drop-shadow(0 0 8px #00aaff);background:none;"></i>`, className:'custom-marker', iconSize:[28,28], iconAnchor:[14,28] }) })
+          .addTo(window.mapInstance).bindPopup(`<div style="font-family:Inter,sans-serif;color:#111;padding:4px;"><b>${name}</b><br>🕒 ${time}<br>${desc}</div>`);
       });
       setTimeout(()=>window.mapInstance.invalidateSize(),100);
     };
