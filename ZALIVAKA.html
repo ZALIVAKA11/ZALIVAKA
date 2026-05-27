@@ -38,18 +38,22 @@
     .morning-icon { font-size: 72px; color: #00aaff; text-shadow: 0 0 30px rgba(0,170,255,0.5); animation: floatIcon 3s infinite ease-in-out; margin-bottom: 20px; }
     .welcome-title { font-family: 'Playfair Display', serif; font-size: clamp(28px, 7vw, 36px); font-weight: 600; background: linear-gradient(135deg, #ffffff, #99ccff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px; }
     .welcome-subtitle { font-size: clamp(16px, 4vw, 18px); color: #a0b9d9; }
-    .profile-screen { justify-content: center; align-items: center; padding: 44px 24px 24px; }
+
+    .profile-screen { justify-content: center; align-items: center; padding: 44px 24px 24px; position: relative; }
+    .profile-screen::before { content: ''; position: absolute; top: 15px; left: 25px; right: 25px; height: 1px; background: linear-gradient(to right, transparent, rgba(0,170,255,0.3), transparent); }
+    .profile-screen::after { content: ''; position: absolute; bottom: 15px; left: 25px; right: 25px; height: 1px; background: linear-gradient(to right, transparent, rgba(0,170,255,0.15), transparent); }
     .avatar-frame { width: 105px; height: 105px; border-radius: 50%; background: linear-gradient(135deg, #0088ff, #00aaff); padding: 3px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,136,255,0.3); animation: softPulse 3s infinite; position: relative; }
     .avatar-frame::after { content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px; border-radius: 50%; border: 1px dashed rgba(255,255,255,0.2); animation: rotate 12s linear infinite; pointer-events: none; }
     .avatar { width: 100%; height: 100%; border-radius: 50%; background: #111827; display: flex; align-items: center; justify-content: center; font-size: 46px; color: #00aaff; overflow: hidden; }
     .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
     .username { font-family: 'Playfair Display', serif; font-size: clamp(24px, 6vw, 28px); font-weight: 600; background: linear-gradient(to right, #e0f0ff, #a0c8f0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 6px; }
-    .user-level { font-size: 13px; font-weight: 500; background: rgba(255,255,255,0.04); backdrop-filter: blur(12px); padding: 5px 20px; border-radius: 24px; color: #a0b9d9; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 28px; display: flex; align-items: center; gap: 6px; }
+    .city-badge { font-size: 13px; font-weight: 500; background: rgba(255,255,255,0.04); backdrop-filter: blur(12px); padding: 5px 20px; border-radius: 24px; color: #a0b9d9; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 28px; display: flex; align-items: center; gap: 6px; }
     .stats-row { display: flex; gap: 14px; margin-bottom: 28px; flex-wrap: wrap; justify-content: center; }
-    .stat-item { background: rgba(20, 30, 48, 0.5); backdrop-filter: blur(18px); border-radius: 24px; padding: 14px 22px; border: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; align-items: center; min-width: 75px; }
-    .stat-value { font-weight: 700; font-size: 20px; color: #00aaff; }
-    .stat-label { font-size: 10px; color: #7b8ca8; text-transform: uppercase; margin-top: 4px; }
-    .balance-badge { background: rgba(0,136,255,0.06); backdrop-filter: blur(25px); border-radius: 34px; padding: 14px 32px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(0,170,255,0.25); margin-top: 10px; }
+    .stat-item { background: rgba(20, 30, 48, 0.5); backdrop-filter: blur(18px); border-radius: 24px; padding: 14px 22px; border: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; align-items: center; min-width: 75px; position: relative; overflow: hidden; }
+    .stat-item::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 30% 20%, rgba(0,170,255,0.08), transparent 70%); pointer-events: none; }
+    .stat-value { font-weight: 700; font-size: 20px; color: #00aaff; text-shadow: 0 0 10px rgba(0,170,255,0.5); }
+    .stat-label { font-size: 10px; color: #7b8ca8; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
     .flavor-screen { background: rgba(10, 15, 27, 0.95); backdrop-filter: blur(30px); padding: 20px 16px; }
     .flavor-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
     .flavor-header h2 { font-weight: 600; font-size: 20px; color: #e0f0ff; flex: 1; }
@@ -62,6 +66,7 @@
     .flavor-info { flex: 1; }
     .flavor-name { font-weight: 600; color: #e0f0ff; }
     .flavor-prefix { font-size: 13px; color: #7b8ca8; }
+
     .order-screen { background: rgba(10, 15, 27, 0.95); backdrop-filter: blur(30px); padding: 20px 16px; }
     .order-section { margin-bottom: 20px; }
     .order-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 10px; color: #e0f0ff; }
@@ -79,12 +84,14 @@
     .order-btn { background: linear-gradient(135deg, #00aaff, #0088ff); border: none; color: #fff; font-weight: 700; padding: 18px 36px; border-radius: 36px; font-size: 17px; cursor: pointer; box-shadow: 0 10px 28px rgba(0,170,255,0.5); width: 100%; margin: 24px 0 40px 0; letter-spacing: 0.5px; }
     .order-btn:active { transform: scale(0.97); }
     .price-display { text-align: center; font-size: 20px; font-weight: 700; color: #00aaff; margin: 18px 0; }
+
     .map-screen { flex-direction: column; background: #030711; padding-bottom: 0; }
     .map-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: rgba(10, 15, 27, 0.85); backdrop-filter: blur(20px); position: relative; z-index: 10; }
     .map-title { font-weight: 600; font-size: 15px; color: #f0f4ff; }
     .map-close { background: rgba(255,255,255,0.06); border: none; color: #ccc; font-size: 18px; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
     .map-close:active { background: rgba(255,255,255,0.2); }
     #map { flex: 1; width: 100%; background: #030711; }
+
     .bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; align-items: center; gap: clamp(16px, 5vw, 24px); padding: 10px 20px 16px; background: rgba(8, 12, 20, 0.7); backdrop-filter: blur(45px); border-top: 1px solid rgba(255,255,255,0.05); z-index: 100; }
     .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border: none; color: #7b8ca8; font-family: 'Inter', sans-serif; cursor: pointer; padding: 6px 10px; border-radius: 16px; }
     .nav-btn i { font-size: clamp(20px, 5vw, 22px); }
@@ -95,6 +102,7 @@
     .center-btn span { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #b0c8e0; }
     .center-btn:active { transform: scale(0.95); border-color: rgba(0,170,255,0.7); }
     .custom-marker { background: none !important; border: none !important; }
+
     .confirm-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
     .confirm-modal.open { opacity: 1; pointer-events: auto; }
     .confirm-box { background: rgba(20, 26, 38, 0.95); border-radius: 36px; padding: 28px 22px; width: 90%; max-width: 360px; text-align: center; border: 1px solid rgba(0,170,255,0.2); }
@@ -104,6 +112,7 @@
     .confirm-btn { padding: 12px 28px; border-radius: 30px; font-weight: 600; border: none; cursor: pointer; font-size: 15px; }
     .confirm-yes { background: linear-gradient(135deg, #0088ff, #0066cc); color: white; }
     .confirm-no { background: rgba(255,255,255,0.08); color: #ccc; }
+
     @media (max-width: 380px) { .center-btn { width: 64px; height: 64px; } .center-btn i { font-size: 24px; } .screen { padding-bottom: 65px; } .screen.map-screen { padding-bottom: 0; } }
   </style>
 </head>
@@ -126,13 +135,10 @@
   <div class="screen profile-screen hidden" id="profileScreen">
     <div class="avatar-frame"><div class="avatar" id="avatarContainer"><i class="fas fa-cloud"></i></div></div>
     <div class="username" id="profileUsername">Vaper_Dimasta</div>
-    <div class="user-level"><i class="fas fa-crown" style="color:#00aaff;"></i> Platinum Level</div>
+    <div class="city-badge"><i class="fas fa-map-marker-alt" style="color:#00aaff;"></i> Бобруйск</div>
     <div class="stats-row" id="profileStatsRow">
-      <div class="stat-item"><span class="stat-value">247</span><span class="stat-label">заправок</span></div>
-      <div class="stat-item"><span class="stat-value">18.5K</span><span class="stat-label">puffs</span></div>
+      <div class="stat-item"><span class="stat-value" id="refillCount">247</span><span class="stat-label">заправок</span></div>
     </div>
-    <div class="balance-badge"><span class="balance-icon"><i class="fas fa-tint"></i></span><span class="balance-text">1 280 BYN</span></div>
-    <div style="font-size:11px; color:#6b7c9e; margin-top:6px;">баланс жижи</div>
   </div>
 
   <div class="screen flavor-screen hidden" id="flavorScreen">
@@ -201,7 +207,13 @@
     };
     window.setActiveNav = function(btn) { document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); if (btn) btn.classList.add('active'); };
     window.showWelcome = function() { window.hideAllScreens(); document.getElementById('welcomeScreen').classList.remove('hidden'); window.setActiveNav(null); };
-    window.showProfile = function() { window.hideAllScreens(); document.getElementById('profileScreen').classList.remove('hidden'); window.setActiveNav(document.getElementById('profileNavBtn')); if (typeof window.updateStreak==='function') window.updateStreak(); };
+    window.showProfile = function() {
+      window.hideAllScreens();
+      document.getElementById('profileScreen').classList.remove('hidden');
+      window.setActiveNav(document.getElementById('profileNavBtn'));
+      updateRefillCountDisplay();
+      if (typeof window.updateStreak==='function') window.updateStreak();
+    };
     window.showFlavorSelection = function() { window.hideAllScreens(); document.getElementById('flavorScreen').classList.remove('hidden'); window.setActiveNav(null); if (typeof window.loadFlavors==='function' && document.getElementById('flavorList').children.length===0) window.loadFlavors(); };
     window.showMap = function() { window.hideAllScreens(); document.getElementById('mapScreen').classList.remove('hidden'); window.setActiveNav(document.getElementById('mapNavBtn')); if (!window.mapInstance) { if (typeof window.initMap==='function') window.initMap(); } else { setTimeout(()=>window.mapInstance.invalidateSize(),200); } };
 
@@ -242,11 +254,23 @@
         localStorage.setItem('lastActiveDate', today);
         localStorage.setItem('streakCount', streak);
       }
-      const row = document.getElementById('profileStatsRow');
-      let el = document.getElementById('streakStatItem');
-      if (!el) { el = document.createElement('div'); el.className='stat-item'; el.id='streakStatItem'; row.appendChild(el); }
-      el.innerHTML = `<span class="stat-value">${streak}🔥</span><span class="stat-label">дней подряд</span>`;
+      // отображаем streak если нужно, но мы убрали puffs, так что можно оставить скрыто
     };
+
+    // ========== СЧЁТЧИК ЗАПРАВОК ==========
+    function getRefillCount() {
+      return parseInt(localStorage.getItem('refillCount') || '0');
+    }
+    function incrementRefillCount() {
+      let count = getRefillCount();
+      count += 1;
+      localStorage.setItem('refillCount', count.toString());
+      updateRefillCountDisplay();
+    }
+    function updateRefillCountDisplay() {
+      const el = document.getElementById('refillCount');
+      if (el) el.textContent = getRefillCount();
+    }
 
     window.loadFlavors = async function() {
       const c = document.getElementById('flavorList');
@@ -360,6 +384,7 @@
         const webhookUrl = webhooks[point] || webhooks['Другое место доставки'];
         const payload = { content: `**Новый заказ!**\n${confirmText}` };
         try { await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); } catch(e) {}
+        incrementRefillCount();
         alert('Ваш заказ оформлен! Напишите любое сообщение в бота.');
         if (window.Telegram && window.Telegram.WebApp) {
           window.Telegram.WebApp.openTelegramLink('https://t.me/ZalivakaShop_Bot');
@@ -392,6 +417,7 @@
     };
 
     window.loadFlavors();
+    updateRefillCountDisplay();
     if (!localStorage.getItem('onboarding_done')) localStorage.setItem('onboarding_done','true');
     window.showWelcome();
   })();
