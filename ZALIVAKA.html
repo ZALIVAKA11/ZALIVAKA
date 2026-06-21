@@ -18,7 +18,6 @@
     .bg-circle.c1 { width: 450px; height: 450px; background: #0088ff; top: -15%; left: -10%; }
     .bg-circle.c2 { width: 350px; height: 350px; background: #00aaff; bottom: -10%; right: -5%; animation-delay: -7s; }
     .bg-circle.c3 { width: 200px; height: 200px; background: #66ccff; top: 40%; left: 60%; opacity: 0.04; }
-
     .floating-icons { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
     .float-icon { position: absolute; font-size: 32px; color: #00aaff; opacity: 0.06; animation: driftIcon 14s infinite linear; }
     .float-icon:nth-child(1) { top: 15%; left: 10%; animation-duration: 18s; }
@@ -27,7 +26,6 @@
     .float-icon:nth-child(4) { top: 80%; left: 70%; animation-duration: 24s; animation-delay: -9s; }
     .float-icon:nth-child(5) { top: 45%; left: 50%; animation-duration: 16s; animation-delay: -12s; }
     .float-icon:nth-child(6) { top: 20%; left: 40%; animation-duration: 26s; animation-delay: -15s; }
-
     @keyframes driftIcon {
       0% { transform: translate(0, 0) rotate(0deg) scale(1); }
       25% { transform: translate(25px, -15px) rotate(90deg) scale(1.2); }
@@ -75,7 +73,7 @@
     .flavor-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
     .flavor-item { background: rgba(20, 26, 36, 0.6); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 16px 18px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s; animation: fadeInUp 0.5s ease; }
     .flavor-item:active { background: rgba(0,136,255,0.2); transform: scale(0.98); }
-    .flavor-icon { font-size: 24px; color: #00aaff; animation: softPulse 2s infinite; }
+    .flavor-icon { font-size: 26px; background: linear-gradient(135deg, #00aaff, #0088ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 0 6px rgba(0,170,255,0.5)); animation: softPulse 2s infinite; }
     .flavor-info { flex: 1; }
     .flavor-name { font-weight: 600; color: #e0f0ff; }
     .flavor-prefix { font-size: 13px; color: #7b8ca8; }
@@ -96,6 +94,7 @@
     .order-input::placeholder { color: #6b7c9e; }
     .order-btn { background: linear-gradient(135deg, #00aaff, #0088ff); border: none; color: #fff; font-weight: 700; padding: 18px 36px; border-radius: 36px; font-size: 17px; cursor: pointer; box-shadow: 0 10px 28px rgba(0,170,255,0.5); width: 100%; margin: 16px 0 50px 0; letter-spacing: 0.5px; animation: subtleGlow 2s infinite; transition: all 0.2s; }
     .order-btn:active { transform: scale(0.97); }
+    .order-btn:disabled { opacity: 0.5; pointer-events: none; animation: none; }
     .price-display { text-align: center; font-size: 20px; font-weight: 700; color: #00aaff; margin: 16px 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
     .map-screen { flex-direction: column; background: #030711; padding-bottom: 0; }
@@ -217,7 +216,11 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   (function() {
-    // ========== НАВИГАЦИЯ ==========
+    let geoPoints = [];
+    let currentCategory = '';
+    let currentTaste = '';
+
+    // Навигация
     window.hideAllScreens = function() {
       ['welcomeScreen','profileScreen','flavorScreen','tasteScreen','orderScreen','mapScreen'].forEach(id => document.getElementById(id).classList.add('hidden'));
       document.querySelectorAll('.order-select-options').forEach(o => o.classList.remove('open'));
@@ -230,7 +233,7 @@
       updateRefillCountDisplay(); updateStreakDisplay();
     };
     window.showFlavorSelection = function() { window.hideAllScreens(); document.getElementById('flavorScreen').classList.remove('hidden'); window.setActiveNav(null); if (typeof window.loadFlavors==='function' && document.getElementById('flavorList').children.length===0) window.loadFlavors(); };
-    window.showMap = function() { window.hideAllScreens(); document.getElementById('mapScreen').classList.remove('hidden'); window.setActiveNav(document.getElementById('mapNavBtn')); if (!window.mapInstance) { if (typeof window.initMap==='function') window.initMap(); } else { setTimeout(()=>window.mapInstance.invalidateSize(),200); } };
+    window.showMap = function() { window.hideAllScreens(); document.getElementById('mapScreen').classList.remove('hidden'); window.setActiveNav(document.getElementById('mapNavBtn')); if (!window.mapInstance) { window.initMap(); } else { setTimeout(()=>window.mapInstance.invalidateSize(),200); } };
 
     document.getElementById('profileNavBtn').onclick = window.showProfile;
     document.getElementById('mapNavBtn').onclick = window.showMap;
@@ -240,7 +243,7 @@
     document.getElementById('backFromTasteBtn').onclick = window.showFlavorSelection;
     document.getElementById('backFromOrderBtn').onclick = function() { window.hideAllScreens(); document.getElementById('tasteScreen').classList.remove('hidden'); };
 
-    // ========== TELEGRAM ==========
+    // Telegram
     let tgUser = null;
     try { if (window.Telegram?.WebApp?.initDataUnsafe?.user) tgUser = window.Telegram.WebApp.initDataUnsafe.user; } catch(e) {}
     const username = tgUser ? (tgUser.first_name || 'Vaper') : 'Vaper_Dimasta';
@@ -283,6 +286,63 @@
     function incrementRefillCount() { localStorage.setItem('refillCount', (getRefillCount()+1).toString()); updateRefillCountDisplay(); }
     function updateRefillCountDisplay() { const el = document.getElementById('refillCount'); if (el) el.textContent = getRefillCount(); }
 
+    // Загрузка GEO.txt
+    async function loadGeoPoints() {
+      try {
+        const res = await fetch('https://raw.githubusercontent.com/ZALIVAKA11/ZALIVAKA/refs/heads/main/GEO.txt');
+        const text = await res.text();
+        const lines = text.split('\n').filter(l => l.trim() !== '');
+        geoPoints = [];
+        lines.forEach(line => {
+          // Разбираем строку: Название - Время - Описание - Координаты
+          // Используем split, ограничивая количество частей до 4
+          const parts = line.split(' - ');
+          if (parts.length >= 4) {
+            const name = parts[0].trim();
+            const time = parts[1].trim();
+            // Координаты – последний элемент
+            const coordsStr = parts[parts.length-1].trim();
+            // Описание – всё, что между временем и координатами
+            const desc = parts.slice(2, parts.length-1).join(' - ').trim();
+            const coords = coordsStr.split(',').map(c => parseFloat(c.trim()));
+            if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+              geoPoints.push({ name, time, desc, coords });
+            }
+          }
+        });
+        // Обновляем карту, если она уже создана
+        if (window.mapInstance) {
+          updateMapMarkers();
+        }
+      } catch(e) {
+        console.error('Ошибка загрузки GEO.txt:', e);
+        // Оставляем пустой массив, чтобы не показывать статические точки
+        geoPoints = [];
+      }
+    }
+
+    function updateMapMarkers() {
+      if (!window.mapInstance) return;
+      // Удаляем все существующие маркеры
+      window.mapInstance.eachLayer(layer => {
+        if (layer instanceof L.Marker) {
+          window.mapInstance.removeLayer(layer);
+        }
+      });
+      // Добавляем новые маркеры
+      geoPoints.forEach(p => {
+        const icon = L.divIcon({
+          html: `<i class="fas fa-map-pin" style="font-size:28px;color:#00aaff;filter:drop-shadow(0 0 8px #00aaff);background:none;"></i>`,
+          className: 'custom-marker',
+          iconSize: [28, 28],
+          iconAnchor: [14, 28]
+        });
+        L.marker(p.coords, { icon }).addTo(window.mapInstance)
+          .bindPopup(`<div style="font-family:Inter,sans-serif;color:#111;padding:4px;"><b>${p.name}</b><br>🕒 ${p.time}<br>${p.desc}</div>`);
+      });
+    }
+
+    // Категории жиж
     window.loadFlavors = async function() {
       const c = document.getElementById('flavorList');
       try {
@@ -295,6 +355,7 @@
     };
 
     window.showTasteSelection = async function(cat) {
+      currentCategory = cat;
       const tc = document.getElementById('tasteList');
       tc.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Загрузка...</div>';
       document.getElementById('tasteScreenTitle').textContent = cat;
@@ -304,7 +365,7 @@
         const t = await r.text();
         const tastes = t.split('\n').filter(l=>l.trim()).map(l=>{ const p=l.split(/\s*-\s*/); return p.length>=3&&p[0].trim().toLowerCase()===cat.toLowerCase()?{cat:p[0].trim(),num:p[1].trim(),taste:p.slice(2).join(' - ').trim()}:null; }).filter(t=>t);
         tc.innerHTML = tastes.length ? tastes.map(t=>`<div class="flavor-item" data-taste="${t.taste}" data-full="${t.cat} ${t.taste}"><div class="flavor-icon"><i class="fas fa-flask"></i></div><div class="flavor-info"><div class="flavor-name">${t.taste}</div><div class="flavor-prefix">${t.cat} #${t.num}</div></div></div>`).join('') : '<div style="color:#7b8ca8;text-align:center;padding:40px;">Нет вкусов</div>';
-        tc.querySelectorAll('.flavor-item').forEach(el=>{ el.onclick = () => window.showOrderScreen(el.dataset.taste, el.dataset.full); });
+        tc.querySelectorAll('.flavor-item').forEach(el=>{ el.onclick = () => window.showOrderScreen(el.dataset.taste, el.dataset.full, cat); });
       } catch(e) { tc.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Ошибка загрузки вкусов</div>'; }
     };
 
@@ -316,12 +377,48 @@
       document.addEventListener('click', () => options.classList.remove('open'));
     }
 
-    window.showOrderScreen = function(taste, fullName) {
+    // Таймаут 30 минут
+    function checkOrderTimeout() {
+      const lastTime = parseInt(localStorage.getItem('lastOrderTime') || '0');
+      const now = Date.now();
+      const diff = now - lastTime;
+      const timeout = 30 * 60 * 1000;
+      const btn = document.getElementById('submitOrderBtn');
+      if (diff < timeout) {
+        const remaining = Math.ceil((timeout - diff) / 1000);
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-clock"></i> Подождите ${formatTime(remaining)}`;
+        const interval = setInterval(() => {
+          const now2 = Date.now();
+          const r = Math.ceil((timeout - (now2 - lastTime)) / 1000);
+          if (r <= 0) {
+            clearInterval(interval);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Оформить заказ';
+          } else {
+            btn.innerHTML = `<i class="fas fa-clock"></i> Подождите ${formatTime(r)}`;
+          }
+        }, 1000);
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> Оформить заказ';
+      }
+    }
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    window.showOrderScreen = function(taste, fullName, category) {
+      currentCategory = category;
+      currentTaste = taste;
       window.hideAllScreens(); document.getElementById('orderScreen').classList.remove('hidden');
       document.getElementById('orderScreen').querySelector('h2').textContent = `Заказ: ${fullName || taste}`;
 
-      const points = ['Западный','Черепки','Киселевичи','Ж/Д вокзал','Держинка','Другое место доставки'];
-      document.getElementById('pointOptions').innerHTML = points.map(p => `<div class="order-select-option" data-value="${p}">${p}</div>`).join('');
+      const pointNames = geoPoints.map(p => p.name).concat(['Другое место доставки']);
+      document.getElementById('pointOptions').innerHTML = pointNames.map(p => `<div class="order-select-option" data-value="${p}">${p}</div>`).join('');
       document.getElementById('pointTrigger').querySelector('span').textContent = 'Выберите точку';
       document.getElementById('customAddressInput').classList.remove('visible');
       initSelect('pointTrigger', 'pointOptions', function(value) { document.getElementById('customAddressInput').classList.toggle('visible', value === 'Другое место доставки'); updatePrice(); });
@@ -341,6 +438,7 @@
       document.getElementById('customVolumeInput').oninput = updatePrice;
       document.getElementById('priceDisplay').querySelector('span').textContent = 'Цена: 0 BYN';
       document.getElementById('commentInput').value = '';
+      checkOrderTimeout();
     };
 
     function updatePrice() {
@@ -358,7 +456,8 @@
       document.getElementById('priceDisplay').querySelector('span').textContent = `Цена: ${ml.toFixed(1)} BYN`;
     }
 
-    const webhooks = {
+    // Webhook'и
+    const knownWebhooks = {
       'Киселевичи': 'https://discord.com/api/webhooks/1508956035619098857/zePPerF2NfzuaHiae9I0o_ssCDdC9rRAl07SFNO6DmBqgnhAYmOERpwHZAsKoa_kfppK',
       'Западный': 'https://discord.com/api/webhooks/1508956040761184336/zATQDtXD_-qIM48t-DIPTvfBptxg_Y4SdlSs6noHC4UtR3Gi-sBrlS1EZUsIpwrJSUUj',
       'Черепки': 'https://discord.com/api/webhooks/1508956039339577486/N801vXVcKQPgqNVcjkxWyEr_5MGcJtnxBf5H7IXYI0IuBs6x4XvCiRsEyRXvGA4lRpoQ',
@@ -368,6 +467,7 @@
     };
 
     document.getElementById('submitOrderBtn').onclick = function() {
+      if (this.disabled) return;
       const point = document.getElementById('pointTrigger').querySelector('span').textContent;
       const address = document.getElementById('customAddressInput').value;
       const tankSize = document.getElementById('tankSizeInput').value || 'Не указан';
@@ -378,43 +478,47 @@
       if (point === 'Выберите точку') return alert('Выберите точку заливки');
       if (volume === 'Выберите объём') return alert('Выберите объём');
       const priceText = document.getElementById('priceDisplay').querySelector('span').textContent;
-      const userInfo = `👤 Заказчик: ${username}\n🆔 ID: ${tgId}\n📛 Username: ${tgUsername}`;
+      const userInfo = `👤 Заказчик: \`${username}\` (ID: \`${tgId}\`, ${tgUsername})`;
+      const flavorInfo = `🧪 Жижа: ${currentCategory || 'не указана'}\n🍓 Вкус: ${currentTaste || 'не указан'}`;
       const orderInfo = `📍 Точка: ${point}${point==='Другое место доставки'&&address?' ('+address+')':''}\n🧪 Бак: ${tankSize} мл\n💧 Объём: ${volume}${customVolume?` (${customVolume} мл)`:''}\n💳 Оплата: ${payment}\n${comment?`💬 Комментарий: ${comment}\n`:''}${priceText}`;
-      const confirmText = `${userInfo}\n\n${orderInfo}`;
+      const confirmText = `${userInfo}\n${flavorInfo}\n\n${orderInfo}`;
       document.getElementById('confirmText').innerText = confirmText;
       document.getElementById('confirmModal').classList.add('open');
       document.getElementById('confirmYesBtn').onclick = async function() {
         document.getElementById('confirmModal').classList.remove('open');
-        const webhookUrl = webhooks[point] || webhooks['Другое место доставки'];
+        localStorage.setItem('lastOrderTime', Date.now());
+        const webhookUrl = knownWebhooks[point] || knownWebhooks['Другое место доставки'];
         try { await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: `**Новый заказ!**\n${confirmText}` }) }); } catch(e) {}
         incrementRefillCount();
         alert('Ваш заказ оформлен! Напишите любое сообщение в бота.');
+        checkOrderTimeout();
         if (window.Telegram?.WebApp) { window.Telegram.WebApp.openTelegramLink('https://t.me/ZalivakaShop_Bot'); window.Telegram.WebApp.close(); }
         else window.open('https://t.me/ZalivakaShop_Bot', '_blank');
       };
       document.getElementById('confirmNoBtn').onclick = function() { document.getElementById('confirmModal').classList.remove('open'); };
     };
 
+    // Инициализация карты
     window.initMap = function() {
       const el = document.getElementById('map');
       if (!el || el.offsetWidth===0 || el.offsetHeight===0) { setTimeout(window.initMap,200); return; }
       if (window.mapInstance) { window.mapInstance.invalidateSize(); return; }
       window.mapInstance = L.map('map', { center: [53.15,29.20], zoom:13, zoomControl:true, dragging:true, scrollWheelZoom:true, doubleClickZoom:true, touchZoom:true, attributionControl:false });
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution:'', maxZoom:19 }).addTo(window.mapInstance);
-      const pts = [
-        [53.141822,29.160164,'Киселевичи','24/7','Бесплатная доставка в радиусе 1 км, дальше по тарифу.'],
-        [53.163148,29.176973,'Западный','12:00–23:00','Бесплатная доставка в радиусе 1 км, дальше по тарифу. После закрытия — переплата.'],
-        [53.154420,29.160507,'Черепки','12:00–23:00','Бесплатная доставка в радиусе 1 км, дальше по тарифу. После закрытия — переплата.'],
-        [53.139830,29.195309,'ЖД вокзал','15:00–21:00','Бесплатная доставка в радиусе 1 км, дальше по тарифу. После закрытия — переплата.'],
-        [53.133610,29.227515,'Держинка','15:00–21:00','Бесплатная доставка в радиусе 1 км, дальше по тарифу. После закрытия — переплата.']
-      ];
-      pts.forEach(([lat,lng,name,time,desc]) => {
-        L.marker([lat,lng], { icon: L.divIcon({ html: `<i class="fas fa-map-pin" style="font-size:28px;color:#00aaff;filter:drop-shadow(0 0 8px #00aaff);background:none;"></i>`, className:'custom-marker', iconSize:[28,28], iconAnchor:[14,28] }) })
-          .addTo(window.mapInstance).bindPopup(`<div style="font-family:Inter,sans-serif;color:#111;padding:4px;"><b>${name}</b><br>🕒 ${time}<br>${desc}</div>`);
-      });
+      // Если geoPoints уже загружены, сразу отображаем маркеры
+      if (geoPoints.length > 0) {
+        updateMapMarkers();
+      } else {
+        // Иначе ждём загрузки (loadGeoPoints вызовет updateMapMarkers)
+        loadGeoPoints().then(() => {
+          if (geoPoints.length > 0) updateMapMarkers();
+        });
+      }
       setTimeout(()=>window.mapInstance.invalidateSize(),100);
     };
 
+    // Старт
+    loadGeoPoints();
     window.loadFlavors();
     updateRefillCountDisplay();
     if (!localStorage.getItem('onboarding_done')) localStorage.setItem('onboarding_done','true');
