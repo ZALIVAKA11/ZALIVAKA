@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Vape Shop</title>
+  <title>Shop</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
@@ -290,18 +290,39 @@
   let selectedBuyVariant = null;
   let currentOrderType = 'refill';
   let mapInstance = null;
-  let orderTimeoutInterval = null; // для хранения интервала обновления кнопки
+  let orderTimeoutInterval = null;
 
   // ====== Telegram user ======
   let tgUser = null;
-  try {
-    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-      tgUser = window.Telegram.WebApp.initDataUnsafe.user;
+  let username = 'Vaper_Dimasta';
+  let tgId = 'unknown';
+  let tgUsername = 'unknown';
+
+  // Функция для получения данных пользователя Telegram
+  function initTelegramUser() {
+    try {
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+        tgUser = window.Telegram.WebApp.initDataUnsafe.user;
+        username = tgUser.first_name || 'Vaper';
+        tgId = tgUser.id || 'unknown';
+        tgUsername = tgUser.username ? '@' + tgUser.username : 'нет юзернейма';
+      }
+    } catch(e) {}
+    // Обновляем welcomeUsername сразу после получения
+    const welcomeUserEl = document.getElementById('welcomeUsername');
+    if (welcomeUserEl) welcomeUserEl.textContent = username;
+  }
+
+  // Вызываем сразу и ждем готовности Telegram WebApp
+  initTelegramUser();
+
+  if (window.Telegram && window.Telegram.WebApp) {
+    window.Telegram.WebApp.ready();
+    // Дополнительно подписываемся на событие ready, если API поддерживает
+    if (typeof window.Telegram.WebApp.onEvent === 'function') {
+      window.Telegram.WebApp.onEvent('ready', initTelegramUser);
     }
-  } catch(e) {}
-  const username = tgUser ? (tgUser.first_name || 'Vaper') : 'Vaper_Dimasta';
-  const tgId = tgUser ? tgUser.id : 'unknown';
-  const tgUsername = tgUser ? (tgUser.username ? '@' + tgUser.username : 'нет юзернейма') : 'unknown';
+  }
 
   // ====== Утилиты ======
   function hideAllScreens() {
@@ -357,6 +378,7 @@
 
   function showWelcome() {
     showScreen('welcomeScreen');
+    // Обновляем username при каждом показе (на случай, если он еще не был установлен)
     document.getElementById('welcomeUsername').textContent = username;
     updateWelcomeByTime();
     updateWelcomeStats();
@@ -707,7 +729,6 @@
 
   // ====== Проверка таймаута (раздельно для заливки и покупки) ======
   function checkOrderTimeout(type) {
-    // Очищаем предыдущий интервал
     if (orderTimeoutInterval) clearInterval(orderTimeoutInterval);
 
     const btn = document.getElementById('submitOrderBtn');
@@ -788,7 +809,6 @@
     document.getElementById('confirmModal').classList.add('open');
     document.getElementById('confirmYesBtn').onclick = async function() {
       document.getElementById('confirmModal').classList.remove('open');
-      // Сохраняем время последнего заказа для соответствующего типа
       if (currentOrderType === 'buy') {
         localStorage.setItem('lastBuyOrderTime', Date.now());
       } else {
@@ -797,14 +817,12 @@
       try { await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: `**Новый заказ!**\n${confirmText}` }) }); } catch (e) {}
       incrementOrderCount();
       alert('Ваш заказ оформлен! Напишите любое сообщение в бота.');
-      // После закрытия alert открываем бота
       if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.openTelegramLink('https://t.me/ZalivakaShopBot');
         window.Telegram.WebApp.close();
       } else {
         window.open('https://t.me/ZalivakaShopBot', '_blank');
       }
-      // Обновляем таймаут на кнопке
       checkOrderTimeout(currentOrderType);
     };
     document.getElementById('confirmNoBtn').onclick = function() { document.getElementById('confirmModal').classList.remove('open'); };
