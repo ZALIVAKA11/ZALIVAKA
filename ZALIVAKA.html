@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>BOBR ZALI</title>
+  <title>Shop Bpbr</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
@@ -424,6 +424,7 @@
       cursor: pointer;
       color: #ccc;
       transition: all 0.2s;
+      width: 100%;
     }
     .order-select-trigger:active { background: rgba(0,136,255,0.2); }
     .order-select-options {
@@ -566,7 +567,6 @@
       .app-container { max-width: 480px; margin: 0 auto; border-radius: 24px; overflow: hidden; }
       .screen { padding-bottom: 20px; }
     }
-    /* Отключение анимаций для пользователей, предпочитающих уменьшенное движение */
     @media (prefers-reduced-motion: reduce) {
       * {
         animation: none !important;
@@ -640,7 +640,7 @@
       </div>
       <div class="order-section" id="volumeSection"><h3><i class="fas fa-tint"></i> 3. Сколько вам надо мл?</h3>
         <div class="order-select" id="volumeSelect">
-          <div class="order-select-trigger" id="volumeTrigger"><span>Выберите объём</span> <i class="fas fa-chevron-down"></i></div>
+          <div class="order-select-trigger" id="volumeTrigger" data-target="volumeOptions"><span>Выберите объём</span> <i class="fas fa-chevron-down"></i></div>
           <div class="order-select-options" id="volumeOptions"></div>
         </div>
         <input type="number" class="order-input" id="customVolumeInput" placeholder="Введите количество мл..." min="0.5" step="0.5" inputmode="decimal">
@@ -648,14 +648,14 @@
       <div class="price-display" id="priceDisplay"><i class="fas fa-coins"></i> <span>Цена: 0 BYN</span></div>
       <div class="order-section"><h3><i class="fas fa-map-marker-alt"></i> 1. Выберите точку для заливки</h3>
         <div class="order-select" id="pointSelect">
-          <div class="order-select-trigger" id="pointTrigger"><span>Выберите точку</span> <i class="fas fa-chevron-down"></i></div>
+          <div class="order-select-trigger" id="pointTrigger" data-target="pointOptions"><span>Выберите точку</span> <i class="fas fa-chevron-down"></i></div>
           <div class="order-select-options" id="pointOptions"></div>
         </div>
         <input type="text" class="order-input" id="customAddressInput" placeholder="Введите адрес...">
       </div>
       <div class="order-section"><h3><i class="fas fa-credit-card"></i> 4. Способ оплаты</h3>
         <div class="order-select" id="paymentSelect">
-          <div class="order-select-trigger" id="paymentTrigger"><span>Выберите способ</span> <i class="fas fa-chevron-down"></i></div>
+          <div class="order-select-trigger" id="paymentTrigger" data-target="paymentOptions"><span>Выберите способ</span> <i class="fas fa-chevron-down"></i></div>
           <div class="order-select-options" id="paymentOptions"></div>
         </div>
       </div>
@@ -706,525 +706,557 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  (function() {
-    // ====== Глобальные переменные ======
-    let geoPoints = [];
-    let currentCategory = '';
-    let currentTaste = '';
-    let buyData = [];
-    let buyDetails = [];
-    let selectedBuyProduct = null;
-    let selectedBuyVariant = null;
-    let currentOrderType = 'refill';
-    let mapInstance = null; // храним экземпляр карты
+(function() {
+  // ====== Глобальные переменные ======
+  let geoPoints = [];
+  let currentCategory = '';
+  let currentTaste = '';
+  let buyData = [];
+  let buyDetails = [];
+  let selectedBuyProduct = null;
+  let selectedBuyVariant = null;
+  let currentOrderType = 'refill';
+  let mapInstance = null;
 
-    // ====== Утилиты ======
-    function hideAllScreens() {
-      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-      document.querySelectorAll('.order-select-options').forEach(o => o.classList.remove('open'));
+  // ====== Telegram user ======
+  let tgUser = null;
+  try {
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+      tgUser = window.Telegram.WebApp.initDataUnsafe.user;
     }
+  } catch(e) {}
+  const username = tgUser ? (tgUser.first_name || 'Vaper') : 'Vaper_Dimasta';
+  const tgId = tgUser ? tgUser.id : 'unknown';
+  const tgUsername = tgUser ? (tgUser.username ? '@' + tgUser.username : 'нет юзернейма') : 'unknown';
 
-    function showScreen(id) {
-      hideAllScreens();
-      const screen = document.getElementById(id);
-      if (screen) screen.classList.remove('hidden');
+  // ====== Утилиты ======
+  function hideAllScreens() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.querySelectorAll('.order-select-options.open').forEach(o => o.classList.remove('open'));
+  }
+
+  function showScreen(id) {
+    hideAllScreens();
+    const screen = document.getElementById(id);
+    if (screen) screen.classList.remove('hidden');
+  }
+
+  function updateWelcomeByTime() {
+    const h = new Date().getHours();
+    let greeting;
+    if (h >= 6 && h < 12) greeting = 'Доброе утро';
+    else if (h >= 12 && h < 18) greeting = 'Добрый день';
+    else if (h >= 18 && h < 24) greeting = 'Добрый вечер';
+    else greeting = 'Сладких снов';
+    document.getElementById('welcomeTitle').textContent = greeting;
+  }
+
+  function updateStreak() {
+    const today = new Date().toISOString().split('T')[0];
+    let last = localStorage.getItem('lastActiveDate');
+    let streak = parseInt(localStorage.getItem('streakCount') || '0');
+    if (!last || last !== today) {
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      streak = (last === yesterday) ? streak + 1 : 1;
+      localStorage.setItem('lastActiveDate', today);
+      localStorage.setItem('streakCount', streak);
     }
+    return streak;
+  }
 
-    function updateWelcomeByTime() {
-      const h = new Date().getHours();
-      let greeting;
-      if (h >= 6 && h < 12) greeting = 'Доброе утро';
-      else if (h >= 12 && h < 18) greeting = 'Добрый день';
-      else if (h >= 18 && h < 24) greeting = 'Добрый вечер';
-      else greeting = 'Сладких снов';
-      document.getElementById('welcomeTitle').textContent = greeting;
+  function getRefillCount() { return parseInt(localStorage.getItem('refillCount') || '0'); }
+  function getBuyCount() { return parseInt(localStorage.getItem('buyCount') || '0'); }
+  function incrementOrderCount() {
+    if (currentOrderType === 'buy') {
+      localStorage.setItem('buyCount', (getBuyCount() + 1).toString());
+    } else {
+      localStorage.setItem('refillCount', (getRefillCount() + 1).toString());
     }
+    updateWelcomeStats();
+  }
 
-    function updateStreak() {
-      const today = new Date().toISOString().split('T')[0];
-      let last = localStorage.getItem('lastActiveDate');
-      let streak = parseInt(localStorage.getItem('streakCount') || '0');
-      if (!last || last !== today) {
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-        streak = (last === yesterday) ? streak + 1 : 1;
-        localStorage.setItem('lastActiveDate', today);
-        localStorage.setItem('streakCount', streak);
-      }
-      return streak;
-    }
+  function updateWelcomeStats() {
+    document.getElementById('welcomeRefillCount').textContent = getRefillCount();
+    document.getElementById('welcomeBuyCount').textContent = getBuyCount();
+    document.getElementById('welcomeStreak').textContent = updateStreak() + '🔥';
+  }
 
-    function getRefillCount() { return parseInt(localStorage.getItem('refillCount') || '0'); }
-    function getBuyCount() { return parseInt(localStorage.getItem('buyCount') || '0'); }
-    function incrementOrderCount() {
-      if (currentOrderType === 'buy') {
-        localStorage.setItem('buyCount', (getBuyCount() + 1).toString());
-      } else {
-        localStorage.setItem('refillCount', (getRefillCount() + 1).toString());
-      }
-      updateWelcomeStats();
-    }
+  function showWelcome() {
+    showScreen('welcomeScreen');
+    document.getElementById('welcomeUsername').textContent = username;
+    updateWelcomeByTime();
+    updateWelcomeStats();
+    setTimeout(() => document.getElementById('welcomeStats').classList.add('visible'), 2200);
+  }
 
-    function updateWelcomeStats() {
-      document.getElementById('welcomeRefillCount').textContent = getRefillCount();
-      document.getElementById('welcomeBuyCount').textContent = getBuyCount();
-      document.getElementById('welcomeStreak').textContent = updateStreak() + '🔥';
-    }
-
-    function showWelcome() {
-      showScreen('welcomeScreen');
-      updateWelcomeByTime();
-      updateWelcomeStats();
-      setTimeout(() => document.getElementById('welcomeStats').classList.add('visible'), 2200);
-    }
-
-    function showMap() {
-      showScreen('mapScreen');
-      if (!mapInstance) {
-        // Инициализация карты только при первом открытии
-        mapInstance = L.map('map', {
-          center: [53.15, 29.20],
-          zoom: 13,
-          zoomControl: false,
-          dragging: true,
-          scrollWheelZoom: false,
-          doubleClickZoom: true,
-          touchZoom: true,
-          attributionControl: false,
-          preferCanvas: true // ускоряет отрисовку маркеров
-        });
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-          maxZoom: 19
-        }).addTo(mapInstance);
-        if (geoPoints.length > 0) updateMapMarkers();
-        else loadGeoPoints().then(() => { if (geoPoints.length > 0) updateMapMarkers(); });
-      }
-      setTimeout(() => mapInstance.invalidateSize(), 200);
-    }
-
-    function updateMapMarkers() {
-      if (!mapInstance) return;
-      // Удаляем старые маркеры
-      mapInstance.eachLayer(layer => {
-        if (layer instanceof L.Marker) mapInstance.removeLayer(layer);
+  // ====== Карта ======
+  function showMap() {
+    showScreen('mapScreen');
+    if (!mapInstance) {
+      mapInstance = L.map('map', {
+        center: [53.15, 29.20],
+        zoom: 13,
+        zoomControl: false,
+        dragging: true,
+        scrollWheelZoom: false,
+        doubleClickZoom: true,
+        touchZoom: true,
+        attributionControl: false,
+        preferCanvas: true
       });
-      geoPoints.forEach(p => {
-        const icon = L.divIcon({
-          html: `<i class="fas fa-map-pin" style="font-size:26px;color:#00aaff;filter:drop-shadow(0 0 6px #00aaff);background:none;"></i>`,
-          className: 'custom-marker',
-          iconSize: [26, 26],
-          iconAnchor: [13, 26]
-        });
-        L.marker(p.coords, { icon }).addTo(mapInstance)
-          .bindPopup(`<div style="font-family:Inter,sans-serif;color:#111;padding:4px;"><b>${p.name}</b><br>🕒 ${p.time}<br>${p.desc}</div>`);
-      });
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19
+      }).addTo(mapInstance);
+      if (geoPoints.length > 0) updateMapMarkers();
+      else loadGeoPoints().then(() => { if (geoPoints.length > 0) updateMapMarkers(); });
     }
+    setTimeout(() => mapInstance.invalidateSize(), 200);
+  }
 
-    async function loadGeoPoints() {
-      try {
-        const res = await fetch('https://raw.githubusercontent.com/ZALIVAKA11/ZALIVAKA/refs/heads/main/GEO.txt');
-        const text = await res.text();
-        const lines = text.split('\n').filter(l => l.trim() !== '');
-        geoPoints = [];
-        lines.forEach(line => {
-          const parts = line.split(' - ');
-          if (parts.length >= 4) {
-            const name = parts[0].trim();
-            const time = parts[1].trim();
-            const coordsStr = parts[parts.length - 1].trim();
-            const desc = parts.slice(2, parts.length - 1).join(' - ').trim();
-            const coords = coordsStr.split(',').map(c => parseFloat(c.trim()));
-            if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
-              geoPoints.push({ name, time, desc, coords });
-            }
+  function updateMapMarkers() {
+    if (!mapInstance) return;
+    mapInstance.eachLayer(layer => {
+      if (layer instanceof L.Marker) mapInstance.removeLayer(layer);
+    });
+    geoPoints.forEach(p => {
+      const icon = L.divIcon({
+        html: `<i class="fas fa-map-pin" style="font-size:26px;color:#00aaff;filter:drop-shadow(0 0 6px #00aaff);background:none;"></i>`,
+        className: 'custom-marker',
+        iconSize: [26, 26],
+        iconAnchor: [13, 26]
+      });
+      L.marker(p.coords, { icon }).addTo(mapInstance)
+        .bindPopup(`<div style="font-family:Inter,sans-serif;color:#111;padding:4px;"><b>${p.name}</b><br>🕒 ${p.time}<br>${p.desc}</div>`);
+    });
+  }
+
+  async function loadGeoPoints() {
+    try {
+      const res = await fetch('https://raw.githubusercontent.com/ZALIVAKA11/ZALIVAKA/refs/heads/main/GEO.txt');
+      const text = await res.text();
+      const lines = text.split('\n').filter(l => l.trim() !== '');
+      geoPoints = [];
+      lines.forEach(line => {
+        const parts = line.split(' - ');
+        if (parts.length >= 4) {
+          const name = parts[0].trim();
+          const time = parts[1].trim();
+          const coordsStr = parts[parts.length - 1].trim();
+          const desc = parts.slice(2, parts.length - 1).join(' - ').trim();
+          const coords = coordsStr.split(',').map(c => parseFloat(c.trim()));
+          if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+            geoPoints.push({ name, time, desc, coords });
           }
-        });
-        if (mapInstance) updateMapMarkers();
-      } catch (e) {
-        console.error('Ошибка загрузки GEO.txt:', e);
-        geoPoints = [];
-      }
-    }
-
-    async function loadFlavors() {
-      const c = document.getElementById('flavorList');
-      try {
-        const r = await fetch('https://raw.githubusercontent.com/ZALIVAKA11/ZALIVAKA/refs/heads/main/ZIZAN');
-        const t = await r.text();
-        const flavors = t.split('\n').filter(l => l.trim()).map(l => {
-          const p = l.split(/\s*-\s*/);
-          return p.length >= 3 ? { name: p[1].trim(), prefix: p.slice(2).join(' - ').trim() } : null;
-        }).filter(f => f);
-        c.innerHTML = flavors.length
-          ? flavors.map(f => `
-            <div class="flavor-item" data-name="${f.name}">
-              <div class="flavor-icon"><i class="fas fa-tint"></i></div>
-              <div class="flavor-info">
-                <div class="flavor-name">${f.name}</div>
-                <div class="flavor-prefix">${f.prefix}</div>
-              </div>
-            </div>`).join('')
-          : '<div style="color:#7b8ca8;text-align:center;padding:40px;">Список пуст</div>';
-        c.querySelectorAll('.flavor-item').forEach(el => {
-          el.onclick = () => showTasteSelection(el.dataset.name);
-        });
-      } catch (e) {
-        c.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Ошибка загрузки</div>';
-      }
-    }
-
-    function showFlavorSelection() {
-      showScreen('flavorScreen');
-      if (!document.getElementById('flavorList').children.length) loadFlavors();
-    }
-
-    async function showTasteSelection(cat) {
-      currentCategory = cat;
-      const tc = document.getElementById('tasteList');
-      tc.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Загрузка...</div>';
-      document.getElementById('tasteScreenTitle').textContent = cat;
-      showScreen('tasteScreen');
-      try {
-        const r = await fetch('https://raw.githubusercontent.com/ZALIVAKA11/ZALIVAKA/refs/heads/main/VKYS');
-        const t = await r.text();
-        const tastes = t.split('\n').filter(l => l.trim()).map(l => {
-          const p = l.split(/\s*-\s*/);
-          return p.length >= 3 && p[0].trim().toLowerCase() === cat.toLowerCase()
-            ? { cat: p[0].trim(), num: p[1].trim(), taste: p.slice(2).join(' - ').trim() }
-            : null;
-        }).filter(t => t);
-        tc.innerHTML = tastes.length
-          ? tastes.map(t => `
-            <div class="flavor-item" data-taste="${t.taste}" data-full="${t.cat} ${t.taste}">
-              <div class="flavor-icon"><i class="fas fa-flask"></i></div>
-              <div class="flavor-info">
-                <div class="flavor-name">${t.taste}</div>
-                <div class="flavor-prefix">${t.cat} #${t.num}</div>
-              </div>
-            </div>`).join('')
-          : '<div style="color:#7b8ca8;text-align:center;padding:40px;">Нет вкусов</div>';
-        tc.querySelectorAll('.flavor-item').forEach(el => {
-          el.onclick = () => showOrderScreen(el.dataset.taste, el.dataset.full, cat);
-        });
-      } catch (e) {
-        tc.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Ошибка загрузки вкусов</div>';
-      }
-    }
-
-    function showOrderScreen(taste, fullName, category) {
-      currentOrderType = 'refill';
-      showScreen('orderScreen');
-      document.getElementById('orderScreen').querySelector('h2').textContent = `Заказ: ${fullName || taste}`;
-      document.getElementById('tankSection').style.display = 'block';
-      document.getElementById('volumeSection').style.display = 'block';
-
-      // Точки
-      const pointNames = geoPoints.map(p => p.name).concat(['Другое место доставки']);
-      document.getElementById('pointOptions').innerHTML = pointNames.map(p => `<div class="order-select-option" data-value="${p}">${p}</div>`).join('');
-      document.getElementById('pointTrigger').querySelector('span').textContent = 'Выберите точку';
-      document.getElementById('customAddressInput').classList.remove('visible');
-      initSelect('pointTrigger', 'pointOptions', function(value) {
-        document.getElementById('customAddressInput').classList.toggle('visible', value === 'Другое место доставки');
-        updatePrice();
-      });
-
-      // Объёмы
-      const volumes = ['До ватки', 'Полбака', 'Фулл бак', 'Другое количество'];
-      document.getElementById('volumeOptions').innerHTML = volumes.map(v => `<div class="order-select-option" data-value="${v}">${v}</div>`).join('');
-      document.getElementById('volumeTrigger').querySelector('span').textContent = 'Выберите объём';
-      document.getElementById('customVolumeInput').classList.remove('visible');
-      initSelect('volumeTrigger', 'volumeOptions', function(value) {
-        document.getElementById('customVolumeInput').classList.toggle('visible', value === 'Другое количество');
-        updatePrice();
-      });
-
-      // Оплата
-      document.getElementById('paymentOptions').innerHTML = ['Наличными', 'Картой'].map(p => `<div class="order-select-option" data-value="${p}">${p}</div>`).join('');
-      document.getElementById('paymentTrigger').querySelector('span').textContent = 'Выберите способ';
-      initSelect('paymentTrigger', 'paymentOptions', null);
-
-      document.getElementById('tankSizeInput').value = '';
-      document.getElementById('tankSizeInput').oninput = updatePrice;
-      document.getElementById('customVolumeInput').oninput = updatePrice;
-      document.getElementById('priceDisplay').querySelector('span').textContent = 'Цена: 0 BYN';
-      document.getElementById('commentInput').value = '';
-      checkOrderTimeout();
-    }
-
-    function updatePrice() {
-      const tankSize = parseFloat(document.getElementById('tankSizeInput').value) || 0;
-      const selectedVol = document.getElementById('volumeTrigger').querySelector('span').textContent;
-      const point = document.getElementById('pointTrigger').querySelector('span').textContent;
-      let ml = 0;
-      if (tankSize > 0) {
-        if (selectedVol === 'До ватки') ml = tankSize / (tankSize + 1);
-        else if (selectedVol === 'Полбака') ml = tankSize / 2;
-        else if (selectedVol === 'Фулл бак') ml = tankSize;
-        else if (selectedVol === 'Другое количество') ml = parseFloat(document.getElementById('customVolumeInput').value) || 0;
-      }
-      if (point === 'Другое место доставки') ml += 1;
-      document.getElementById('priceDisplay').querySelector('span').textContent = `Цена: ${ml.toFixed(1)} BYN`;
-    }
-
-    function initSelect(triggerId, optionsId, onSelect) {
-      const trigger = document.getElementById(triggerId);
-      const options = document.getElementById(optionsId);
-      trigger.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isOpen = options.classList.contains('open');
-        document.querySelectorAll('.order-select-options').forEach(o => o.classList.remove('open'));
-        if (!isOpen) options.classList.add('open');
-      });
-      options.addEventListener('click', (e) => {
-        const opt = e.target.closest('.order-select-option');
-        if (opt) {
-          trigger.querySelector('span').textContent = opt.dataset.value;
-          options.classList.remove('open');
-          if (onSelect) onSelect(opt.dataset.value);
         }
       });
-      document.addEventListener('click', () => options.classList.remove('open'));
+      if (mapInstance) updateMapMarkers();
+    } catch (e) {
+      console.error('Ошибка загрузки GEO.txt:', e);
+      geoPoints = [];
     }
+  }
 
-    function checkOrderTimeout() {
-      const lastTime = parseInt(localStorage.getItem('lastOrderTime') || '0');
-      const now = Date.now();
-      const diff = now - lastTime;
-      const timeout = 30 * 60 * 1000;
-      const btn = document.getElementById('submitOrderBtn');
-      if (diff < timeout) {
-        const remaining = Math.ceil((timeout - diff) / 1000);
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fas fa-clock"></i> Подождите ${formatTime(remaining)}`;
-        const interval = setInterval(() => {
-          const now2 = Date.now();
-          const r = Math.ceil((timeout - (now2 - lastTime)) / 1000);
-          if (r <= 0) {
-            clearInterval(interval);
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-check-circle"></i> Оформить заказ';
-          } else {
-            btn.innerHTML = `<i class="fas fa-clock"></i> Подождите ${formatTime(r)}`;
-          }
-        }, 1000);
-      } else {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-check-circle"></i> Оформить заказ';
-      }
+  // ====== Заливка ======
+  async function loadFlavors() {
+    const c = document.getElementById('flavorList');
+    try {
+      const r = await fetch('https://raw.githubusercontent.com/ZALIVAKA11/ZALIVAKA/refs/heads/main/ZIZAN');
+      const t = await r.text();
+      const flavors = t.split('\n').filter(l => l.trim()).map(l => {
+        const p = l.split(/\s*-\s*/);
+        return p.length >= 3 ? { name: p[1].trim(), prefix: p.slice(2).join(' - ').trim() } : null;
+      }).filter(f => f);
+      c.innerHTML = flavors.length
+        ? flavors.map(f => `
+          <div class="flavor-item" data-name="${f.name}">
+            <div class="flavor-icon"><i class="fas fa-tint"></i></div>
+            <div class="flavor-info">
+              <div class="flavor-name">${f.name}</div>
+              <div class="flavor-prefix">${f.prefix}</div>
+            </div>
+          </div>`).join('')
+        : '<div style="color:#7b8ca8;text-align:center;padding:40px;">Список пуст</div>';
+      c.querySelectorAll('.flavor-item').forEach(el => {
+        el.addEventListener('click', () => showTasteSelection(el.dataset.name));
+      });
+    } catch (e) {
+      c.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Ошибка загрузки</div>';
     }
+  }
 
-    function formatTime(seconds) {
-      const m = Math.floor(seconds / 60);
-      const s = seconds % 60;
-      return `${m}:${s < 10 ? '0' : ''}${s}`;
+  function showFlavorSelection() {
+    showScreen('flavorScreen');
+    if (!document.getElementById('flavorList').children.length) loadFlavors();
+  }
+
+  async function showTasteSelection(cat) {
+    currentCategory = cat;
+    const tc = document.getElementById('tasteList');
+    tc.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Загрузка...</div>';
+    document.getElementById('tasteScreenTitle').textContent = cat;
+    showScreen('tasteScreen');
+    try {
+      const r = await fetch('https://raw.githubusercontent.com/ZALIVAKA11/ZALIVAKA/refs/heads/main/VKYS');
+      const t = await r.text();
+      const tastes = t.split('\n').filter(l => l.trim()).map(l => {
+        const p = l.split(/\s*-\s*/);
+        return p.length >= 3 && p[0].trim().toLowerCase() === cat.toLowerCase()
+          ? { cat: p[0].trim(), num: p[1].trim(), taste: p.slice(2).join(' - ').trim() }
+          : null;
+      }).filter(t => t);
+      tc.innerHTML = tastes.length
+        ? tastes.map(t => `
+          <div class="flavor-item" data-taste="${t.taste}" data-full="${t.cat} ${t.taste}">
+            <div class="flavor-icon"><i class="fas fa-flask"></i></div>
+            <div class="flavor-info">
+              <div class="flavor-name">${t.taste}</div>
+              <div class="flavor-prefix">${t.cat} #${t.num}</div>
+            </div>
+          </div>`).join('')
+        : '<div style="color:#7b8ca8;text-align:center;padding:40px;">Нет вкусов</div>';
+      tc.querySelectorAll('.flavor-item').forEach(el => {
+        el.addEventListener('click', () => showOrderScreen(el.dataset.taste, el.dataset.full, cat));
+      });
+    } catch (e) {
+      tc.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Ошибка загрузки вкусов</div>';
     }
+  }
 
-    // ====== Покупка ======
-    function showBuyProducts() {
-      showScreen('buyProductsScreen');
-      const list = document.getElementById('buyProductsList');
-      list.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Загрузка...</div>';
-      fetch('https://raw.githubusercontent.com/ZALIVAKA11/ZALIVAKA/refs/heads/main/BUY.txt')
-        .then(r => r.text())
-        .then(text => {
-          const lines = text.split('\n').filter(l => l.trim() !== '');
-          buyData = lines.map(line => {
-            const parts = line.split(' - ');
-            if (parts.length >= 4) {
-              return {
-                category: parts[0].trim(),
-                image: parts[1].trim(),
-                name: parts[2].trim(),
-                price: parts[3].trim()
-              };
-            }
-            return null;
-          }).filter(item => item);
-          if (buyData.length === 0) {
-            list.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Нет товаров</div>';
-            return;
-          }
-          list.innerHTML = buyData.map(p => `
-            <div class="product-card" data-name="${p.name}" data-price="${p.price}" data-image="${p.image}" data-category="${p.category}">
-              <img src="${p.image}" class="product-image" loading="lazy" decoding="async" onerror="this.style.display='none'">
-              <div class="product-info">
-                <div class="product-name">${p.name}</div>
-                <div class="flavor-prefix">${p.category} • ${p.price}</div>
-              </div>
-            </div>`).join('');
-          list.querySelectorAll('.product-card').forEach(el => {
-            el.onclick = () => {
-              selectedBuyProduct = {
-                category: el.dataset.category,
-                name: el.dataset.name,
-                price: el.dataset.price,
-                image: el.dataset.image
-              };
-              showBuyDetails(el.dataset.name);
+  // ====== Покупка ======
+  function showBuyProducts() {
+    showScreen('buyProductsScreen');
+    const list = document.getElementById('buyProductsList');
+    list.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Загрузка...</div>';
+    fetch('https://raw.githubusercontent.com/ZALIVAKA11/ZALIVAKA/refs/heads/main/BUY.txt')
+      .then(r => r.text())
+      .then(text => {
+        const lines = text.split('\n').filter(l => l.trim() !== '');
+        buyData = lines.map(line => {
+          const parts = line.split(' - ');
+          if (parts.length >= 4) {
+            return {
+              category: parts[0].trim(),
+              image: parts[1].trim(),
+              name: parts[2].trim(),
+              price: parts[3].trim()
             };
-          });
-        })
-        .catch(() => {
-          list.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Ошибка загрузки</div>';
-        });
-    }
-
-    function showBuyDetails(productName) {
-      showScreen('buyDetailsScreen');
-      document.getElementById('buyDetailsTitle').textContent = `${productName} - варианты`;
-      const list = document.getElementById('buyDetailsList');
-      list.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Загрузка...</div>';
-      fetch('https://raw.githubusercontent.com/ZALIVAKA11/ZALIVAKA/refs/heads/main/BUBOR.txt')
-        .then(r => r.text())
-        .then(text => {
-          const lines = text.split('\n').filter(l => l.trim() !== '');
-          buyDetails = lines.map(line => {
-            const parts = line.split(' - ');
-            if (parts.length >= 4) {
-              return {
-                number: parts[0].trim(),
-                product: parts[1].trim(),
-                option: parts[2].trim(),
-                price: parts[3].trim()
-              };
-            }
-            return null;
-          }).filter(item => item && item.product.toLowerCase() === productName.toLowerCase());
-          if (buyDetails.length === 0) {
-            list.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Нет вариантов, можно сразу заказать</div>';
-            selectedBuyVariant = null;
-            const orderBtn = document.createElement('button');
-            orderBtn.className = 'order-btn';
-            orderBtn.innerHTML = '<i class="fas fa-check-circle"></i> Заказать без варианта';
-            orderBtn.style.margin = '0 10px';
-            orderBtn.onclick = showBuyOrderScreen;
-            list.appendChild(orderBtn);
-            return;
           }
-          list.innerHTML = buyDetails.map(d => `
-            <div class="flavor-item" data-number="${d.number}" data-option="${d.option}" data-price="${d.price}">
-              <div class="flavor-icon"><i class="fas fa-tag"></i></div>
-              <div class="flavor-info">
-                <div class="flavor-name">${d.option}</div>
-                <div class="flavor-prefix">#${d.number} • ${d.product} • ${d.price}</div>
-              </div>
-            </div>`).join('');
-          list.querySelectorAll('.flavor-item').forEach(el => {
-            el.onclick = () => {
-              selectedBuyVariant = {
-                number: el.dataset.number,
-                option: el.dataset.option,
-                price: el.dataset.price
-              };
-              showBuyOrderScreen();
+          return null;
+        }).filter(item => item);
+        if (buyData.length === 0) {
+          list.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Нет товаров</div>';
+          return;
+        }
+        list.innerHTML = buyData.map(p => `
+          <div class="product-card" data-name="${p.name}" data-price="${p.price}" data-image="${p.image}" data-category="${p.category}">
+            <img src="${p.image}" class="product-image" loading="lazy" decoding="async" onerror="this.style.display='none'">
+            <div class="product-info">
+              <div class="product-name">${p.name}</div>
+              <div class="flavor-prefix">${p.category} • ${p.price}</div>
+            </div>
+          </div>`).join('');
+        list.querySelectorAll('.product-card').forEach(el => {
+          el.addEventListener('click', () => {
+            selectedBuyProduct = {
+              category: el.dataset.category,
+              name: el.dataset.name,
+              price: el.dataset.price,
+              image: el.dataset.image
             };
+            showBuyDetails(el.dataset.name);
           });
-        })
-        .catch(() => {
-          list.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Ошибка загрузки вариантов</div>';
         });
+      })
+      .catch(() => {
+        list.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Ошибка загрузки</div>';
+      });
+  }
+
+  function showBuyDetails(productName) {
+    showScreen('buyDetailsScreen');
+    document.getElementById('buyDetailsTitle').textContent = `${productName} - варианты`;
+    const list = document.getElementById('buyDetailsList');
+    list.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Загрузка...</div>';
+    fetch('https://raw.githubusercontent.com/ZALIVAKA11/ZALIVAKA/refs/heads/main/BUBOR.txt')
+      .then(r => r.text())
+      .then(text => {
+        const lines = text.split('\n').filter(l => l.trim() !== '');
+        buyDetails = lines.map(line => {
+          const parts = line.split(' - ');
+          if (parts.length >= 4) {
+            return {
+              number: parts[0].trim(),
+              product: parts[1].trim(),
+              option: parts[2].trim(),
+              price: parts[3].trim()
+            };
+          }
+          return null;
+        }).filter(item => item && item.product.toLowerCase() === productName.toLowerCase());
+        if (buyDetails.length === 0) {
+          list.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Нет вариантов, можно сразу заказать</div>';
+          selectedBuyVariant = null;
+          const orderBtn = document.createElement('button');
+          orderBtn.className = 'order-btn';
+          orderBtn.innerHTML = '<i class="fas fa-check-circle"></i> Заказать без варианта';
+          orderBtn.style.margin = '0 10px';
+          orderBtn.addEventListener('click', showBuyOrderScreen);
+          list.appendChild(orderBtn);
+          return;
+        }
+        list.innerHTML = buyDetails.map(d => `
+          <div class="flavor-item" data-number="${d.number}" data-option="${d.option}" data-price="${d.price}">
+            <div class="flavor-icon"><i class="fas fa-tag"></i></div>
+            <div class="flavor-info">
+              <div class="flavor-name">${d.option}</div>
+              <div class="flavor-prefix">#${d.number} • ${d.product} • ${d.price}</div>
+            </div>
+          </div>`).join('');
+        list.querySelectorAll('.flavor-item').forEach(el => {
+          el.addEventListener('click', () => {
+            selectedBuyVariant = {
+              number: el.dataset.number,
+              option: el.dataset.option,
+              price: el.dataset.price
+            };
+            showBuyOrderScreen();
+          });
+        });
+      })
+      .catch(() => {
+        list.innerHTML = '<div style="color:#7b8ca8;text-align:center;padding:40px;">Ошибка загрузки вариантов</div>';
+      });
+  }
+
+  function showBuyOrderScreen() {
+    currentOrderType = 'buy';
+    showScreen('orderScreen');
+    document.getElementById('orderScreen').querySelector('h2').textContent = 'Оформление покупки';
+    document.getElementById('tankSection').style.display = 'none';
+    document.getElementById('volumeSection').style.display = 'none';
+
+    const pointNames = geoPoints.map(p => p.name).concat(['Другое место доставки']);
+    document.getElementById('pointOptions').innerHTML = pointNames.map(p => `<div class="order-select-option" data-value="${p}">${p}</div>`).join('');
+    document.getElementById('pointTrigger').querySelector('span').textContent = 'Выберите точку';
+    document.getElementById('customAddressInput').classList.remove('visible');
+    document.getElementById('paymentOptions').innerHTML = ['Наличными', 'Картой'].map(p => `<div class="order-select-option" data-value="${p}">${p}</div>`).join('');
+    document.getElementById('paymentTrigger').querySelector('span').textContent = 'Выберите способ';
+    document.getElementById('commentInput').value = '';
+    let priceText = selectedBuyVariant ? selectedBuyVariant.price : (selectedBuyProduct ? selectedBuyProduct.price : '0 BYN');
+    document.getElementById('priceDisplay').querySelector('span').textContent = `Цена: ${priceText}`;
+    checkOrderTimeout();
+  }
+
+  // ====== Оформление заказа (заливка) ======
+  function showOrderScreen(taste, fullName, category) {
+    currentOrderType = 'refill';
+    showScreen('orderScreen');
+    document.getElementById('orderScreen').querySelector('h2').textContent = `Заказ: ${fullName || taste}`;
+    document.getElementById('tankSection').style.display = 'block';
+    document.getElementById('volumeSection').style.display = 'block';
+
+    const pointNames = geoPoints.map(p => p.name).concat(['Другое место доставки']);
+    document.getElementById('pointOptions').innerHTML = pointNames.map(p => `<div class="order-select-option" data-value="${p}">${p}</div>`).join('');
+    document.getElementById('pointTrigger').querySelector('span').textContent = 'Выберите точку';
+    document.getElementById('customAddressInput').classList.remove('visible');
+
+    const volumes = ['До ватки', 'Полбака', 'Фулл бак', 'Другое количество'];
+    document.getElementById('volumeOptions').innerHTML = volumes.map(v => `<div class="order-select-option" data-value="${v}">${v}</div>`).join('');
+    document.getElementById('volumeTrigger').querySelector('span').textContent = 'Выберите объём';
+    document.getElementById('customVolumeInput').classList.remove('visible');
+
+    document.getElementById('paymentOptions').innerHTML = ['Наличными', 'Картой'].map(p => `<div class="order-select-option" data-value="${p}">${p}</div>`).join('');
+    document.getElementById('paymentTrigger').querySelector('span').textContent = 'Выберите способ';
+
+    document.getElementById('tankSizeInput').value = '';
+    document.getElementById('tankSizeInput').oninput = updatePrice;
+    document.getElementById('customVolumeInput').oninput = updatePrice;
+    document.getElementById('priceDisplay').querySelector('span').textContent = 'Цена: 0 BYN';
+    document.getElementById('commentInput').value = '';
+    checkOrderTimeout();
+  }
+
+  function updatePrice() {
+    const tankSize = parseFloat(document.getElementById('tankSizeInput').value) || 0;
+    const selectedVol = document.getElementById('volumeTrigger').querySelector('span').textContent;
+    const point = document.getElementById('pointTrigger').querySelector('span').textContent;
+    let ml = 0;
+    if (tankSize > 0) {
+      if (selectedVol === 'До ватки') ml = tankSize / (tankSize + 1);
+      else if (selectedVol === 'Полбака') ml = tankSize / 2;
+      else if (selectedVol === 'Фулл бак') ml = tankSize;
+      else if (selectedVol === 'Другое количество') ml = parseFloat(document.getElementById('customVolumeInput').value) || 0;
     }
+    if (point === 'Другое место доставки') ml += 1;
+    document.getElementById('priceDisplay').querySelector('span').textContent = `Цена: ${ml.toFixed(1)} BYN`;
+  }
 
-    function showBuyOrderScreen() {
-      currentOrderType = 'buy';
-      showScreen('orderScreen');
-      document.getElementById('orderScreen').querySelector('h2').textContent = 'Оформление покупки';
-      document.getElementById('tankSection').style.display = 'none';
-      document.getElementById('volumeSection').style.display = 'none';
-
-      const pointNames = geoPoints.map(p => p.name).concat(['Другое место доставки']);
-      document.getElementById('pointOptions').innerHTML = pointNames.map(p => `<div class="order-select-option" data-value="${p}">${p}</div>`).join('');
-      document.getElementById('pointTrigger').querySelector('span').textContent = 'Выберите точку';
-      document.getElementById('customAddressInput').classList.remove('visible');
-      initSelect('pointTrigger', 'pointOptions', function(value) { document.getElementById('customAddressInput').classList.toggle('visible', value === 'Другое место доставки'); });
-
-      document.getElementById('paymentOptions').innerHTML = ['Наличными', 'Картой'].map(p => `<div class="order-select-option" data-value="${p}">${p}</div>`).join('');
-      document.getElementById('paymentTrigger').querySelector('span').textContent = 'Выберите способ';
-      initSelect('paymentTrigger', 'paymentOptions', null);
-
-      document.getElementById('commentInput').value = '';
-      let priceText = selectedBuyVariant ? selectedBuyVariant.price : (selectedBuyProduct ? selectedBuyProduct.price : '0 BYN');
-      document.getElementById('priceDisplay').querySelector('span').textContent = `Цена: ${priceText}`;
-      checkOrderTimeout();
-    }
-
-    // ====== Обработчики ======
-    document.getElementById('onboardingContinueBtn').addEventListener('click', () => {
-      localStorage.setItem('onboarding_done', 'true');
-      showWelcome();
-    });
-    document.getElementById('welcomeOrderBtn').addEventListener('click', showFlavorSelection);
-    document.getElementById('welcomeBuyBtn').addEventListener('click', showBuyProducts);
-    document.getElementById('welcomeMapBtn').addEventListener('click', showMap);
-    document.getElementById('backFromFlavorBtn').addEventListener('click', showWelcome);
-    document.getElementById('backFromTasteBtn').addEventListener('click', showFlavorSelection);
-    document.getElementById('backFromOrderBtn').addEventListener('click', () => {
-      if (currentOrderType === 'buy') showBuyProducts();
-      else if (currentCategory) showTasteSelection(currentCategory);
-      else showFlavorSelection();
-    });
-    document.getElementById('mapBackBtn').addEventListener('click', showWelcome);
-    document.getElementById('backFromBuyProductsBtn').addEventListener('click', showWelcome);
-    document.getElementById('backFromBuyDetailsBtn').addEventListener('click', showBuyProducts);
-
-    document.getElementById('submitOrderBtn').addEventListener('click', function() {
-      if (this.disabled) return;
-      const point = document.getElementById('pointTrigger').querySelector('span').textContent;
-      const address = document.getElementById('customAddressInput').value;
-      const payment = document.getElementById('paymentTrigger').querySelector('span').textContent;
-      const comment = document.getElementById('commentInput').value;
-      const priceText = document.getElementById('priceDisplay').querySelector('span').textContent;
-      if (point === 'Выберите точку') return alert('Выберите точку');
-      if (payment === 'Выберите способ') return alert('Выберите способ оплаты');
-
-      const username = window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || 'Vaper';
-      const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 'unknown';
-      const tgUsername = window.Telegram?.WebApp?.initDataUnsafe?.user?.username ? '@' + window.Telegram.WebApp.initDataUnsafe.user.username : 'нет юзернейма';
-
-      let userInfo, orderInfo, webhookUrl;
-      if (currentOrderType === 'buy') {
-        const productName = selectedBuyProduct ? selectedBuyProduct.name : 'Товар';
-        const variantInfo = selectedBuyVariant ? ` (${selectedBuyVariant.option})` : '';
-        userInfo = `👤 Покупатель: \`${username}\` (ID: \`${tgId}\`, ${tgUsername})`;
-        orderInfo = `🛒 Покупка: ${productName}${variantInfo}\n💰 Цена: ${priceText}\n📍 Точка: ${point}${point === 'Другое место доставки' && address ? ' (' + address + ')' : ''}\n💳 Оплата: ${payment}\n${comment ? `💬 Комментарий: ${comment}` : ''}`;
-        webhookUrl = 'https://discord.com/api/webhooks/1544302650156257320/aPs9TwLu5ijcU6pPlgvGzUTi0sZhFI2yeC30ruyvZfbE7IirgRB4bN9E8MFTnTdau29O';
-      } else {
-        const tankSize = document.getElementById('tankSizeInput').value || 'Не указан';
-        const volume = document.getElementById('volumeTrigger').querySelector('span').textContent;
-        const customVolume = document.getElementById('customVolumeInput').value;
-        if (volume === 'Выберите объём') return alert('Выберите объём');
-        userInfo = `👤 Заказчик: \`${username}\` (ID: \`${tgId}\`, ${tgUsername})`;
-        const flavorInfo = `🧪 Жижа: ${currentCategory || 'не указана'}\n🍓 Вкус: ${currentTaste || 'не указан'}`;
-        orderInfo = `📍 Точка: ${point}${point === 'Другое место доставки' && address ? ' (' + address + ')' : ''}\n🧪 Бак: ${tankSize} мл\n💧 Объём: ${volume}${customVolume ? ` (${customVolume} мл)` : ''}\n💳 Оплата: ${payment}\n${comment ? `💬 Комментарий: ${comment}\n` : ''}${priceText}`;
-        webhookUrl = knownWebhooks[point] || knownWebhooks['Другое место доставки'];
+  // ====== Обработчики выпадающих списков (делегирование) ======
+  document.addEventListener('click', function(e) {
+    const trigger = e.target.closest('.order-select-trigger');
+    if (trigger) {
+      e.stopPropagation();
+      const targetId = trigger.dataset.target;
+      const options = document.getElementById(targetId);
+      if (options) {
+        const isOpen = options.classList.contains('open');
+        document.querySelectorAll('.order-select-options.open').forEach(o => o.classList.remove('open'));
+        if (!isOpen) options.classList.add('open');
       }
+      return;
+    }
+    const option = e.target.closest('.order-select-option');
+    if (option) {
+      e.stopPropagation();
+      const optionsContainer = option.closest('.order-select-options');
+      if (optionsContainer) {
+        const trigger = document.querySelector(`.order-select-trigger[data-target="${optionsContainer.id}"]`);
+        if (trigger) {
+          trigger.querySelector('span').textContent = option.dataset.value;
+          optionsContainer.classList.remove('open');
+          // Вызов специфических действий
+          const targetId = optionsContainer.id;
+          if (targetId === 'pointOptions') {
+            const isCustom = option.dataset.value === 'Другое место доставки';
+            document.getElementById('customAddressInput').classList.toggle('visible', isCustom);
+            if (currentOrderType === 'refill') updatePrice();
+          } else if (targetId === 'volumeOptions') {
+            const isCustom = option.dataset.value === 'Другое количество';
+            document.getElementById('customVolumeInput').classList.toggle('visible', isCustom);
+            if (currentOrderType === 'refill') updatePrice();
+          }
+        }
+      }
+      return;
+    }
+    // Клик вне селекта закрывает все
+    document.querySelectorAll('.order-select-options.open').forEach(o => o.classList.remove('open'));
+  });
 
-      const confirmText = `${userInfo}\n\n${orderInfo}`;
-      document.getElementById('confirmText').innerText = confirmText;
-      document.getElementById('confirmModal').classList.add('open');
-      document.getElementById('confirmYesBtn').onclick = async function() {
-        document.getElementById('confirmModal').classList.remove('open');
-        localStorage.setItem('lastOrderTime', Date.now());
-        try { await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: `**Новый заказ!**\n${confirmText}` }) }); } catch (e) {}
-        incrementOrderCount();
-        alert('Ваш заказ оформлен! Напишите любое сообщение в бота.');
-        checkOrderTimeout();
-        if (window.Telegram?.WebApp) { window.Telegram.WebApp.openTelegramLink('https://t.me/ZalivakaShopBot'); window.Telegram.WebApp.close(); }
-        else window.open('https://t.me/ZalivakaShopBot', '_blank');
-      };
-      document.getElementById('confirmNoBtn').onclick = function() { document.getElementById('confirmModal').classList.remove('open'); };
-    });
-
-    // ====== Инициализация ======
-    loadGeoPoints();
-    // Загружаем список жиж сразу, чтобы был готов
-    loadFlavors();
-
-    if (!localStorage.getItem('onboarding_done')) {
-      showScreen('onboardingScreen');
+  // ====== Проверка таймаута ======
+  function checkOrderTimeout() {
+    const lastTime = parseInt(localStorage.getItem('lastOrderTime') || '0');
+    const now = Date.now();
+    const diff = now - lastTime;
+    const timeout = 30 * 60 * 1000;
+    const btn = document.getElementById('submitOrderBtn');
+    if (diff < timeout) {
+      const remaining = Math.ceil((timeout - diff) / 1000);
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fas fa-clock"></i> Подождите ${formatTime(remaining)}`;
+      const interval = setInterval(() => {
+        const now2 = Date.now();
+        const r = Math.ceil((timeout - (now2 - lastTime)) / 1000);
+        if (r <= 0) {
+          clearInterval(interval);
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-check-circle"></i> Оформить заказ';
+        } else {
+          btn.innerHTML = `<i class="fas fa-clock"></i> Подождите ${formatTime(r)}`;
+        }
+      }, 1000);
     } else {
-      showWelcome();
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-check-circle"></i> Оформить заказ';
     }
-  })();
+  }
+
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  }
+
+  // ====== Отправка заказа ======
+  const knownWebhooks = {
+    'Киселевичи': 'https://discord.com/api/webhooks/1508956035619098857/zePPerF2NfzuaHiae9I0o_ssCDdC9rRAl07SFNO6DmBqgnhAYmOERpwHZAsKoa_kfppK',
+    'Западный': 'https://discord.com/api/webhooks/1508956040761184336/zATQDtXD_-qIM48t-DIPTvfBptxg_Y4SdlSs6noHC4UtR3Gi-sBrlS1EZUsIpwrJSUUj',
+    'Черепки': 'https://discord.com/api/webhooks/1508956039339577486/N801vXVcKQPgqNVcjkxWyEr_5MGcJtnxBf5H7IXYI0IuBs6x4XvCiRsEyRXvGA4lRpoQ',
+    'Ж/Д вокзал': 'https://discord.com/api/webhooks/1508956041487056937/oNvGPEqIk5FKLUmfARlWkW3u1zDOK1EXpsmAJGhJ8BuidHHHtYRiutswXmK-YxWAIIzy',
+    'Держинка': 'https://discord.com/api/webhooks/1508956042367598734/xpPUAWjd2VVyOGOGcvUisTdxlUYLm-RWF7PgdZatOkR34ahaEL2oyHG8D4QUyn2YcWWj',
+    'Другое место доставки': 'https://discord.com/api/webhooks/1508956053172392147/8A7bUKzFHUAyqbpmsyYNBETHqGOG_E2xc2ZoVezfg1Cmjen9r6SJoGDUCXvqLbghenT5'
+  };
+  const buyWebhook = 'https://discord.com/api/webhooks/1544302650156257320/aPs9TwLu5ijcU6pPlgvGzUTi0sZhFI2yeC30ruyvZfbE7IirgRB4bN9E8MFTnTdau29O';
+
+  document.getElementById('submitOrderBtn').addEventListener('click', function() {
+    if (this.disabled) return;
+    const point = document.getElementById('pointTrigger').querySelector('span').textContent;
+    const address = document.getElementById('customAddressInput').value;
+    const payment = document.getElementById('paymentTrigger').querySelector('span').textContent;
+    const comment = document.getElementById('commentInput').value;
+    const priceText = document.getElementById('priceDisplay').querySelector('span').textContent;
+    if (point === 'Выберите точку') return alert('Выберите точку');
+    if (payment === 'Выберите способ') return alert('Выберите способ оплаты');
+
+    let userInfo, orderInfo, webhookUrl;
+    if (currentOrderType === 'buy') {
+      const productName = selectedBuyProduct ? selectedBuyProduct.name : 'Товар';
+      const variantInfo = selectedBuyVariant ? ` (${selectedBuyVariant.option})` : '';
+      userInfo = `👤 Покупатель: \`${username}\` (ID: \`${tgId}\`, ${tgUsername})`;
+      orderInfo = `🛒 Покупка: ${productName}${variantInfo}\n💰 Цена: ${priceText}\n📍 Точка: ${point}${point === 'Другое место доставки' && address ? ' (' + address + ')' : ''}\n💳 Оплата: ${payment}\n${comment ? `💬 Комментарий: ${comment}` : ''}`;
+      webhookUrl = buyWebhook;
+    } else {
+      const tankSize = document.getElementById('tankSizeInput').value || 'Не указан';
+      const volume = document.getElementById('volumeTrigger').querySelector('span').textContent;
+      const customVolume = document.getElementById('customVolumeInput').value;
+      if (volume === 'Выберите объём') return alert('Выберите объём');
+      userInfo = `👤 Заказчик: \`${username}\` (ID: \`${tgId}\`, ${tgUsername})`;
+      const flavorInfo = `🧪 Жижа: ${currentCategory || 'не указана'}\n🍓 Вкус: ${currentTaste || 'не указан'}`;
+      orderInfo = `📍 Точка: ${point}${point === 'Другое место доставки' && address ? ' (' + address + ')' : ''}\n🧪 Бак: ${tankSize} мл\n💧 Объём: ${volume}${customVolume ? ` (${customVolume} мл)` : ''}\n💳 Оплата: ${payment}\n${comment ? `💬 Комментарий: ${comment}\n` : ''}${priceText}`;
+      webhookUrl = knownWebhooks[point] || knownWebhooks['Другое место доставки'];
+    }
+
+    const confirmText = `${userInfo}\n\n${orderInfo}`;
+    document.getElementById('confirmText').innerText = confirmText;
+    document.getElementById('confirmModal').classList.add('open');
+    document.getElementById('confirmYesBtn').onclick = async function() {
+      document.getElementById('confirmModal').classList.remove('open');
+      localStorage.setItem('lastOrderTime', Date.now());
+      try { await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: `**Новый заказ!**\n${confirmText}` }) }); } catch (e) {}
+      incrementOrderCount();
+      alert('Ваш заказ оформлен! Напишите любое сообщение в бота.');
+      checkOrderTimeout();
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.openTelegramLink('https://t.me/ZalivakaShopBot');
+        window.Telegram.WebApp.close();
+      } else {
+        window.open('https://t.me/ZalivakaShopBot', '_blank');
+      }
+    };
+    document.getElementById('confirmNoBtn').onclick = function() { document.getElementById('confirmModal').classList.remove('open'); };
+  });
+
+  // ====== Инициализация ======
+  // Загружаем данные сразу
+  loadGeoPoints();
+  loadFlavors();
+
+  // Обработчики навигации
+  document.getElementById('onboardingContinueBtn').addEventListener('click', () => {
+    localStorage.setItem('onboarding_done', 'true');
+    showWelcome();
+  });
+  document.getElementById('welcomeOrderBtn').addEventListener('click', showFlavorSelection);
+  document.getElementById('welcomeBuyBtn').addEventListener('click', showBuyProducts);
+  document.getElementById('welcomeMapBtn').addEventListener('click', showMap);
+  document.getElementById('backFromFlavorBtn').addEventListener('click', showWelcome);
+  document.getElementById('backFromTasteBtn').addEventListener('click', showFlavorSelection);
+  document.getElementById('backFromOrderBtn').addEventListener('click', () => {
+    if (currentOrderType === 'buy') showBuyProducts();
+    else if (currentCategory) showTasteSelection(currentCategory);
+    else showFlavorSelection();
+  });
+  document.getElementById('mapBackBtn').addEventListener('click', showWelcome);
+  document.getElementById('backFromBuyProductsBtn').addEventListener('click', showWelcome);
+  document.getElementById('backFromBuyDetailsBtn').addEventListener('click', showBuyProducts);
+
+  // Старт
+  if (!localStorage.getItem('onboarding_done')) {
+    showScreen('onboardingScreen');
+  } else {
+    showWelcome();
+  }
+})();
 </script>
 </body>
 </html>
