@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Shop</title>
+  <title>Vape Shop</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
@@ -21,6 +21,7 @@
     .bg-circle.c1 { width: 450px; height: 450px; background: #0088ff; top: -15%; left: -10%; }
     .bg-circle.c2 { width: 350px; height: 350px; background: #00aaff; bottom: -10%; right: -5%; animation-delay: -6s; }
     .bg-circle.c3 { width: 200px; height: 200px; background: #66ccff; top: 40%; left: 60%; opacity: 0.03; }
+
     .floating-icons { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
     .float-icon { position: absolute; font-size: 30px; color: #00aaff; opacity: 0.05; animation: driftIcon 16s infinite linear; }
     .float-icon:nth-child(1) { top: 15%; left: 10%; animation-duration: 20s; }
@@ -29,6 +30,7 @@
     .float-icon:nth-child(4) { top: 80%; left: 70%; animation-duration: 26s; animation-delay: -9s; }
     .float-icon:nth-child(5) { top: 45%; left: 50%; animation-duration: 18s; animation-delay: -12s; }
     .float-icon:nth-child(6) { top: 20%; left: 40%; animation-duration: 28s; animation-delay: -15s; }
+
     @keyframes driftIcon { 0% { transform: translate(0, 0) rotate(0deg) scale(1); } 25% { transform: translate(20px, -10px) rotate(90deg) scale(1.1); } 50% { transform: translate(-10px, 20px) rotate(180deg) scale(0.95); } 75% { transform: translate(-20px, -15px) rotate(270deg) scale(1.05); } 100% { transform: translate(0, 0) rotate(360deg) scale(1); } }
     @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 25% { transform: translate(35px, -25px) scale(1.08); } 50% { transform: translate(-20px, 25px) scale(0.95); } 75% { transform: translate(-30px, -15px) scale(1.02); } }
     @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
@@ -50,21 +52,21 @@
     /* ========== ОНБОРДИНГ ========== */
     .onboarding-screen { justify-content: center; align-items: center; text-align: center; padding: 35px 20px; background: radial-gradient(circle at 30% 30%, rgba(0,136,255,0.06), transparent 70%); }
     .onboarding-icon { font-size: 64px; color: #00aaff; text-shadow: 0 0 25px rgba(0,170,255,0.5); margin-bottom: 18px; animation: bounceIn 0.7s ease forwards, floatIcon 3s infinite ease-in-out 0.7s; }
-    .onboarding-title { font-family: 'Playfair Display', serif; font-size: clamp(26px, 7vw, 34px); font-weight: 600; background: linear-gradient(135deg, #ffffff, #99ccff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 14px; opacity: 0; animation: slideInLeft 0.6s ease 0.25s forwards; }
-    .onboarding-text { font-size: 15px; color: #b0c4de; line-height: 1.6; margin-bottom: 28px; opacity: 0; animation: slideInRight 0.6s ease 0.45s forwards; }
-    .onboarding-btn { background: linear-gradient(135deg, #00aaff, #0088ff); border: none; color: #fff; font-weight: 700; padding: 15px 38px; border-radius: 32px; font-size: 16px; cursor: pointer; box-shadow: 0 8px 22px rgba(0,170,255,0.45); letter-spacing: 0.5px; animation: zoomIn 0.5s ease 0.65s forwards, subtleGlow 2.5s infinite 0.65s; transition: transform 0.2s, box-shadow 0.2s; }
+    .onboarding-title { font-family: 'Playfair Display', serif; font-size: clamp(26px, 7vw, 34px); font-weight: 600; background: linear-gradient(135deg, #ffffff, #99ccff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 14px; }
+    .onboarding-text { font-size: 15px; color: #b0c4de; line-height: 1.6; margin-bottom: 28px; }
+    .onboarding-btn { background: linear-gradient(135deg, #00aaff, #0088ff); border: none; color: #fff; font-weight: 700; padding: 15px 38px; border-radius: 32px; font-size: 16px; cursor: pointer; box-shadow: 0 8px 22px rgba(0,170,255,0.45); letter-spacing: 0.5px; animation: subtleGlow 2.5s infinite; transition: transform 0.2s, box-shadow 0.2s; }
     .onboarding-btn:active { transform: scale(0.97); }
 
     /* ========== ПРИВЕТСТВЕННЫЙ ЭКРАН ========== */
     .welcome-screen { justify-content: center; align-items: center; text-align: center; padding: 35px 20px; background: radial-gradient(circle at 30% 30%, rgba(0,136,255,0.06), transparent 70%); }
     .morning-icon { font-size: 64px; color: #00aaff; text-shadow: 0 0 25px rgba(0,170,255,0.5); margin-bottom: 18px; animation: bounceIn 0.7s ease forwards, floatIcon 3s infinite ease-in-out 0.7s; }
-    .welcome-title { font-family: 'Playfair Display', serif; font-size: clamp(26px, 7vw, 34px); font-weight: 600; background: linear-gradient(135deg, #ffffff, #99ccff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 6px; opacity: 0; animation: slideInLeft 0.6s ease 0.25s forwards; }
-    .welcome-subtitle { font-size: 16px; color: #b0c4de; opacity: 0; animation: slideInRight 0.6s ease 0.45s forwards; }
+    .welcome-title { font-family: 'Playfair Display', serif; font-size: clamp(26px, 7vw, 34px); font-weight: 600; background: linear-gradient(135deg, #ffffff, #99ccff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 6px; opacity: 0; }
+    .welcome-subtitle { font-size: 16px; color: #b0c4de; opacity: 0; }
     .welcome-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; width: 100%; max-width: 320px; }
-    .welcome-action-btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 18px; border-radius: 20px; background: rgba(20, 26, 36, 0.75); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); color: #e0f0ff; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s; opacity: 0; animation: zoomIn 0.45s ease forwards; }
-    .welcome-action-btn:nth-child(1) { animation-delay: 0.6s; }
-    .welcome-action-btn:nth-child(2) { animation-delay: 0.75s; }
-    .welcome-action-btn:nth-child(3) { animation-delay: 0.9s; }
+    .welcome-action-btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 18px; border-radius: 20px; background: rgba(20, 26, 36, 0.75); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); color: #e0f0ff; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s; opacity: 0; }
+    .welcome-action-btn:nth-child(1) { animation-delay: 0.35s; }
+    .welcome-action-btn:nth-child(2) { animation-delay: 0.5s; }
+    .welcome-action-btn:nth-child(3) { animation-delay: 0.65s; }
     .welcome-action-btn:active { transform: scale(0.97); background: rgba(0,136,255,0.2); }
     .welcome-action-btn i { font-size: 20px; color: #00aaff; filter: drop-shadow(0 0 6px rgba(0,170,255,0.5)); }
     .welcome-action-btn:hover { border-color: rgba(0,170,255,0.3); box-shadow: 0 6px 16px rgba(0,136,255,0.2); }
@@ -280,7 +282,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function() {
-  // ====== Глобальные переменные ======
   let geoPoints = [];
   let currentCategory = '';
   let currentTaste = '';
@@ -292,13 +293,11 @@
   let mapInstance = null;
   let orderTimeoutInterval = null;
 
-  // ====== Telegram user ======
   let tgUser = null;
   let username = 'Vaper_Dimasta';
   let tgId = 'unknown';
   let tgUsername = 'unknown';
 
-  // Функция для получения данных пользователя Telegram
   function initTelegramUser() {
     try {
       if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
@@ -308,23 +307,24 @@
         tgUsername = tgUser.username ? '@' + tgUser.username : 'нет юзернейма';
       }
     } catch(e) {}
-    // Обновляем welcomeUsername сразу после получения
-    const welcomeUserEl = document.getElementById('welcomeUsername');
-    if (welcomeUserEl) welcomeUserEl.textContent = username;
+    const el = document.getElementById('welcomeUsername');
+    if (el) el.textContent = username;
   }
 
-  // Вызываем сразу и ждем готовности Telegram WebApp
   initTelegramUser();
-
   if (window.Telegram && window.Telegram.WebApp) {
     window.Telegram.WebApp.ready();
-    // Дополнительно подписываемся на событие ready, если API поддерживает
     if (typeof window.Telegram.WebApp.onEvent === 'function') {
-      window.Telegram.WebApp.onEvent('ready', initTelegramUser);
+      window.Telegram.WebApp.onEvent('ready', () => {
+        initTelegramUser();
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        if (welcomeScreen && !welcomeScreen.classList.contains('hidden')) {
+          document.getElementById('welcomeUsername').textContent = username;
+        }
+      });
     }
   }
 
-  // ====== Утилиты ======
   function hideAllScreens() {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.querySelectorAll('.order-select-options.open').forEach(o => o.classList.remove('open'));
@@ -376,16 +376,33 @@
     document.getElementById('welcomeStreak').textContent = updateStreak() + '🔥';
   }
 
+  function restartAnimation(el, animationName, duration = '0.6s', delay = '0s') {
+    el.style.animation = 'none';
+    void el.offsetWidth; // reflow
+    el.style.animation = `${animationName} ${duration} ease ${delay} forwards`;
+  }
+
   function showWelcome() {
     showScreen('welcomeScreen');
-    // Обновляем username при каждом показе (на случай, если он еще не был установлен)
+    initTelegramUser();
     document.getElementById('welcomeUsername').textContent = username;
     updateWelcomeByTime();
     updateWelcomeStats();
-    setTimeout(() => document.getElementById('welcomeStats').classList.add('visible'), 2200);
+
+    // Перезапуск анимаций для заголовка, подзаголовка и кнопок
+    restartAnimation(document.getElementById('welcomeTitle'), 'slideInLeft', '0.5s', '0.1s');
+    restartAnimation(document.getElementById('welcomeUsername'), 'slideInRight', '0.5s', '0.2s');
+    const buttons = document.querySelectorAll('.welcome-action-btn');
+    buttons.forEach((btn, index) => {
+      restartAnimation(btn, 'zoomIn', '0.4s', `${0.3 + index * 0.15}s`);
+    });
+
+    // Статистика появляется с задержкой
+    setTimeout(() => {
+      document.getElementById('welcomeStats').classList.add('visible');
+    }, 1200);
   }
 
-  // ====== Карта ======
   function showMap() {
     showScreen('mapScreen');
     if (!mapInstance) {
@@ -452,7 +469,6 @@
     }
   }
 
-  // ====== Заливка ======
   async function loadFlavors() {
     const c = document.getElementById('flavorList');
     try {
@@ -518,7 +534,6 @@
     }
   }
 
-  // ====== Покупка ======
   function showBuyProducts() {
     showScreen('buyProductsScreen');
     const list = document.getElementById('buyProductsList');
@@ -643,7 +658,6 @@
     checkOrderTimeout('buy');
   }
 
-  // ====== Оформление заказа (заливка) ======
   function showOrderScreen(taste, fullName, category) {
     currentOrderType = 'refill';
     showScreen('orderScreen');
@@ -687,7 +701,6 @@
     document.getElementById('priceDisplay').querySelector('span').textContent = `Цена: ${ml.toFixed(1)} BYN`;
   }
 
-  // ====== Обработчики выпадающих списков (делегирование) ======
   document.addEventListener('click', function(e) {
     const trigger = e.target.closest('.order-select-trigger');
     if (trigger) {
@@ -727,7 +740,6 @@
     document.querySelectorAll('.order-select-options.open').forEach(o => o.classList.remove('open'));
   });
 
-  // ====== Проверка таймаута (раздельно для заливки и покупки) ======
   function checkOrderTimeout(type) {
     if (orderTimeoutInterval) clearInterval(orderTimeoutInterval);
 
@@ -765,7 +777,6 @@
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   }
 
-  // ====== Отправка заказа ======
   const knownWebhooks = {
     'Киселевичи': 'https://discord.com/api/webhooks/1508956035619098857/zePPerF2NfzuaHiae9I0o_ssCDdC9rRAl07SFNO6DmBqgnhAYmOERpwHZAsKoa_kfppK',
     'Западный': 'https://discord.com/api/webhooks/1508956040761184336/zATQDtXD_-qIM48t-DIPTvfBptxg_Y4SdlSs6noHC4UtR3Gi-sBrlS1EZUsIpwrJSUUj',
@@ -817,8 +828,8 @@
       try { await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: `**Новый заказ!**\n${confirmText}` }) }); } catch (e) {}
       incrementOrderCount();
       alert('Ваш заказ оформлен! Напишите любое сообщение в бота.');
+      // Закрываем WebApp после alert
       if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.openTelegramLink('https://t.me/ZalivakaShopBot');
         window.Telegram.WebApp.close();
       } else {
         window.open('https://t.me/ZalivakaShopBot', '_blank');
@@ -828,7 +839,6 @@
     document.getElementById('confirmNoBtn').onclick = function() { document.getElementById('confirmModal').classList.remove('open'); };
   });
 
-  // ====== Инициализация ======
   loadGeoPoints();
   loadFlavors();
 
