@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0e1a">
+<title>📻 Рация</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--tg-theme-bg-color, #0a0e1a);
+    color: var(--tg-theme-text-color, #e2e8f0);
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background 0.3s, color 0.3s;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse at top, rgba(251,146,60,0.12), transparent 60%),
+      radial-gradient(ellipse at bottom, rgba(74,108,247,0.08), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .screen {
+    position: fixed; inset: 0;
+    display: none; flex-direction: column;
+    z-index: 1;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  }
+  .screen.active { display: flex; }
+
+  /* ============ LOGIN ============ */
+  #screen-login { align-items: center; justify-content: center; padding: 24px; }
+  .login-card {
+    width: 100%; max-width: 380px;
+    display: flex; flex-direction: column; gap: 18px;
+    animation: fadeUp 0.5s ease;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .logo { text-align: center; margin-bottom: 4px; }
+  .logo-icon {
+    font-size: 64px; line-height: 1;
+    filter: drop-shadow(0 0 20px rgba(251,146,60,0.6));
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+  @keyframes pulseGlow { 50% { filter: drop-shadow(0 0 30px rgba(251,146,60,0.9)); } }
+  .logo h1 {
+    font-size: 28px; font-weight: 800; letter-spacing: 4px; margin-top: 12px;
+    background: linear-gradient(135deg, #fb923c, #f59e0b);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .logo p { color: var(--tg-theme-hint-color, #64748b); font-size: 13px; margin-top: 6px; letter-spacing: 1px; }
+
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field label {
+    font-size: 11px; color: var(--tg-theme-hint-color, #94a3b8);
+    text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;
+  }
+  .field input {
+    background: var(--tg-theme-secondary-bg-color, rgba(15,23,42,0.7));
+    border: 1.5px solid rgba(148,163,184,0.15);
+    color: var(--tg-theme-text-color, #e2e8f0);
+    padding: 14px 16px; border-radius: 12px; font-size: 16px;
+    font-family: inherit; transition: border 0.2s; width: 100%;
+  }
+  .field input:focus { outline: none; border-color: #fb923c; }
+  .field input::placeholder { color: var(--tg-theme-hint-color, #475569); }
+  .code-input {
+    font-family: 'SF Mono', Monaco, monospace !important;
+    letter-spacing: 6px; text-align: center; font-size: 22px !important;
+    font-weight: 700; color: var(--tg-theme-link-color, #fbbf24) !important;
+  }
+
+  .btn {
+    background: linear-gradient(135deg, #fb923c, #ea580c);
+    color: white; border: none; padding: 16px; border-radius: 12px;
+    font-size: 16px; font-weight: 700; letter-spacing: 1.5px;
+    cursor: pointer; transition: transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 8px 20px rgba(234,88,12,0.35);
+    font-family: inherit; touch-action: manipulation;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn.secondary {
+    background: var(--tg-theme-secondary-bg-color, rgba(148,163,184,0.1));
+    border: 1.5px solid rgba(148,163,184,0.2);
+    box-shadow: none; color: var(--tg-theme-text-color, #cbd5e1);
+  }
+
+  .login-hint {
+    font-size: 12px; color: var(--tg-theme-hint-color, #64748b);
+    text-align: center; line-height: 1.6; padding: 0 8px;
+  }
+
+  /* ============ RADIO ============ */
+  #screen-radio { padding: max(10px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); gap: 10px; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--tg-theme-secondary-bg-color, rgba(15,23,42,0.7));
+    border: 1px solid rgba(148,163,184,0.1);
+    border-radius: 14px; padding: 10px 14px; backdrop-filter: blur(10px);
+  }
+  .room-info { display: flex; align-items: center; gap: 10px; }
+  .room-code {
+    font-family: 'SF Mono', Monaco, monospace; font-size: 16px;
+    font-weight: 700; color: var(--tg-theme-link-color, #fbbf24); letter-spacing: 3px;
+  }
+  .room-label {
+    font-size: 10px; color: var(--tg-theme-hint-color, #64748b);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .led { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--tg-theme-hint-color, #94a3b8); }
+  .led-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #4ade80; box-shadow: 0 0 8px #4ade80;
+    animation: ledBlink 2s ease-in-out infinite;
+  }
+  @keyframes ledBlink { 50% { opacity: 0.5; } }
+
+  .exit-btn {
+    background: transparent; border: 1px solid rgba(148,163,184,0.2);
+    color: var(--tg-theme-hint-color, #94a3b8);
+    width: 34px; height: 34px; border-radius: 10px;
+    font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .exit-btn:active { background: rgba(239,68,68,0.15); color: #f87171; }
+
+  .peers {
+    display: flex; gap: 8px; overflow-x: auto;
+    padding: 4px 0; min-height: 58px; scrollbar-width: none;
+  }
+  .peers::-webkit-scrollbar { display: none; }
+  .peer {
+    flex-shrink: 0; display: flex; flex-direction: column;
+    align-items: center; gap: 4px; width: 52px;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+  .peer-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px; color: white;
+    border: 2px solid rgba(74,222,128,0.5);
+    box-shadow: 0 0 10px rgba(74,222,128,0.2);
+    transition: all 0.2s;
+  }
+  .peer.me .peer-avatar { border-color: #fb923c; box-shadow: 0 0 12px rgba(251,146,60,0.4); }
+  .peer-name {
+    font-size: 10px; color: var(--tg-theme-hint-color, #94a3b8);
+    max-width: 52px; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap; text-align: center;
+  }
+  .peer.empty .peer-avatar {
+    background: var(--tg-theme-secondary-bg-color, rgba(148,163,184,0.08)) !important;
+    border-style: dashed; border-color: rgba(148,163,184,0.2);
+    color: var(--tg-theme-hint-color, #475569); box-shadow: none;
+  }
+
+  .ptt-area {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 14px; position: relative;
+  }
+  .ptt-btn {
+    position: relative;
+    width: min(280px, 68vw); height: min(280px, 68vw);
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 25%, #ff8a8a 0%, #ef4444 30%, #991b1b 100%);
+    border: 8px solid rgba(15,23,42,0.8);
+    box-shadow:
+      0 20px 50px rgba(239,68,68,0.4),
+      0 0 0 4px rgba(239,68,68,0.15),
+      inset 0 -10px 30px rgba(0,0,0,0.5),
+      inset 0 10px 30px rgba(255,255,255,0.15);
+    color: white; font-family: inherit; font-weight: 800;
+    font-size: 20px; letter-spacing: 3px; cursor: pointer;
+    transition: all 0.15s ease; touch-action: none;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
+  .ptt-btn:disabled {
+    background: radial-gradient(circle at 30% 25%, #475569 0%, #334155 30%, #1e293b 100%);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 -6px 20px rgba(0,0,0,0.4);
+    color: #64748b; text-shadow: none; cursor: not-allowed;
+  }
+  .ptt-btn:not(:disabled):active,
+  .ptt-btn.tx {
+    background: radial-gradient(circle at 30% 25%, #86efac 0%, #22c55e 30%, #15803d 100%);
+    box-shadow:
+      0 0 60px rgba(34,197,94,0.7),
+      0 0 0 8px rgba(34,197,94,0.2),
+      inset 0 -10px 30px rgba(0,0,0,0.5),
+      inset 0 10px 30px rgba(255,255,255,0.2);
+    transform: scale(0.96);
+  }
+  .ptt-btn .ptt-icon { font-size: 52px; line-height: 1; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.3)); }
+  .ptt-btn .ptt-text { font-size: 16px; letter-spacing: 4px; opacity: 0.95; }
+  .ptt-btn::before {
+    content: ''; position: absolute; inset: -20px;
+    border-radius: 50%; border: 2px solid rgba(239,68,68,0.3);
+    opacity: 0; pointer-events: none;
+  }
+  .ptt-btn.tx::before { border-color: rgba(34,197,94,0.6); animation: ripple 1.2s ease-out infinite; }
+  @keyframes ripple { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.4); opacity: 0; } }
+
+  .waveform { display: none; gap: 3px; align-items: center; height: 24px; }
+  .ptt-btn.tx .waveform { display: flex; }
+  .waveform span {
+    display: block; width: 3px; background: rgba(255,255,255,0.8);
+    border-radius: 2px; animation: wave 0.6s ease-in-out infinite;
+  }
+  .waveform span:nth-child(1) { animation-delay: 0s;    height: 8px; }
+  .waveform span:nth-child(2) { animation-delay: 0.1s;  height: 16px; }
+  .waveform span:nth-child(3) { animation-delay: 0.2s;  height: 22px; }
+  .waveform span:nth-child(4) { animation-delay: 0.15s; height: 14px; }
+  .waveform span:nth-child(5) { animation-delay: 0.05s; height: 20px; }
+  .waveform span:nth-child(6) { animation-delay: 0.25s; height: 10px; }
+  .waveform span:nth-child(7) { animation-delay: 0.12s; height: 18px; }
+  @keyframes wave { 0%, 100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
+
+  .volume-row {
+    display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+    background: var(--tg-theme-secondary-bg-color, rgba(15,23,42,0.7));
+    border-radius: 14px; border: 1px solid rgba(148,163,184,0.1);
+  }
+  .volume-row span { font-size: 16px; }
+  input[type=range] {
+    flex: 1; -webkit-appearance: none; height: 4px;
+    border-radius: 2px; background: rgba(148,163,184,0.2); outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 20px; height: 20px;
+    border-radius: 50%; background: linear-gradient(135deg, #fb923c, #ea580c);
+    box-shadow: 0 0 12px rgba(251,146,60,0.6); cursor: pointer;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 20px; height: 20px; border: none; border-radius: 50%;
+    background: linear-gradient(135deg, #fb923c, #ea580c);
+    box-shadow: 0 0 12px rgba(251,146,60,0.6);
+  }
+
+  .log-toggle {
+    position: absolute; bottom: 4px; right: 0;
+    background: var(--tg-theme-secondary-bg-color, rgba(15,23,42,0.7));
+    border: 1px solid rgba(148,163,184,0.15);
+    color: var(--tg-theme-hint-color, #64748b);
+    font-size: 10px; padding: 5px 10px; border-radius: 8px;
+    cursor: pointer; letter-spacing: 1px;
+  }
+  .log {
+    display: none; position: absolute; bottom: 40px; left: 0; right: 0;
+    background: var(--tg-theme-secondary-bg-color, rgba(2,6,23,0.95));
+    border: 1px solid rgba(148,163,184,0.15);
+    border-radius: 12px; padding: 10px;
+    font-family: 'SF Mono', Monaco, monospace; font-size: 10px;
+    line-height: 1.6; color: var(--tg-theme-hint-color, #94a3b8);
+    max-height: 180px; overflow-y: auto; backdrop-filter: blur(10px);
+  }
+  .log.open { display: block; }
+  .log div { padding: 1px 0; word-break: break-all; }
+  .log .ok { color: #4ade80; }
+  .log .err { color: #f87171; }
+  .log .info { color: #60a5fa; }
+  .log .tx { color: #fb923c; }
+
+  .loading-overlay {
+    position: fixed; inset: 0;
+    background: rgba(10,14,26,0.95);
+    display: none; align-items: center; justify-content: center;
+    flex-direction: column; gap: 20px; z-index: 100;
+    backdrop-filter: blur(6px);
+  }
+  .loading-overlay.active { display: flex; }
+  .spinner {
+    width: 50px; height: 50px;
+    border: 3px solid rgba(251,146,60,0.2);
+    border-top-color: #fb923c; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-overlay p {
+    color: var(--tg-theme-hint-color, #94a3b8);
+    font-size: 13px; letter-spacing: 1px; text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="logo">
+      <div class="logo-icon">📻</div>
+      <h1>РАЦИЯ</h1>
+      <p id="tgUserLabel">P2P · БЕЗ СЕРВЕРОВ · МЕШ-СЕТЬ</p>
+    </div>
+
+    <div class="field">
+      <label>Код комнаты</label>
+      <input type="text" id="inputRoom" class="code-input" placeholder="ALFA" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    </div>
+
+    <div class="field">
+      <label>Ваш позывной</label>
+      <input type="text" id="inputNick" placeholder="Например, Медведь" maxlength="14" autocomplete="off">
+    </div>
+
+    <button id="btnJoin" class="btn">🎙 ВОЙТИ В ЭФИР</button>
+
+    <p class="login-hint">
+      Все участники вводят один код — оказываются в одном канале.<br>
+      До 8 человек. Аудио идёт напрямую между устройствами.
+    </p>
+  </div>
+</div>
+
+<!-- ============ RADIO ============ -->
+<div id="screen-radio" class="screen">
+  <div class="topbar">
+    <div class="room-info">
+      <div>
+        <div class="room-label">КАНАЛ</div>
+        <div class="room-code" id="dispRoom">ALFA</div>
+      </div>
+    </div>
+    <div class="led">
+      <span class="led-dot" id="ledDot"></span>
+      <span id="ledCount">1/8</span>
+    </div>
+    <button class="exit-btn" id="btnExit" title="Выйти">✕</button>
+  </div>
+
+  <div class="peers" id="peersList"></div>
+
+  <div class="ptt-area">
+    <button class="ptt-btn" id="pttBtn" disabled>
+      <span class="ptt-icon">🎙</span>
+      <span class="ptt-text">УДЕРЖИВАЙ</span>
+      <div class="waveform">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
+    </button>
+    <div class="log-toggle" id="logToggle">ЛОГ</div>
+    <div class="log" id="log"></div>
+  </div>
+
+  <div class="volume-row">
+    <span>🔉</span>
+    <input type="range" id="volume" min="0" max="1" step="0.05" value="1">
+    <span>🔊</span>
+  </div>
+</div>
+
+<!-- ============ LOADING ============ -->
+<div id="loading" class="loading-overlay">
+  <div class="spinner"></div>
+  <p id="loadingText">Подключение к эфиру...</p>
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const MAX_SLOTS = 8;
+
+  // ================================================================
+  //  TELEGRAM WEB APP INIT
+  // ================================================================
+  const tg = window.Telegram?.WebApp;
+  const isTg = !!tg;
+
+  if (isTg) {
+    // Развернуть на весь экран
+    try {
+      tg.ready();
+      tg.expand();
+      tg.disableVerticalSwipes();
+      if (tg.requestFullscreen) {
+        try { tg.requestFullscreen(); } catch(e) {}
+      }
+      // Цвет хедера под тему
+      try { tg.setHeaderColor('secondary_bg_color'); } catch(e) {}
+    } catch(e) {}
+
+    // Подставить имя пользователя из Telegram
+    const u = tg.initDataUnsafe?.user;
+    if (u) {
+      const name = u.first_name || u.username || ('ID' + u.id);
+      $('inputNick').value = name.slice(0, 14);
+      $('tgUserLabel').textContent = 'Привет, ' + name + '! Выбери канал';
+    }
+  }
+
+  // ================================================================
+  //  STATE
+  // ================================================================
+  let audioCtx = null;
+  let rawStream = null;
+  let gatedStream = null;
+  let micGain = null;
+  let masterOut = null;
+  let localBus = null;
+  let txBus = null;
+  let peer = null;
+  let mySlot = 0;
+  let myNick = '';
+  let roomCode = '';
+  const peersMap = new Map();
+  let transmitting = false;
+
+  // ================================================================
+  //  HAPTIC FEEDBACK (Telegram)
+  // ================================================================
+  function haptic(type) {
+    if (!isTg || !tg.HapticFeedback) return;
+    try {
+      if (type === 'light')  tg.HapticFeedback.impactOccurred('light');
+      if (type === 'medium') tg.HapticFeedback.impactOccurred('medium');
+      if (type === 'heavy')  tg.HapticFeedback.impactOccurred('heavy');
+      if (type === 'success')tg.HapticFeedback.notificationOccurred('success');
+      if (type === 'error')  tg.HapticFeedback.notificationOccurred('error');
+    } catch(e) {}
+  }
+
+  // ================================================================
+  //  CLOUD STORAGE (Telegram)
+  // ================================================================
+  function cloudGet(key) {
+    return new Promise(resolve => {
+      if (!isTg || !tg.CloudStorage) return resolve(null);
+      try {
+        tg.CloudStorage.getItem(key, (err, val) => resolve(err ? null : val));
+      } catch(e) { resolve(null); }
+    });
+  }
+  function cloudSet(key, val) {
+    if (!isTg || !tg.CloudStorage) return;
+    try { tg.CloudStorage.setItem(key, String(val), () => {}); } catch(e) {}
+  }
+
+  // Загрузить сохранённые настройки
+  (async function loadSaved() {
+    const savedRoom = await cloudGet('radio_room');
+    const savedNick = await cloudGet('radio_nick');
+    if (savedRoom) $('inputRoom').value = savedRoom;
+    if (savedNick && !$('inputNick').value) $('inputNick').value = savedNick;
+  })();
+
+  // ================================================================
+  //  ЗВУКИ РАЦИИ
+  // ================================================================
+  function ensureCtx() {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch(e) { return null; }
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+    return audioCtx;
+  }
+
+  function tone(freq, dur, when, bus, type, vol) {
+    const ctx = audioCtx;
+    const start = ctx.currentTime + (when || 0);
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, start);
+    g.gain.setValueAtTime(0, start);
+    g.gain.linearRampToValueAtTime(vol || 0.18, start + 0.005);
+    g.gain.setValueAtTime(vol || 0.18, start + dur - 0.01);
+    g.gain.linearRampToValueAtTime(0, start + dur);
+    osc.connect(g);
+    g.connect(bus || localBus);
+    osc.start(start);
+    osc.stop(start + dur + 0.05);
+  }
+
+  function noise(dur, freq, when, bus, vol) {
+    const ctx = audioCtx;
+    const start = ctx.currentTime + (when || 0);
+    const sr = ctx.sampleRate;
+    const len = Math.floor(sr * dur);
+    const buf = ctx.createBuffer(1, len, sr);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const filt = ctx.createBiquadFilter();
+    filt.type = 'bandpass';
+    filt.frequency.value = freq || 2200;
+    filt.Q.value = 1.5;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(vol || 0.12, start);
+    g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+    src.connect(filt); filt.connect(g); g.connect(bus || localBus);
+    src.start(start); src.stop(start + dur + 0.02);
+  }
+
+  function rogerBeep(bus, when) {
+    const w = when || 0;
+    tone(1100, 0.07, w,       bus, 'sine', 0.22);
+    tone(1600, 0.10, w + 0.09, bus, 'sine', 0.22);
+  }
+
+  const sfx = {
+    pttStart() {
+      noise(0.04, 2600, 0, txBus, 0.18);
+      tone(1000, 0.05, 0.04, txBus, 'sine', 0.20);
+      tone(1500, 0.06, 0.10, txBus, 'sine', 0.20);
+    },
+    pttEnd() {
+      rogerBeep(txBus, 0);
+      noise(0.06, 1800, 0.22, txBus, 0.15);
+    },
+    connected() {
+      tone(660, 0.08, 0,    localBus, 'triangle', 0.15);
+      tone(880, 0.08, 0.09, localBus, 'triangle', 0.15);
+      tone(1320,0.14, 0.18, localBus, 'triangle', 0.15);
+    },
+    peerJoin()  { tone(1200, 0.06, 0, localBus, 'sine', 0.14); tone(1600, 0.10, 0.07, localBus, 'sine', 0.14); },
+    peerLeave() { tone(1200, 0.06, 0, localBus, 'sine', 0.12); tone(800,  0.10, 0.07, localBus, 'sine', 0.12); },
+    error()     { tone(220, 0.20, 0, localBus, 'sawtooth', 0.15); tone(180, 0.25, 0.18, localBus, 'sawtooth', 0.15); },
+    click()     { tone(1400, 0.04, 0, localBus, 'sine', 0.10); }
+  };
+
+  // ================================================================
+  //  АУДИО-ПАЙПЛАЙН
+  // ================================================================
+  function buildAudioPipeline(stream) {
+    const ctx = ensureCtx();
+    if (!ctx) throw new Error('Web Audio не поддерживается');
+
+    rawStream = stream;
+
+    const micSrc = ctx.createMediaStreamSource(rawStream);
+    micGain = ctx.createGain();
+    micGain.gain.value = 0;
+
+    const dest = ctx.createMediaStreamDestination();
+    micSrc.connect(micGain);
+    micGain.connect(dest);
+    gatedStream = dest.stream;
+
+    masterOut = ctx.createGain();
+    masterOut.gain.value = parseFloat($('volume').value);
+    masterOut.connect(ctx.destination);
+
+    localBus = ctx.createGain();
+    localBus.gain.value = 1;
+    localBus.connect(ctx.destination);
+
+    txBus = ctx.createGain();
+    txBus.gain.value = 1;
+    txBus.connect(ctx.destination);
+    txBus.connect(dest);
+
+    if (ctx.state === 'suspended') {
+      try { ctx.resume(); } catch(e) {}
+    }
+  }
+
+  // ================================================================
+  //  PEERJS
+  // ================================================================
+  function sanitizeCode(s) {
+    return (s || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) || 'ROOM';
+  }
+  function slotId(code, slot) { return 'wtt-' + code + '-' + slot; }
+
+  function tryClaimSlot(peerId) {
+    return new Promise((resolve) => {
+      let resolved = false;
+      const done = (result) => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(t);
+        resolve(result);
+      };
+      let p;
+      try {
+        p = new Peer(peerId, {
+          debug: 0,
+          config: {
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:global.stun.twilio.com:3478' }
+            ]
+          }
+        });
+      } catch(e) { return done(null); }
+      const t = setTimeout(() => {
+        try { p.destroy(); } catch(e) {}
+        done(null);
+      }, 6000);
+      p.on('open', () => done(p));
+      p.on('error', (e) => {
+        if (e.type === 'unavailable-id') {
+          try { p.destroy(); } catch(_) {}
+          done(null);
+        }
+      });
+    });
+  }
+
+  async function findAndClaimSlot(code) {
+    for (let s = 1; s <= MAX_SLOTS; s++) {
+      const p = await tryClaimSlot(slotId(code, s));
+      if (p) return { peer: p, slot: s };
+    }
+    throw new Error('Канал заполнен (макс. ' + MAX_SLOTS + ')');
+  }
+
+  // ================================================================
+  //  WEBRTC
+  // ================================================================
+  function handleCall(call) {
+    const peerId = call.peer;
+    if (peersMap.has(peerId)) {
+      try { call.close(); } catch(e) {}
+      return;
+    }
+
+    const peerSlot = parseInt(peerId.split('-').pop(), 10) || 0;
+    const nick = (call.metadata && call.metadata.nickname) || ('Радист ' + peerSlot);
+
+    const entry = { call, nickname: nick, slot: peerSlot, gain: null, connected: false };
+    peersMap.set(peerId, entry);
+    renderPeers();
+
+    call.on('stream', (remoteStream) => {
+      const ctx = audioCtx;
+      const src = ctx.createMediaStreamSource(remoteStream);
+      const g = ctx.createGain();
+      g.gain.value = 1;
+      src.connect(g);
+      g.connect(masterOut);
+      entry.gain = g;
+      entry.connected = true;
+      log('📥 Поток от ' + nick, 'ok');
+      renderPeers();
+    });
+
+    call.on('close', () => {
+      peersMap.delete(peerId);
+      renderPeers();
+      sfx.peerLeave();
+      log('🚪 ' + nick + ' покинул канал', 'info');
+    });
+
+    call.on('error', (e) => log('Ошибка с ' + nick + ': ' + e.type, 'err'));
+  }
+
+  function callSlot(slot) {
+    const targetId = slotId(roomCode, slot);
+    if (peersMap.has(targetId)) return;
+    if (slot === mySlot) return;
+    try {
+      peer.call(targetId, gatedStream, { metadata: { nickname: myNick } });
+    } catch(e) { log('Ошибка вызова: ' + e.message, 'err'); }
+  }
+
+  // ================================================================
+  //  UI
+  // ================================================================
+  function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    $('screen-' + name).classList.add('active');
+  }
+
+  function log(msg, cls) {
+    const d = document.createElement('div');
+    if (cls) d.className = cls;
+    const t = new Date().toLocaleTimeString('ru-RU', { hour12: false });
+    d.textContent = '[' + t + '] ' + msg;
+    const l = $('log');
+    l.appendChild(d);
+    l.scrollTop = l.scrollHeight;
+    while (l.children.length > 100) l.removeChild(l.firstChild);
+  }
+
+  function colorFor(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+    return 'hsl(' + (Math.abs(h) % 360) + ', 65%, 55%)';
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  function renderPeers() {
+    const list = $('peersList');
+    list.innerHTML = '';
+
+    const me = document.createElement('div');
+    me.className = 'peer me';
+    me.innerHTML =
+      '<div class="peer-avatar" style="background:' + colorFor(myNick || 'me') + '">' +
+        (myNick ? myNick[0].toUpperCase() : '★') +
+      '</div><div class="peer-name">' + escapeHtml(myNick || 'Вы') + '</div>';
+    list.appendChild(me);
+
+    peersMap.forEach((p) => {
+      const el = document.createElement('div');
+      el.className = 'peer';
+      el.innerHTML =
+        '<div class="peer-avatar" style="background:' + colorFor(p.nickname) + '">' +
+          (p.nickname ? p.nickname[0].toUpperCase() : '?') +
+        '</div><div class="peer-name">' + escapeHtml(p.nickname) + '</div>';
+      list.appendChild(el);
+    });
+
+    const total = peersMap.size + 1;
+    for (let i = total; i < Math.max(4, peersMap.size + 1); i++) {
+      const el = document.createElement('div');
+      el.className = 'peer empty';
+      el.innerHTML = '<div class="peer-avatar">+</div><div class="peer-name">—</div>';
+      list.appendChild(el);
+    }
+    $('ledCount').textContent = total + '/' + MAX_SLOTS;
+  }
+
+  // ================================================================
+  //  PTT
+  // ================================================================
+  function pttDown() {
+    if (!peer || transmitting) return;
+    const ctx = ensureCtx();
+    if (ctx && ctx.state === 'suspended') ctx.resume().catch(()=>{});
+    transmitting = true;
+    micGain.gain.cancelScheduledValues(ctx.currentTime);
+    micGain.gain.setTargetAtTime(1, ctx.currentTime, 0.008);
+    $('pttBtn').classList.add('tx');
+    $('pttBtn').querySelector('.ptt-text').textContent = 'В ЭФИРЕ';
+    sfx.pttStart();
+    haptic('medium');
+  }
+
+  function pttUp() {
+    if (!transmitting) return;
+    transmitting = false;
+    const ctx = ensureCtx();
+    micGain.gain.cancelScheduledValues(ctx.currentTime);
+    micGain.gain.setTargetAtTime(0, ctx.currentTime, 0.008);
+    $('pttBtn').classList.remove('tx');
+    $('pttBtn').querySelector('.ptt-text').textContent = 'УДЕРЖИВАЙ';
+    sfx.pttEnd();
+    haptic('light');
+  }
+
+  // ================================================================
+  //  JOIN — СИНХРОННЫЙ ЗАПРОС МИКРОФОНА
+  // ================================================================
+  $('btnJoin').addEventListener('click', function() {
+    const code = sanitizeCode($('inputRoom').value);
+    const nick = ($('inputNick').value || '').trim() || 'Радист';
+    if (!code) { sfx.error(); haptic('error'); return; }
+
+    // КРИТИЧНО ДЛЯ iOS/TELEGRAM: getUserMedia должен вызываться
+    // СИНХРОННО в обработчике события нажатия
+    let streamPromise;
+    try {
+      streamPromise = navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          channelCount: 1
+        },
+        video: false
+      });
+    } catch(e) {
+      alert('Не удалось запросить микрофон: ' + e.message);
+      sfx.error();
+      return;
+    }
+
+    // Дальше — асинхронно
+    myNick = nick;
+    roomCode = code;
+    cloudSet('radio_room', code);
+    cloudSet('radio_nick', nick);
+
+    $('loading').classList.add('active');
+    $('loadingText').textContent = 'Доступ к микрофону...';
+    haptic('light');
+
+    streamPromise.then(async (stream) => {
+      try {
+        ensureCtx();
+        buildAudioPipeline(stream);
+        log('🎤 Микрофон подключён', 'ok');
+
+        $('loadingText').textContent = 'Поиск свободного слота в канале ' + code + '...';
+
+        const claimed = await findAndClaimSlot(code);
+        peer = claimed.peer;
+        mySlot = claimed.slot;
+        log('Занял слот #' + mySlot + ' в канале ' + code, 'ok');
+
+        $('loadingText').textContent = 'Подключение к участникам...';
+
+        peer.on('call', (call) => {
+          call.answer(gatedStream, { metadata: { nickname: myNick } });
+          handleCall(call);
+        });
+
+        peer.on('error', (e) => {
+          if (e.type === 'peer-unavailable') return;
+          log('Peer: ' + e.type, 'err');
+        });
+
+        peer.on('disconnected', () => {
+          log('Сигнальный сервер отключён, переподключаюсь...', 'info');
+          try { peer.reconnect(); } catch(e) {}
+        });
+
+        for (let s = 1; s < mySlot; s++) callSlot(s);
+
+        setInterval(() => {
+          for (let s = 1; s < mySlot; s++) {
+            const tid = slotId(roomCode, s);
+            if (!peersMap.has(tid)) callSlot(s);
+          }
+        }, 7000);
+
+        $('loading').classList.remove('active');
+        $('dispRoom').textContent = code;
+        showScreen('radio');
+        renderPeers();
+        sfx.connected();
+        haptic('success');
+        log('📻 В эфире как ' + nick + ' (слот ' + mySlot + ')', 'ok');
+
+        setTimeout(() => { $('pttBtn').disabled = false; }, 200);
+
+      } catch(e) {
+        $('loading').classList.remove('active');
+        log('Ошибка: ' + e.message, 'err');
+        sfx.error();
+        haptic('error');
+        alert('Ошибка: ' + e.message);
+      }
+    }).catch((e) => {
+      $('loading').classList.remove('active');
+      sfx.error();
+      haptic('error');
+      alert('Не удалось получить доступ к микрофону.\n\n' + e.name + ': ' + e.message +
+            '\n\nПроверьте:\n• Разрешение на микрофон в настройках Telegram\n• Настройки > Приложения > Telegram > Микрофон\n• Микрофон не занят другим приложением');
+    });
+  });
+
+  // ================================================================
+  //  LEAVE
+  // ================================================================
+  function leaveRadio() {
+    try { if (peer) peer.destroy(); } catch(e) {}
+    try { if (rawStream) rawStream.getTracks().forEach(t => t.stop()); } catch(e) {}
+    try { if (audioCtx) audioCtx.close(); } catch(e) {}
+    location.reload();
+  }
+
+  // ================================================================
+  //  ОБРАБОТЧИКИ
+  // ================================================================
+  $('inputRoom').addEventListener('input', (e) => {
+    e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  });
+  $('inputNick').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') $('btnJoin').click();
+  });
+  $('btnExit').addEventListener('click', () => {
+    if (confirm('Выйти из канала?')) leaveRadio();
+  });
+
+  const pttBtn = $('pttBtn');
+  pttBtn.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    try { pttBtn.setPointerCapture(e.pointerId); } catch(_) {}
+    pttDown();
+  });
+  pttBtn.addEventListener('pointerup',     (e) => { e.preventDefault(); pttUp(); });
+  pttBtn.addEventListener('pointercancel', () => pttUp());
+  pttBtn.addEventListener('pointerleave',  () => pttUp());
+  pttBtn.addEventListener('contextmenu',   (e) => e.preventDefault());
+
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && !e.repeat) {
+      const t = document.activeElement;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+      e.preventDefault(); pttDown();
+    }
+  });
+  document.addEventListener('keyup', (e) => {
+    if (e.code === 'Space') {
+      const t = document.activeElement;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+      e.preventDefault(); pttUp();
+    }
+  });
+
+  $('volume').addEventListener('input', () => {
+    if (masterOut) masterOut.gain.value = parseFloat($('volume').value);
+  });
+  $('logToggle').addEventListener('click', () => {
+    $('log').classList.toggle('open');
+    sfx.click();
+  });
+
+  // Параметр ?room=ALFA
+  (function() {
+    try {
+      const p = new URLSearchParams(location.search);
+      const r = p.get('room');
+      if (r) $('inputRoom').value = sanitizeCode(r);
+    } catch(e) {}
+  })();
+
+  // iOS: возврат из фона
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(()=>{});
+    }
+  });
+
+  // Разблокировка звука
+  const unlockAudio = () => {
+    ensureCtx();
+    document.removeEventListener('touchstart', unlockAudio);
+    document.removeEventListener('click', unlockAudio);
+  };
+  document.addEventListener('touchstart', unlockAudio);
+  document.addEventListener('click', unlockAudio);
+
+})();
+</script>
+</body>
+</html>
