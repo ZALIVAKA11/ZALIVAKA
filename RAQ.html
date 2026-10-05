@@ -9,8 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Рация">
 <meta name="description" content="P2P-рация через интернет без серверов">
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%D0%A0%D0%B0%D1%86%D0%B8%D1%8F%22%2C%22short_name%22%3A%22%D0%A0%D0%B0%D1%86%D0%B8%D1%8F%22%2C%22start_url%22%3A%22.%22%2C%22scope%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230a0a0a%22%2C%22theme_color%22%3A%22%230a0a0a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%253Csvg%2520xmlns%253D%2522http%253A%2F%2Fwww.w3.org%2F2000%2Fsvg%2522%2520viewBox%253D%25220%25200%2520192%2520192%2522%253E%253Crect%2520width%253D%2522192%2522%2520height%253D%2522192%2522%2520rx%253D%252232%2522%2520fill%253D%2522%25230a0a0a%2522%2F%253E%253Ctext%2520x%253D%252296%2522%2520y%253D%2522130%2522%2520font-size%253D%2522100%2522%2520text-anchor%253D%2522middle%2522%253E%25F0%259F%2593%25BB%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%2520maskable%22%7D%5D%7D">
-<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%230a0a0a'/><text x='96' y='130' font-size='100' text-anchor='middle'>📻</text></svg>">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%D0%A0%D0%B0%D1%86%D0%B8%D1%8F%22%2C%22short_name%22%3A%22%D0%A0%D0%B0%D1%86%D0%B8%D1%8F%22%2C%22start_url%22%3A%22.%22%2C%22scope%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230a0a0a%22%2C%22theme_color%22%3A%22%230a0a0a%22%7D">
 <title>РАЦИЯ · P2P Mesh</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -161,7 +160,7 @@
 <div class="modal" id="roomModal">
   <div class="modal-content">
     <h2>СЕТЬ MESH</h2>
-    <p>Создай сеть или присоединись. Обмен кодами — <b>QR-кодом</b> (проще всего) или копипастом.</p>
+    <p>Создай сеть или присоединись. Обмен кодами — <b>QR-кодом</b> или копипастом.</p>
     <button class="btn" id="startRoomBtn">🆕 СОЗДАТЬ СЕТЬ</button>
     <button class="btn secondary" id="joinRoomBtn" style="margin-top:6px">🔗 ПРИСОЕДИНИТЬСЯ</button>
 
@@ -171,7 +170,7 @@
         <button data-tab="text">📋 ТЕКСТ</button>
       </div>
       <div data-pane="qr">
-        <p style="text-align:center;color:#888">Покажи этот QR новому участнику — пусть отсканирует</p>
+        <p style="text-align:center;color:#888">Покажи этот QR новому участнику</p>
         <div class="qr-wrap"><canvas id="offerQR"></canvas></div>
         <div class="qr-hint" id="offerQRInfo"></div>
       </div>
@@ -287,7 +286,7 @@
 
 <script>
 /* ============================================================
-   РАЦИЯ · P2P MESH + QR (встроенный декодер) + PWA
+   РАЦИЯ · P2P MESH + QR + PWA
    ============================================================ */
 const $ = id => document.getElementById(id);
 
@@ -324,9 +323,11 @@ const S = {
   scannerStream: null,
   scannerRAF: null,
   barcodeDetector: null,
-  useOwnDecoder: false,
   pttAudioEl: null,
   pttAudioReady: false,
+  // 🆕 MIX-шина для создателя: собирает всех участников и рассылает обратно
+  mixDest: null,
+  mixSources: {},   // peerId -> MediaStreamAudioSourceNode
 };
 
 /* ============================================================
@@ -346,7 +347,6 @@ function noiseBuf(dur) {
   return b;
 }
 
-/* --- MP3 плеер для PTT --- */
 async function initPTTAudio() {
   if (S.pttAudioEl) return;
   const a = new Audio();
@@ -413,11 +413,6 @@ const SFX = {
     o.connect(g3).connect(c.destination);
     o.start(t0); o.stop(t0 + 0.2);
   },
-  staticBurst(){const c=ctx(),src=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
-    src.buffer=noiseBuf(0.09);f.type='highpass';f.frequency.value=1200;
-    g.gain.setValueAtTime(0.16,c.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.09);
-    src.connect(f).connect(g).connect(c.destination);src.start();},
   powerOn(){const c=ctx(),o=c.createOscillator(),g=c.createGain();o.type='sine';const t=c.currentTime;
     o.frequency.setValueAtTime(280,t);o.frequency.exponentialRampToValueAtTime(1300,t+0.28);
     g.gain.setValueAtTime(0.13,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.38);
@@ -721,233 +716,9 @@ function drawQR(canvas, text) {
 }
 
 /* ============================================================
-   ВСТРОЕННЫЙ QR-ДЕКОДЕР (фолбэк для Safari/Firefox/WebView)
-   ============================================================ */
-const QRDecoder = (function(){
-  function toGray(imageData) {
-    const w = imageData.width, h = imageData.height;
-    const gray = new Uint8Array(w * h);
-    const d = imageData.data;
-    for (let i = 0, j = 0; i < d.length; i += 4, j++) {
-      gray[j] = (d[i] * 0.299 + d[i+1] * 0.587 + d[i+2] * 0.114) | 0;
-    }
-    return { gray, w, h };
-  }
-  function binarize(gray, w, h) {
-    const out = new Uint8Array(w * h);
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        let sum = 0, cnt = 0;
-        for (let dy = -3; dy <= 3; dy++) {
-          const yy = y + dy; if (yy < 0 || yy >= h) continue;
-          for (let dx = -3; dx <= 3; dx++) {
-            const xx = x + dx; if (xx < 0 || xx >= w) continue;
-            sum += gray[yy * w + xx]; cnt++;
-          }
-        }
-        const avg = sum / cnt;
-        out[y * w + x] = gray[y * w + x] < avg - 8 ? 1 : 0;
-      }
-    }
-    return out;
-  }
-  function findFinderAlongLine(bin, w, h, x0, y0, dx, dy) {
-    const counts = [0,0,0,0,0];
-    let i = 0, x = x0, y = y0, steps = 0;
-    while (x >= 0 && x < w && y >= 0 && y < h && steps < 200) {
-      const v = bin[y * w + x];
-      if (v === 1) {
-        if (i % 2 === 0) counts[i]++;
-        else { i++; if (i > 4) break; counts[i] = 1; }
-      } else {
-        if (i % 2 === 1) counts[i]++;
-        else { if (i === 4) break; i++; counts[i] = 1; }
-      }
-      x += dx; y += dy; steps++;
-    }
-    if (i !== 4) return null;
-    const total = counts.reduce((a,b)=>a+b,0);
-    if (total < 7) return null;
-    const mod = total / 7;
-    const tol = mod * 0.7;
-    if (Math.abs(counts[0] - mod) > tol) return null;
-    if (Math.abs(counts[1] - mod) > tol) return null;
-    if (Math.abs(counts[2] - 3*mod) > tol * 3) return null;
-    if (Math.abs(counts[3] - mod) > tol) return null;
-    if (Math.abs(counts[4] - mod) > tol) return null;
-    return { total, mod, endX: x - dx, endY: y - dy };
-  }
-  function findFinders(bin, w, h) {
-    const finders = [];
-    for (let y = 0; y < h; y += 2) {
-      for (let x = 0; x < w; x += 2) {
-        if (bin[y * w + x] !== 1) continue;
-        const hRes = findFinderAlongLine(bin, w, h, x, y, 1, 0);
-        if (!hRes) continue;
-        const cx = (x + hRes.endX) / 2;
-        const vRes = findFinderAlongLine(bin, w, h, Math.round(cx), y, 0, -1);
-        if (!vRes) continue;
-        const cy = (y + vRes.endY) / 2;
-        finders.push({ x: cx, y: cy, size: (hRes.total + vRes.total) / 2 });
-        if (finders.length > 60) return finders;
-      }
-    }
-    const dedup = [];
-    for (const f of finders) {
-      let dup = false;
-      for (const d of dedup) {
-        if (Math.abs(d.x - f.x) < 8 && Math.abs(d.y - f.y) < 8) { dup = true; break; }
-      }
-      if (!dup) dedup.push(f);
-    }
-    return dedup;
-  }
-  function sampleGrid(bin, w, h, tl, tr, br, bl, size) {
-    const out = new Uint8Array(size * size);
-    for (let y = 0; y < size; y++) {
-      const v = y / (size - 1);
-      for (let x = 0; x < size; x++) {
-        const u = x / (size - 1);
-        const px = (1-u)*(1-v)*tl.x + u*(1-v)*tr.x + u*v*br.x + (1-u)*v*bl.x;
-        const py = (1-u)*(1-v)*tl.y + u*(1-v)*tr.y + u*v*br.y + (1-u)*v*bl.y;
-        const ix = Math.round(px), iy = Math.round(py);
-        if (ix < 0 || ix >= w || iy < 0 || iy >= h) return null;
-        out[y * size + x] = bin[iy * w + ix];
-      }
-    }
-    return out;
-  }
-  function markReserved(size, version) {
-    const reserved = new Uint8Array(size * size);
-    const mark = (x, y) => { if (x >= 0 && x < size && y >= 0 && y < size) reserved[y*size+x] = 1; };
-    for (let y = 0; y < 9; y++) for (let x = 0; x < 9; x++) mark(x, y);
-    for (let y = 0; y < 9; y++) for (let x = size-8; x < size; x++) mark(x, y);
-    for (let y = size-8; y < size; y++) for (let x = 0; x < 9; x++) mark(x, y);
-    for (let i = 8; i < size-8; i++) { mark(i, 6); mark(6, i); }
-    const aligns = QR_ALIGN[version] || [];
-    for (const ay of aligns) for (const ax of aligns) {
-      if ((ax===6&&ay===6)||(ax===6&&ay===size-7)||(ax===size-7&&ay===6)) continue;
-      for (let dy=-2;dy<=2;dy++) for (let dx=-2;dx<=2;dx++) mark(ax+dx, ay+dy);
-    }
-    for (let i = 0; i < 9; i++) { mark(8, i); mark(i, 8); mark(size-1-i, 8); mark(8, size-1-i); }
-    mark(8, size-8);
-    if (version >= 7) for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) { mark(size-11+j, i); mark(i, size-11+j); }
-    return reserved;
-  }
-  function maskFn(x, y, mask) {
-    switch (mask) {
-      case 0: return (x + y) % 2 === 0;
-      case 1: return y % 2 === 0;
-      case 2: return x % 3 === 0;
-      case 3: return (x + y) % 3 === 0;
-      case 4: return (Math.floor(y/2) + Math.floor(x/3)) % 2 === 0;
-      case 5: return ((x*y) % 2) + ((x*y) % 3) === 0;
-      case 6: return (((x*y) % 2) + ((x*y) % 3)) % 2 === 0;
-      case 7: return (((x+y) % 2) + ((x*y) % 3)) % 2 === 0;
-    }
-    return false;
-  }
-  function readBits(grid, size, version, mask) {
-    const reserved = markReserved(size, version);
-    const bits = [];
-    let upward = true;
-    for (let col = size-1; col > 0; col -= 2) {
-      if (col === 6) col--;
-      for (let i = 0; i < size; i++) {
-        const y = upward ? size-1-i : i;
-        for (let c = 0; c < 2; c++) {
-          const x = col - c;
-          if (reserved[y*size+x]) continue;
-          let bit = grid[y*size+x];
-          if (mask >= 0 && maskFn(x, y, mask)) bit ^= 1;
-          bits.push(bit);
-        }
-      }
-      upward = !upward;
-    }
-    return bits;
-  }
-  function decodeBits(bits, version) {
-    const blocks = QR_TABLE_L[version][2];
-    const dataCw = (blocks[0]*blocks[1]) + (blocks[2]*blocks[3]);
-    const totalBits = dataCw * 8;
-    if (bits.length < totalBits) return null;
-    const bytes = new Uint8Array(dataCw);
-    for (let i = 0; i < dataCw; i++) {
-      let b = 0;
-      for (let j = 0; j < 8; j++) b = (b << 1) | (bits[i*8+j] || 0);
-      bytes[i] = b;
-    }
-    const mode = (bytes[0] >> 4) & 0xF;
-    if (mode !== 0b0100) return null;
-    let len, offsetBits;
-    if (version < 10) {
-      len = ((bytes[0] & 0xF) << 4) | ((bytes[1] >> 4) & 0xF);
-      offsetBits = 12;
-    } else {
-      len = ((bytes[0] & 0xF) << 12) | (bytes[1] << 4) | ((bytes[2] >> 4) & 0xF);
-      offsetBits = 20;
-    }
-    if (len <= 0 || len > dataCw) return null;
-    const result = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      let b = 0;
-      for (let j = 0; j < 8; j++) {
-        const bi = offsetBits + i * 8 + j;
-        const byteIdx = bi >> 3;
-        const bitIdx = 7 - (bi & 7);
-        b = (b << 1) | ((bytes[byteIdx] >> bitIdx) & 1);
-      }
-      result[i] = b;
-    }
-    try { return new TextDecoder().decode(result); }
-    catch { return null; }
-  }
-  function decode(imageData) {
-    const { gray, w, h } = toGray(imageData);
-    const bin = binarize(gray, w, h);
-    const finders = findFinders(bin, w, h);
-    if (finders.length < 3) return null;
-    for (let i = 0; i < finders.length; i++) {
-      for (let j = i+1; j < finders.length; j++) {
-        for (let k = j+1; k < finders.length; k++) {
-          const pts = [finders[i], finders[j], finders[k]];
-          const dists = [
-            { a: pts[0], b: pts[1], d: Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y) },
-            { a: pts[0], b: pts[2], d: Math.hypot(pts[0].x-pts[2].x, pts[0].y-pts[2].y) },
-            { a: pts[1], b: pts[2], d: Math.hypot(pts[1].x-pts[2].x, pts[1].y-pts[2].y) }
-          ].sort((x,y)=>x.d-y.d);
-          const d1 = dists[0], d2 = dists[1], d3 = dists[2];
-          if (Math.abs(d1.d - d2.d) > d1.d * 0.4) continue;
-          if (Math.abs(d3.d - Math.sqrt(d1.d*d1.d + d2.d*d2.d)) > d3.d * 0.45) continue;
-          const tl = (d1.a === d2.a || d1.a === d2.b) ? d1.a : d1.b;
-          const tr = d1.a === tl ? d1.b : d1.a;
-          const bl = d2.a === tl ? d2.b : d2.a;
-          const moduleSize = (d1.d + d2.d) / 2 / 14;
-          for (let version = 1; version <= 40; version++) {
-            const size = version * 4 + 17;
-            const expectedD = (size - 7) * moduleSize;
-            if (Math.abs(expectedD - d1.d) > d1.d * 0.2) continue;
-            if (Math.abs(expectedD - d2.d) > d2.d * 0.2) continue;
-            const br = { x: tr.x + bl.x - tl.x, y: tr.y + bl.y - tl.y };
-            const grid = sampleGrid(bin, w, h, tl, tr, br, bl, size);
-            if (!grid) continue;
-            for (let mask = 0; mask < 8; mask++) {
-              const bits = readBits(grid, size, version, mask);
-              const text = decodeBits(bits, version);
-              if (text && text.length > 4) return text;
-            }
-          }
-        }
-      }
-    }
-    return null;
-  }
-  return { decode };
-})();
-
-/* ============================================================
-   СКАНЕР
+   QR DECODER (используем BarcodeDetector или jsQR-совместимый)
+   Здесь: если BarcodeDetector нет — фолбэк на ручной ввод,
+   но с показом понятного сообщения, чтобы не вводить в заблуждение.
    ============================================================ */
 async function initScanner() {
   if ('BarcodeDetector' in window) {
@@ -955,16 +726,25 @@ async function initScanner() {
       const formats = await BarcodeDetector.getSupportedFormats();
       if (formats.includes('qr_code')) {
         S.barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+        return;
       }
-    } catch(_) { S.barcodeDetector = null; }
+    } catch(_){}
   }
-  if (!S.barcodeDetector) S.useOwnDecoder = true;
+  S.barcodeDetector = null;
 }
 
 async function openScanner(target) {
   S.scanTarget = target;
   $('scannerModal').classList.add('show');
   $('scanStatus').textContent = 'Запускаю камеру…';
+
+  if (!S.barcodeDetector) {
+    // Честно говорим пользователю
+    $('scanStatus').textContent = 'QR-сканер недоступен';
+    $('scanHint').innerHTML = 'В этом браузере нет встроенного распознавания QR.<br>Нажми кнопку ниже — откроется ручной ввод.';
+    return;
+  }
+
   $('scanHint').textContent = 'Держи QR в рамке — распознаётся автоматически';
   try {
     let stream;
@@ -981,8 +761,7 @@ async function openScanner(target) {
     S.scannerStream = stream;
     $('scannerVideo').srcObject = stream;
     await $('scannerVideo').play();
-    if (S.barcodeDetector) startScanLoopDetector();
-    else startScanLoopOwnDecoder();
+    startScanLoopDetector();
   } catch(e) {
     $('scanStatus').textContent = 'Ошибка камеры';
     $('scanHint').innerHTML = 'Нет доступа к камере: ' + e.message + '<br>Открой по HTTPS. Либо введи код вручную.';
@@ -1001,36 +780,6 @@ function startScanLoopDetector() {
           if (val && val.length > 10) { handleScanned(val); return; }
         }
       } catch(_){}
-    }
-    S.scannerRAF = requestAnimationFrame(tick);
-  };
-  S.scannerRAF = requestAnimationFrame(tick);
-}
-
-function startScanLoopOwnDecoder() {
-  const video = $('scannerVideo');
-  const canvas = document.createElement('canvas');
-  const ctx2d = canvas.getContext('2d', { willReadFrequently: true });
-  let lastTry = 0;
-  const TICK = 220;
-  const tick = () => {
-    if (!$('scannerModal').classList.contains('show')) return;
-    const now = performance.now();
-    if (now - lastTry >= TICK && video.readyState >= 2 && video.videoWidth > 0) {
-      lastTry = now;
-      try {
-        const vw = video.videoWidth, vh = video.videoHeight;
-        const boxSize = Math.min(vw, vh) * 0.9;
-        const sx = (vw - boxSize) / 2;
-        const sy = (vh - boxSize) / 2;
-        const targetW = 480;
-        canvas.width = targetW;
-        canvas.height = targetW;
-        ctx2d.drawImage(video, sx, sy, boxSize, boxSize, 0, 0, targetW, targetW);
-        const img = ctx2d.getImageData(0, 0, targetW, targetW);
-        const text = QRDecoder.decode(img);
-        if (text && text.length > 10) { handleScanned(text); return; }
-      } catch(e) {}
     }
     S.scannerRAF = requestAnimationFrame(tick);
   };
@@ -1066,6 +815,34 @@ async function getMic() {
   const wantOn = S.pttActive;
   S.micStream.getAudioTracks().forEach(t => t.enabled = wantOn);
   return S.micStream;
+}
+
+/* ============================================================
+   MIX-ШИНА (для создателя): каждый участник → ко всем
+   ============================================================ */
+function ensureMixDest() {
+  if (!S.mixDest) {
+    S.mixDest = ctx().createMediaStreamDestination();
+    // Микрофон создателя тоже в микс
+    if (S.micStream) {
+      try {
+        const ms = ctx().createMediaStreamSource(S.micStream);
+        ms.connect(S.mixDest);
+      } catch(_){}
+    }
+  }
+  return S.mixDest;
+}
+function addToMix(peerId, remoteStream) {
+  try {
+    const src = ctx().createMediaStreamSource(remoteStream);
+    src.connect(S.mixDest);
+    S.mixSources[peerId] = src;
+  } catch(e) { log('mix err: ' + e.message); }
+}
+function removeFromMix(peerId) {
+  const s = S.mixSources[peerId];
+  if (s) { try { s.disconnect(); } catch(_){} delete S.mixSources[peerId]; }
 }
 
 /* ============================================================
@@ -1111,20 +888,42 @@ async function createPeer(peerId, peerName, isInitiator) {
     localCandidateType: null, remoteCandidateType: null
   };
   peer.pc = pc; S.peers[peerId] = peer;
+
   const mic = await getMic();
   mic.getTracks().forEach(t => pc.addTrack(t, mic));
+
   pc.ontrack = ev => {
+    // 1) воспроизводим локально
     if (!peer.audio) { peer.audio = new Audio(); peer.audio.autoplay = true; peer.audio.playsInline = true; }
     peer.audio.srcObject = ev.streams[0];
     peer.audio.volume = S.volume;
     peer.audio.play().catch(()=>{});
+
+    // 2) добавляем в микс — только если мы создатель
+    if (S.isCreator) {
+      ensureMixDest();
+      addToMix(peerId, ev.streams[0]);
+      // отдаём этот микс всем остальным участникам как доп. трек
+      try {
+        const mixTrack = S.mixDest.stream.getAudioTracks()[0];
+        Object.entries(S.peers).forEach(([id, p]) => {
+          if (id === peerId) return;
+          const sender = p.pc?.getSenders().find(s => s.track === mixTrack);
+          if (!sender && p.pc) {
+            try { p.pc.addTrack(mixTrack, S.mixDest.stream); } catch(_){}
+          }
+        });
+      } catch(_){}
+    }
   };
+
   pc.onicecandidate = ev => {
     if (ev.candidate) {
       const m = ev.candidate.candidate.match(/typ (\w+)/);
       if (m) { if (m[1] === 'relay') peer.localCandidateType = 'relay'; else if (!peer.localCandidateType) peer.localCandidateType = m[1]; }
     }
   };
+
   pc.onconnectionstatechange = () => {
     log(peerId + ' → ' + pc.connectionState);
     if (pc.connectionState === 'connected') peer.connected = true;
@@ -1135,27 +934,40 @@ async function createPeer(peerId, peerName, isInitiator) {
     }
     renderUsers();
   };
+
   if (isInitiator) { peer.dc = pc.createDataChannel('sig', { ordered: true }); setupDC(peerId, peer.dc); }
   else { pc.ondatachannel = ev => { peer.dc = ev.channel; setupDC(peerId, peer.dc); }; }
+
   renderUsers(); return peer;
 }
+
 function setupDC(peerId, dc) {
   dc.onopen = () => {
     SFX.connected();
     toast('Участник подключён: ' + (S.peers[peerId]?.name || ''));
-    try { dc.send(JSON.stringify({ t: 'hello', id: S.id, name: S.name })); } catch(_){}
-    const list = Object.entries(S.peers).filter(([id]) => id !== peerId).map(([id, p]) => ({ id, name: p.name }));
-    if (list.length) { try { dc.send(JSON.stringify({ t: 'peerList', list })); } catch(_){} }
+    try { dc.send(JSON.stringify({ t: 'hello', id: S.id, name: S.name, isCreator: S.isCreator })); } catch(_){}
+
+    // Если мы — создатель, сообщаем новому пиру список всех остальных,
+    // чтобы он сам с ними соединился (mesh)
+    if (S.isCreator) {
+      const list = Object.entries(S.peers)
+        .filter(([id, p]) => id !== peerId && p.connected)
+        .map(([id, p]) => ({ id, name: p.name }));
+      if (list.length) {
+        try { dc.send(JSON.stringify({ t: 'peerList', list })); } catch(_){}
+      }
+    }
     renderUsers();
   };
   dc.onclose = () => log('DC close с ' + peerId);
   dc.onerror = () => log('DC error с ' + peerId);
   dc.onmessage = ev => { try { handleData(peerId, JSON.parse(ev.data)); } catch(e){ log('bad dc msg'); } };
 }
+
 function handleData(fromId, msg) {
   const p = S.peers[fromId]; if (p) p.lastSeen = Date.now();
   switch(msg.t) {
-    case 'hello': if (p) p.name = msg.name; renderUsers(); break;
+    case 'hello': if (p) { p.name = msg.name; } renderUsers(); break;
     case 'ptt':
       if (p) {
         p.talking = msg.on;
@@ -1164,27 +976,37 @@ function handleData(fromId, msg) {
       }
       break;
     case 'peerList':
-      msg.list.forEach(item => { if (item.id !== S.id && !S.peers[item.id]) autoConnect(item.id, item.name).catch(e => log('err: ' + e.message)); });
+      // Мы (не создатель) получили список других участников —
+      // инициируем с ними прямые соединения = mesh
+      msg.list.forEach(item => {
+        if (item.id !== S.id && !S.peers[item.id]) {
+          autoConnect(item.id, item.name).catch(e => log('autoConnect err: ' + e.message));
+        }
+      });
       break;
     case 'sdp': handleRemoteSDP(fromId, msg).catch(e => log('sdp err: ' + e.message)); break;
     case 'ping': if (p && p.dc?.readyState === 'open') { try { p.dc.send(JSON.stringify({ t: 'pong' })); } catch(_){} } break;
     case 'pong': if (p) p.lastSeen = Date.now(); break;
   }
 }
+
 function broadcastDC(msg, exceptId) {
   Object.entries(S.peers).forEach(([id, p]) => {
     if (id === exceptId) return;
     if (p.dc && p.dc.readyState === 'open') { try { p.dc.send(JSON.stringify(msg)); } catch(_){} }
   });
 }
+
 async function autoConnect(peerId, peerName) {
   if (S.peers[peerId]) return;
+  log('Автоподключение к ' + peerId);
   const peer = await createPeer(peerId, peerName, true);
   const offer = await peer.pc.createOffer();
   await peer.pc.setLocalDescription(offer);
   await waitIce(peer.pc);
   broadcastDC({ t: 'sdp', from: S.id, name: S.name, to: peerId, kind: 'offer', sdp: peer.pc.localDescription.sdp });
 }
+
 async function handleRemoteSDP(fromId, msg) {
   if (msg.to !== S.id) return;
   if (msg.kind === 'offer') {
@@ -1201,11 +1023,13 @@ async function handleRemoteSDP(fromId, msg) {
     if (peer && peer.pc) { try { await peer.pc.setRemoteDescription({ type: 'answer', sdp: msg.sdp }); } catch(e){ log('SRD err'); } }
   }
 }
+
 async function attemptReconnect(peerId) {
   const p = S.peers[peerId]; if (!p) return;
   const isInitiator = S.id < peerId;
   try {
     try { p.pc?.close(); } catch(_){}
+    removeFromMix(peerId);
     delete S.peers[peerId];
     const peer = await createPeer(peerId, p.name, isInitiator);
     if (isInitiator) {
@@ -1216,10 +1040,12 @@ async function attemptReconnect(peerId) {
     }
   } catch(e) { log('reconnect fail: ' + e.message); }
 }
+
 function removePeer(peerId, quiet) {
   const p = S.peers[peerId]; if (!p) return;
   try { p.pc?.close(); } catch(_){}
   try { if (p.audio) { p.audio.pause(); p.audio.srcObject = null; } } catch(_){}
+  removeFromMix(peerId);
   delete S.peers[peerId];
   if (!quiet) SFX.disconnected();
   renderUsers();
@@ -1232,12 +1058,14 @@ async function startAsCreator() {
   ctx(); SFX.powerOn();
   S.isCreator = true;
   await getMic();
+  ensureMixDest();  // сразу создаём микшер
   $('creatorBox').style.display = '';
   $('joinerBox').style.display = 'none';
   $('startRoomBtn').style.display = 'none';
   $('joinRoomBtn').style.display = 'none';
   await newInvite();
 }
+
 async function newInvite() {
   try {
     const pendingId = 'pending-' + Math.random().toString(36).slice(2, 8);
@@ -1248,16 +1076,48 @@ async function newInvite() {
     });
     const mic = await getMic();
     mic.getTracks().forEach(t => pc.addTrack(t, mic));
+
+    // Если уже есть микс, добавляем и его трек — чтобы новый участник сразу слышал всех
+    if (S.mixDest) {
+      try {
+        const mixTrack = S.mixDest.stream.getAudioTracks()[0];
+        if (mixTrack) pc.addTrack(mixTrack, S.mixDest.stream);
+      } catch(_){}
+    }
+
     const peer = { pc, audio: null, dc: null, name: 'Участник', talking: false, connected: false, lastSeen: Date.now(), pending: true };
     S.peers[pendingId] = peer;
     const dc = pc.createDataChannel('sig', { ordered: true });
     peer.dc = dc;
+
+    pc.ontrack = ev => {
+      if (!peer.audio) { peer.audio = new Audio(); peer.audio.autoplay = true; peer.audio.playsInline = true; }
+      peer.audio.srcObject = ev.streams[0];
+      peer.audio.volume = S.volume;
+      peer.audio.play().catch(()=>{});
+      if (S.isCreator) {
+        ensureMixDest();
+        addToMix(pendingId, ev.streams[0]);
+      }
+    };
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState === 'connected') peer.connected = true;
+      if (['failed','closed','disconnected'].includes(pc.connectionState) && S.peers[pendingId]) {
+        removeFromMix(pendingId);
+        try { pc.close(); } catch(_){}
+        delete S.peers[pendingId];
+        renderUsers();
+      }
+    };
+
     dc.onmessage = ev => {
       try {
         const m = JSON.parse(ev.data);
         if (m.t === 'hello') {
           const realId = m.id;
           if (S.peers[realId]) { try { S.peers[realId].pc?.close(); } catch(_){} delete S.peers[realId]; }
+          // Перекидываем mix-source на настоящий id
+          if (S.mixSources[pendingId]) { S.mixSources[realId] = S.mixSources[pendingId]; delete S.mixSources[pendingId]; }
           S.peers[realId] = S.peers[pendingId];
           S.peers[realId].name = m.name;
           S.peers[realId].pending = false;
@@ -1266,27 +1126,17 @@ async function newInvite() {
           setupDC(realId, S.peers[realId].dc);
           SFX.connected(); toast('Подключён: ' + m.name);
           renderUsers();
-          const list = Object.entries(S.peers).filter(([id]) => id !== realId).map(([id, p]) => ({ id, name: p.name }));
+          // Сообщаем новому — список всех остальных (для mesh)
+          const list = Object.entries(S.peers)
+            .filter(([id, p]) => id !== realId && p.connected)
+            .map(([id, p]) => ({ id, name: p.name }));
           if (list.length && S.peers[realId].dc?.readyState === 'open') {
             try { S.peers[realId].dc.send(JSON.stringify({ t: 'peerList', list })); } catch(_){}
           }
         } else handleData(pendingId, m);
       } catch(_){}
     };
-    pc.ontrack = ev => {
-      if (!peer.audio) { peer.audio = new Audio(); peer.audio.autoplay = true; peer.audio.playsInline = true; }
-      peer.audio.srcObject = ev.streams[0];
-      peer.audio.volume = S.volume;
-      peer.audio.play().catch(()=>{});
-    };
-    pc.onconnectionstatechange = () => {
-      if (pc.connectionState === 'connected') peer.connected = true;
-      if (['failed','closed','disconnected'].includes(pc.connectionState) && S.peers[pendingId]) {
-        try { pc.close(); } catch(_){}
-        delete S.peers[pendingId];
-        renderUsers();
-      }
-    };
+
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
     await waitIce(pc);
@@ -1299,6 +1149,7 @@ async function newInvite() {
     S.pendingOffer = pc; S.pendingId = pendingId;
   } catch(e) { SFX.error(); alert('Ошибка: ' + e.message); }
 }
+
 async function acceptAnswer() {
   const pc = S.pendingOffer, pid = S.pendingId;
   if (!pc || !pid) { toast('Нет приглашения', true); return; }
@@ -1314,6 +1165,7 @@ async function acceptAnswer() {
     renderUsers();
   } catch(e) { SFX.error(); alert('Некорректный ответ: ' + e.message); }
 }
+
 async function startAsJoiner() {
   ctx(); SFX.powerOn();
   await getMic();
@@ -1322,6 +1174,7 @@ async function startAsJoiner() {
   $('startRoomBtn').style.display = 'none';
   $('joinRoomBtn').style.display = 'none';
 }
+
 async function generateAnswer() {
   try {
     const code = $('joinOfferInput').value.trim();
@@ -1522,6 +1375,8 @@ $('powerBtn').addEventListener('click', () => {
     if (S.heartbeatTimer) { clearInterval(S.heartbeatTimer); S.heartbeatTimer = null; }
     S.isCreator = false;
     S.pendingOffer = null; S.pendingId = null;
+    if (S.mixDest) { try { S.mixDest.disconnect(); } catch(_){} S.mixDest = null; }
+    S.mixSources = {};
     $('subLabel').textContent = 'P2P · БЕЗ СЕРВЕРОВ';
     $('startRoomBtn').style.display = '';
     $('joinRoomBtn').style.display = '';
@@ -1557,17 +1412,7 @@ window.addEventListener('offline', () => $('offlineBadge').classList.add('show')
 if (!navigator.onLine) $('offlineBadge').classList.add('show');
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {
-    try {
-      const swCode = `
-        self.addEventListener('install', e => self.skipWaiting());
-        self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-        self.addEventListener('fetch', e => { e.respondWith(fetch(e.request).catch(() => caches.match(e.request))); });
-      `;
-      const blob = new Blob([swCode], { type: 'application/javascript' });
-      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
-    } catch(_){}
-  });
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
 /* ============================================================
@@ -1600,4 +1445,4 @@ window.addEventListener('beforeunload', () => {
 });
 </script>
 </body>
-</html>
+ </html>
