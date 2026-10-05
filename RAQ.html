@@ -2,994 +2,2357 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<title>Рация P2P с QR</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Рация">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%D0%A0%D0%B0%D1%86%D0%B8%D1%8F%22%2C%22short_name%22%3A%22%D0%A0%D0%B0%D1%86%D0%B8%D1%8F%22%2C%22start_url%22%3A%22.%22%2C%22scope%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230a0a0a%22%2C%22theme_color%22%3A%22%230a0a0a%22%7D">
+<title>РАЦИЯ · P2P Mesh</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:rgba(0,0,0,0);}
-body{background:#111;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:12px;min-height:100vh;overflow-x:hidden;}
-.box{max-width:440px;margin:0 auto;background:#1e1e1e;border-radius:20px;padding:14px;border:1px solid #333;}
-.screen{background:#051005;border:2px solid #1a1a1a;border-radius:12px;padding:10px;margin-bottom:12px;font-family:'Courier New',monospace;color:#4ade80;}
-.status-line{display:flex;justify-content:space-between;font-size:11px;}
-.dot{width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block;margin-right:5px;vertical-align:middle;}
-.dot.on{background:#4ade80;box-shadow:0 0 8px #4ade80;}
-.center{text-align:center;margin-top:6px;}
-.big{font-size:17px;font-weight:bold;letter-spacing:1px;}
-.small{font-size:11px;margin-top:3px;opacity:0.9;}
-button{width:100%;padding:15px;font-size:14px;font-weight:bold;border:none;border-radius:11px;margin-bottom:7px;cursor:pointer;font-family:inherit;color:#fff;-webkit-appearance:none;appearance:none;transition:transform .05s;}
-button:active{transform:scale(0.97);}
-.b-blue{background:#2563eb;}
-.b-green{background:#16a34a;}
-.b-gray{background:#4b5563;}
-.b-red{background:#dc2626;}
-.b-orange{background:#ea580c;}
-.b-purple{background:#7c3aed;}
-textarea{width:100%;padding:8px;background:#000;border:1px solid #333;border-radius:7px;color:#4ade80;font-family:'Courier New',monospace;font-size:10px;resize:none;height:70px;margin-bottom:7px;word-break:break-all;-webkit-user-select:text;user-select:text;}
-.label{font-size:11px;color:#4ade80;margin-bottom:4px;font-family:'Courier New',monospace;}
-.hint{font-size:11px;color:#aaa;text-align:center;margin-bottom:8px;line-height:1.35;}
-.hidden{display:none !important;}
-#log{background:#000;border-radius:8px;padding:6px;font-family:'Courier New',monospace;font-size:9px;color:#888;height:90px;overflow-y:auto;margin-top:8px;line-height:1.35;}
-.ptt{width:150px;height:150px;border-radius:50%;background:#333;border:5px solid #555;font-size:14px;font-weight:bold;margin:10px auto;display:block;padding:0;line-height:1.25;}
-.ptt.on{background:#dc2626;border-color:#ef4444;box-shadow:0 0 40px rgba(239,68,68,0.7);}
-.ptt:disabled{opacity:0.4;}
-.qr-box{background:#fff;padding:12px;border-radius:10px;text-align:center;margin-bottom:10px;}
-.qr-box canvas{display:block;margin:0 auto;max-width:100%;image-rendering:pixelated;}
-#scanner{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:9999;display:none;flex-direction:column;}
-#scanner.on{display:flex;}
-#scanVideo{width:100%;flex:1;object-fit:cover;background:#000;}
-#scanOverlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70vw;max-width:320px;height:70vw;max-height:320px;border:3px solid #4ade80;border-radius:16px;box-shadow:0 0 0 9999px rgba(0,0,0,0.6);pointer-events:none;}
-#scanInfo{position:absolute;bottom:100px;left:0;right:0;text-align:center;color:#4ade80;font-family:monospace;font-size:12px;}
-#scanCancel{position:absolute;bottom:20px;left:20px;right:20px;padding:14px;background:#dc2626;color:#fff;border:none;border-radius:10px;font-weight:bold;font-size:14px;font-family:inherit;}
-.mb{margin-bottom:7px;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:#0a0a0a;color:#e0e0e0;user-select:none;-webkit-user-select:none;overflow:hidden;
+    overscroll-behavior:none;-webkit-text-size-adjust:100%}
+  body{display:flex;flex-direction:column;padding:10px;max-width:520px;margin:0 auto;
+    padding-top:calc(10px + env(safe-area-inset-top));
+    padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+  header{display:flex;justify-content:space-between;align-items:center;padding:4px;margin-bottom:6px}
+  .logo{font-weight:700;letter-spacing:2px;color:#4ade80;font-size:12px}
+  .role{font-size:10px;color:#888;letter-spacing:1px;padding:3px 8px;border:1px solid #222;border-radius:10px}
+  .display{background:linear-gradient(180deg,#0f2a0f,#0a1f0a);border:2px solid #222;border-radius:10px;
+    padding:10px;margin-bottom:8px;box-shadow:inset 0 0 20px rgba(0,255,0,.08);position:relative}
+  .channel{font-size:32px;font-weight:700;color:#4ade80;text-align:center;
+    font-family:'Courier New',monospace;letter-spacing:4px;text-shadow:0 0 12px #4ade80}
+  .channel-label{text-align:center;font-size:9px;color:#4ade80;opacity:.55;letter-spacing:3px;margin-top:2px}
+  .signal{position:absolute;top:8px;right:10px;font-size:10px;color:#4ade80;opacity:.7;font-family:monospace}
+  .net{position:absolute;top:8px;left:10px;font-size:9px;color:#4ade80;opacity:.6;font-family:monospace}
+  .users{flex:1;overflow-y:auto;margin-bottom:8px;min-height:70px;-webkit-overflow-scrolling:touch}
+  .user{display:flex;align-items:center;padding:7px 10px;background:#151515;border-radius:8px;
+    margin-bottom:4px;transition:.2s;border-left:3px solid transparent}
+  .user.talking{background:#16321c;border-left-color:#4ade80;animation:pulse 1.2s infinite}
+  @keyframes pulse{0%,100%{box-shadow:inset 0 0 0 rgba(74,222,128,0)}50%{box-shadow:inset 0 0 12px rgba(74,222,128,.15)}}
+  .user .icon{font-size:14px;margin-right:8px}
+  .user .name{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .user .badge{font-size:9px;padding:2px 6px;border-radius:4px;background:#222;color:#777}
+  .user .badge.ok{background:#14331a;color:#4ade80}
+  .user .badge.warn{background:#332414;color:#f59e0b}
+  .user .badge.relay{background:#1a1a3a;color:#7c9cff}
+  .ptt-wrap{display:flex;flex-direction:column;align-items:center;padding:2px 0}
+  .ptt{width:130px;height:130px;border-radius:50%;border:4px solid #2a2a2a;
+    background:radial-gradient(circle at 30% 30%,#444,#161616);color:#e0e0e0;
+    font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:.08s;
+    box-shadow:0 6px 0 #000,0 8px 22px rgba(0,0,0,.6),inset 0 2px 4px rgba(255,255,255,.08);
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;
+    touch-action:none;outline:none;position:relative}
+  .ptt .mic{font-size:26px}
+  .ptt.active{background:radial-gradient(circle at 30% 30%,#16a34a,#14532d);color:#fff;
+    border-color:#4ade80;box-shadow:0 2px 0 #000,0 0 40px rgba(74,222,128,.55),
+    inset 0 2px 8px rgba(0,0,0,.3);transform:translateY(4px)}
+  .ptt.active::after{content:'';position:absolute;inset:-8px;border-radius:50%;
+    border:2px solid #4ade80;animation:ring 1s infinite}
+  @keyframes ring{0%{transform:scale(1);opacity:.8}100%{transform:scale(1.15);opacity:0}}
+  .ptt-hint{margin-top:8px;font-size:10px;color:#666;letter-spacing:1px}
+  .controls{display:flex;gap:6px;margin-top:4px}
+  .controls button{flex:1;background:#161616;border:1px solid #2a2a2a;color:#e0e0e0;
+    padding:9px 4px;border-radius:8px;font-size:11px;cursor:pointer;letter-spacing:1px}
+  .controls button:active{background:#2a2a2a}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;
+    justify-content:center;padding:14px;z-index:100;backdrop-filter:blur(6px)}
+  .modal.show{display:flex}
+  .modal-content{background:#131313;border:1px solid #2a2a2a;border-radius:12px;padding:14px;
+    width:100%;max-width:480px;max-height:94vh;overflow-y:auto}
+  .modal h2{font-size:13px;margin-bottom:12px;color:#4ade80;letter-spacing:2px}
+  .modal p{font-size:11px;color:#888;margin-bottom:10px;line-height:1.5}
+  .field{margin-bottom:9px}
+  .field label{display:block;font-size:10px;color:#888;margin-bottom:4px;letter-spacing:1px}
+  .field input,.field textarea,.field select{width:100%;background:#0a0a0a;border:1px solid #2a2a2a;
+    color:#e0e0e0;padding:8px;border-radius:6px;font-size:11px;outline:none;font-family:monospace}
+  .field textarea{height:70px;resize:vertical}
+  .field input:focus,.field textarea:focus{border-color:#4ade80}
+  .btn{width:100%;background:#16a34a;border:none;color:#fff;padding:11px;border-radius:8px;
+    font-size:12px;font-weight:600;cursor:pointer;margin-top:5px;letter-spacing:1px}
+  .btn:active{background:#15803d}
+  .btn.secondary{background:#222}.btn.secondary:active{background:#333}
+  .copy-row{display:flex;gap:6px;margin-top:6px}
+  .copy-row .btn{margin-top:0}
+  .qr-wrap{background:#fff;padding:10px;border-radius:8px;margin:8px 0;text-align:center}
+  .qr-wrap canvas{display:block;margin:0 auto;image-rendering:pixelated;max-width:100%;height:auto}
+  .qr-hint{font-size:10px;color:#666;text-align:center;margin-top:6px;letter-spacing:1px}
+  .scanner{position:fixed;inset:0;background:#000;z-index:300;display:none;flex-direction:column}
+  .scanner.show{display:flex}
+  .scanner video{flex:1;object-fit:cover;width:100%;height:100%}
+  .scanner-ui{position:absolute;inset:0;display:flex;flex-direction:column;
+    justify-content:space-between;padding:16px;pointer-events:none}
+  .scanner-ui > *{pointer-events:auto}
+  .scanner-top{display:flex;justify-content:space-between;align-items:center;color:#fff;
+    font-size:13px;text-shadow:0 2px 6px rgba(0,0,0,.8)}
+  .scanner-top button{background:rgba(0,0,0,.6);border:1px solid #444;color:#fff;
+    padding:8px 14px;border-radius:8px;font-size:12px;cursor:pointer}
+  .scanner-frame{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:min(75vw,320px);height:min(75vw,320px);border:3px solid #4ade80;border-radius:16px;
+    box-shadow:0 0 0 9999px rgba(0,0,0,.55),0 0 30px rgba(74,222,128,.5);pointer-events:none}
+  .scanner-bottom{background:rgba(0,0,0,.75);border-radius:12px;padding:12px;color:#fff;
+    font-size:12px;text-align:center;line-height:1.5}
+  .scanner-btn{background:#16a34a;border:none;color:#fff;padding:10px 16px;border-radius:8px;
+    font-size:12px;font-weight:600;cursor:pointer;margin-top:8px;width:100%;letter-spacing:1px}
+  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#16a34a;
+    color:#fff;padding:10px 18px;border-radius:8px;font-size:12px;opacity:0;
+    transition:.3s;pointer-events:none;z-index:400;max-width:90%}
+  .toast.show{opacity:1}
+  .toast.err{background:#b91c1c}
+  #log{font-size:9px;color:#555;max-height:60px;overflow-y:auto;padding:5px;
+    font-family:monospace;margin-top:8px;background:#0a0a0a;border-radius:6px;line-height:1.5}
+  .row{display:flex;gap:8px;align-items:center;font-size:11px;color:#888;margin-top:6px}
+  .row input[type=range]{flex:1;accent-color:#4ade80}
+  .tabs{display:flex;gap:4px;margin-bottom:10px;background:#0a0a0a;padding:3px;border-radius:8px}
+  .tabs button{flex:1;background:transparent;border:none;color:#888;padding:8px;border-radius:6px;
+    font-size:11px;cursor:pointer;letter-spacing:1px}
+  .tabs button.active{background:#16a34a;color:#fff;font-weight:600}
+  .install-banner{position:fixed;bottom:10px;left:10px;right:10px;background:#16a34a;color:#fff;
+    padding:10px;border-radius:8px;display:none;justify-content:space-between;align-items:center;
+    font-size:12px;z-index:150;box-shadow:0 4px 20px rgba(0,0,0,.6)}
+  .install-banner.show{display:flex}
+  .install-banner button{background:#fff;color:#16a34a;border:none;padding:6px 12px;
+    border-radius:6px;font-size:11px;font-weight:700;margin-left:8px}
+  .offline-badge{position:fixed;top:10px;left:50%;transform:translateX(-50%);
+    background:#b91c1c;color:#fff;padding:4px 10px;border-radius:10px;font-size:10px;
+    display:none;z-index:500}
+  .offline-badge.show{display:block}
+  .pulse-red{animation:pulseRed 1s infinite}
+  @keyframes pulseRed{0%,100%{box-shadow:0 0 0 rgba(239,68,68,0)}50%{box-shadow:0 0 20px rgba(239,68,68,.6)}}
 </style>
 </head>
 <body>
-<div class="box">
 
-<div class="screen">
-  <div class="status-line">
-    <span><span class="dot" id="stDot"></span><span id="stText">OFFLINE</span></span>
-    <span id="stChan">CH --</span>
+<div class="offline-badge" id="offlineBadge">⚡ Оффлайн-режим</div>
+
+<header>
+  <div class="logo">📻 РАЦИЯ · MESH</div>
+  <div class="role" id="roleTag">не в сети</div>
+</header>
+
+<div class="display">
+  <div class="net" id="netInfo">STUN+TURN</div>
+  <div class="signal" id="sigDisplay">●●●●●</div>
+  <div class="channel" id="channelDisplay">CH 01</div>
+  <div class="channel-label" id="subLabel">P2P · БЕЗ СЕРВЕРОВ</div>
+</div>
+
+<div class="users" id="usersList">
+  <div class="user"><div class="icon">📡</div><div class="name" style="color:#555">Ожидание…</div></div>
+</div>
+
+<div class="ptt-wrap">
+  <button class="ptt" id="pttBtn">
+    <span class="mic">🎙️</span><span>ГОВОРИ</span>
+  </button>
+  <div class="ptt-hint" id="pttHint">Удерживай для передачи</div>
+</div>
+
+<div class="controls">
+  <button id="roomBtn">🏠 ГРУППА</button>
+  <button id="scanBtn">📷 QR</button>
+  <button id="settingsBtn">⚙️</button>
+  <button id="powerBtn">⏻</button>
+</div>
+
+<div class="modal" id="roomModal">
+  <div class="modal-content">
+    <h2>СЕТЬ MESH</h2>
+    <p>Создай сеть или присоединись. Обмен кодами — QR, текст, файл или звук.</p>
+    <button class="btn" id="startRoomBtn">🆕 СОЗДАТЬ СЕТЬ</button>
+    <button class="btn secondary" id="joinRoomBtn" style="margin-top:6px">🔗 ПРИСОЕДИНИТЬСЯ</button>
+
+    <div id="creatorBox" style="display:none;margin-top:12px">
+      <div class="tabs">
+        <button class="active" data-tab="qr">📷 QR</button>
+        <button data-tab="text">📋 ТЕКСТ</button>
+        <button data-tab="file">📎 ФАЙЛ</button>
+        <button data-tab="sound">🔊 ЗВУК</button>
+      </div>
+      <div data-pane="qr">
+        <p style="text-align:center;color:#888">Покажи этот QR новому участнику</p>
+        <div class="qr-wrap"><canvas id="offerQR"></canvas></div>
+        <div class="qr-hint" id="offerQRInfo"></div>
+      </div>
+      <div data-pane="text" style="display:none">
+        <div class="field">
+          <label>1. ОТПРАВЬ ЭТОТ КОД НОВОМУ УЧАСТНИКУ</label>
+          <textarea id="offerText" readonly></textarea>
+          <div class="copy-row">
+            <button class="btn secondary" id="copyOfferBtn">📋 Копировать</button>
+            <button class="btn secondary" id="shareOfferBtn">📤 Поделиться</button>
+          </div>
+          <button class="btn secondary" id="downloadOfferBtn" style="margin-top:6px">💾 Сохранить в файл</button>
+        </div>
+      </div>
+      <div data-pane="file" style="display:none">
+        <div class="field">
+          <label>СОХРАНИ ФАЙЛ С КОДОМ И ПЕРЕДАЙ ЛЮБЫМ СПОСОБОМ</label>
+          <p style="font-size:11px;color:#888;line-height:1.5;margin-bottom:8px">
+            Файл radio-offer.txt (~3 КБ). Передай через AirDrop, WhatsApp, Telegram,
+            Bluetooth, email.
+          </p>
+          <button class="btn" id="saveOfferFileBtn">💾 СОХРАНИТЬ ФАЙЛ</button>
+          <button class="btn secondary" id="shareOfferFileBtn" style="margin-top:6px">📤 ПОДЕЛИТЬСЯ ФАЙЛОМ</button>
+        </div>
+      </div>
+      <div data-pane="sound" style="display:none">
+        <div class="field">
+          <label>ПЕРЕДАЙ КОД ЗВУКОМ (БЕЗ ИНТЕРНЕТА, БЕЗ КАМЕРЫ)</label>
+          <p style="font-size:11px;color:#888;line-height:1.5;margin-bottom:8px">
+            Поднеси телефоны близко (10–30 см). Нажми «Передать». На втором устройстве
+            открой «🔊 ЗВУК» → «Слушать». Код сам вставится.
+          </p>
+          <button class="btn" id="sendOfferSoundBtn">🔊 ПЕРЕДАТЬ ЗВУКОМ</button>
+          <button class="btn secondary" id="listenSoundBtn" style="margin-top:6px">👂 СЛУШАТЬ (принять ответ)</button>
+          <div id="soundStatus" style="text-align:center;font-size:11px;color:#4ade80;margin-top:8px;min-height:16px"></div>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label>2. ОТВЕТ УЧАСТНИКА (QR или код)</label>
+        <textarea id="answerInput" placeholder="Вставь ответный код…"></textarea>
+        <div class="copy-row">
+          <button class="btn secondary" id="scanAnswerBtn">📷 Сканировать QR</button>
+        </div>
+        <button class="btn" id="acceptAnswerBtn" style="margin-top:6px">✅ ПОДКЛЮЧИТЬ</button>
+      </div>
+      <button class="btn secondary" style="margin-top:8px" id="newInviteBtn">➕ ЕЩЁ ОДНОГО УЧАСТНИКА</button>
+    </div>
+
+    <div id="joinerBox" style="display:none;margin-top:12px">
+      <div class="tabs">
+        <button class="active" data-tab="qr">📷 QR</button>
+        <button data-tab="text">📋 ТЕКСТ</button>
+        <button data-tab="file">📎 ФАЙЛ</button>
+        <button data-tab="sound">🔊 ЗВУК</button>
+      </div>
+
+      <div data-pane="qr">
+        <div class="field">
+          <label>1. КОД ОТ СОЗДАТЕЛЯ</label>
+          <textarea id="joinOfferInput" placeholder="Вставь код от создателя…"></textarea>
+          <div class="copy-row">
+            <button class="btn secondary" id="scanOfferBtn">📷 Сканировать QR</button>
+          </div>
+        </div>
+      </div>
+
+      <div data-pane="text" style="display:none">
+        <div class="field">
+          <label>1. ВСТАВЬ КОД ОТ СОЗДАТЕЛЯ</label>
+          <textarea id="joinOfferInputText" placeholder="Вставь код…"></textarea>
+        </div>
+      </div>
+
+      <div data-pane="file" style="display:none">
+        <div class="field">
+          <label>1. ВЫБЕРИ ФАЙЛ С КОДОМ ОТ СОЗДАТЕЛЯ</label>
+          <input type="file" id="offerFileInput" accept=".txt,text/plain,application/octet-stream" style="font-family:inherit">
+        </div>
+      </div>
+
+      <div data-pane="sound" style="display:none">
+        <div class="field">
+          <label>СЛУШАЙ ЗВУК ОТ СОЗДАТЕЛЯ</label>
+          <p style="font-size:11px;color:#888;line-height:1.5;margin-bottom:8px">
+            Поднеси телефон близко к передающему. Нажми «Слушать».
+          </p>
+          <button class="btn" id="listenSoundJoinBtn">👂 СЛУШАТЬ ЗВУК</button>
+          <div id="soundStatusJoin" style="text-align:center;font-size:11px;color:#4ade80;margin-top:8px;min-height:16px"></div>
+        </div>
+      </div>
+
+      <button class="btn" id="genAnswerBtn" style="margin-top:10px">ГЕНЕРИРОВАТЬ ОТВЕТ</button>
+
+      <div class="field" id="joinAnswerBox" style="display:none;margin-top:10px">
+        <label>2. ОТВЕТ ДЛЯ СОЗДАТЕЛЯ</label>
+        <div class="tabs">
+          <button class="active" data-tab="qr">📷 QR</button>
+          <button data-tab="text">📋 ТЕКСТ</button>
+          <button data-tab="file">📎 ФАЙЛ</button>
+          <button data-tab="sound">🔊 ЗВУК</button>
+        </div>
+
+        <div data-pane="qr">
+          <div class="qr-wrap"><canvas id="joinAnswerQR"></canvas></div>
+          <div class="qr-hint" id="joinAnswerQRInfo"></div>
+        </div>
+
+        <div data-pane="text" style="display:none">
+          <textarea id="joinAnswerText" readonly style="margin-top:8px"></textarea>
+          <div class="copy-row">
+            <button class="btn secondary" id="copyAnswerBtn">📋 Копировать</button>
+            <button class="btn secondary" id="shareAnswerBtn">📤 Поделиться</button>
+          </div>
+        </div>
+
+        <div data-pane="file" style="display:none">
+          <p style="font-size:11px;color:#888;line-height:1.5;margin:8px 0">
+            Сохрани файл radio-answer.txt и передай создателю.
+          </p>
+          <button class="btn" id="saveAnswerFileBtn">💾 СОХРАНИТЬ ФАЙЛ</button>
+          <button class="btn secondary" id="shareAnswerFileBtn" style="margin-top:6px">📤 ПОДЕЛИТЬСЯ ФАЙЛОМ</button>
+        </div>
+
+        <div data-pane="sound" style="display:none">
+          <p style="font-size:11px;color:#888;line-height:1.5;margin:8px 0">
+            Передай ответ создателю звуком.
+          </p>
+          <button class="btn" id="sendAnswerSoundBtn">🔊 ПЕРЕДАТЬ ЗВУКОМ</button>
+          <div id="soundStatusAnswer" style="text-align:center;font-size:11px;color:#4ade80;margin-top:8px;min-height:16px"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn secondary" style="margin-top:12px" id="closeRoomModal">Закрыть</button>
+    <div id="log"></div>
   </div>
-  <div class="center">
-    <div class="big" id="stMain">ГОТОВО</div>
-    <div class="small" id="stSub">выберите действие</div>
+</div>
+
+<div class="modal" id="settingsModal">
+  <div class="modal-content">
+    <h2>НАСТРОЙКИ</h2>
+    <div class="field">
+      <label>ПОЗЫВНОЙ</label>
+      <input id="nameInput" maxlength="20" placeholder="Альфа-1">
+    </div>
+    <div class="field">
+      <label>ГРОМКОСТЬ ПРИЁМА</label>
+      <div class="row">
+        🔊 <input type="range" min="0" max="100" value="100" id="volumeSlider">
+        <span id="volValue" style="width:36px;text-align:right">100%</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>РЕЖИМ СОЕДИНЕНИЯ</label>
+      <select id="relayMode">
+        <option value="auto">Авто (STUN → TURN при неудаче)</option>
+        <option value="relay">Только TURN (через relay)</option>
+        <option value="p2p">Только P2P (без TURN)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>ЗВУК PTT</label>
+      <select id="pttSound">
+        <option value="mp3">MP3 (радио-писк из файла)</option>
+        <option value="synth">Синтезированный</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>ШИПЕНИЕ В КОНЦЕ РАЗГОВОРА</label>
+      <div class="row">
+        📻 <input type="range" min="0" max="100" value="60" id="squelchSlider">
+        <span id="squelchValue" style="width:36px;text-align:right">60%</span>
+      </div>
+    </div>
+    <button class="btn" id="saveSettingsBtn">СОХРАНИТЬ</button>
+    <button class="btn secondary" id="testSfxBtn" style="margin-top:6px">🔊 ТЕСТ ЗВУКОВ</button>
+    <button class="btn secondary" style="margin-top:6px" id="closeSettingsModal">Закрыть</button>
   </div>
 </div>
 
-<div id="scrMenu">
-  <div class="hint">Рация P2P через QR-коды.<br>Создайте комнату → покажите QR → второй сканирует → ответный QR → связь.</div>
-  <button class="b-blue mb" id="kCreate">🎙️ СОЗДАТЬ КОМНАТУ</button>
-  <button class="b-green" id="kJoin">📷 СКАНИРОВАТЬ КОД</button>
-</div>
-
-<div id="scrHost" class="hidden">
-  <div class="hint">Покажите этот QR второму устройству.<br>Затем отсканируйте их ответный QR.</div>
-  <div class="qr-box"><canvas id="qrHost"></canvas></div>
-  <div class="label">ИЛИ ТЕКСТОМ:</div>
-  <textarea id="offerCode" readonly onclick="this.select()"></textarea>
-  <button class="b-gray mb" id="kCopyOffer">📋 КОПИРОВАТЬ</button>
-  <button class="b-purple mb" id="kScanAnswer">📷 СКАНИРОВАТЬ ОТВЕТ</button>
-  <div class="label">ИЛИ ВСТАВЬТЕ ОТВЕТ ВРУЧНУЮ:</div>
-  <textarea id="answerInput" placeholder="ответ сюда..."></textarea>
-  <button class="b-green mb" id="kAccept">✅ ПРИНЯТЬ ОТВЕТ</button>
-  <button class="b-gray" id="kBack1">← НАЗАД</button>
-</div>
-
-<div id="scrJoin" class="hidden">
-  <div class="hint">Отсканируйте QR от хоста или вставьте код вручную.</div>
-  <button class="b-blue mb" id="kScanOffer">📷 СКАНИРОВАТЬ QR ХОСТА</button>
-  <div class="label">ИЛИ ВСТАВЬТЕ КОД:</div>
-  <textarea id="offerInput" placeholder="код сюда..."></textarea>
-  <button class="b-green mb" id="kGen">🔧 СОЗДАТЬ ОТВЕТ</button>
-  <div id="joinAnswerBlock" class="hidden">
-    <div class="hint">Покажите этот QR хосту.</div>
-    <div class="qr-box"><canvas id="qrGuest"></canvas></div>
-    <div class="label">ИЛИ ТЕКСТОМ:</div>
-    <textarea id="answerCode" readonly onclick="this.select()"></textarea>
-    <button class="b-gray mb" id="kCopyAnswer">📋 КОПИРОВАТЬ</button>
+<div class="scanner" id="scannerModal">
+  <video id="scannerVideo" playsinline autoplay muted></video>
+  <div class="scanner-ui">
+    <div class="scanner-top">
+      <button id="scanClose">✕ Закрыть</button>
+      <div id="scanStatus">Наведи на QR-код</div>
+    </div>
+    <div class="scanner-frame"></div>
+    <div class="scanner-bottom">
+      <div id="scanHint">Держи QR в рамке.</div>
+      <button class="scanner-btn" id="scanManual">✍️ Ввести вручную</button>
+    </div>
   </div>
-  <button class="b-gray" id="kBack2">← НАЗАД</button>
 </div>
 
-<div id="scrTalk" class="hidden">
-  <button class="ptt" id="kPtt" disabled>🎙️<br>HOLD</button>
-  <button class="b-orange mb" id="kRoger">📻 ROGER BEEP</button>
-  <button class="b-red" id="kDisc">❌ ОТКЛЮЧИТЬСЯ</button>
-</div>
-
-<div id="log">запуск...</div>
-
-</div>
-
-<!-- Сканер -->
-<div id="scanner">
-  <video id="scanVideo" playsinline autoplay muted></video>
-  <div id="scanOverlay"></div>
-  <div id="scanInfo">наведите камеру на QR-код</div>
-  <button id="scanCancel">❌ ОТМЕНА</button>
+<div class="toast" id="toast"></div>
+<div class="install-banner" id="installBanner">
+  <span>Установить как приложение?</span>
+  <div><button id="installYes">Да</button><button id="installNo" style="background:#0d5c2a;color:#fff">Нет</button></div>
 </div>
 
 <script>
-// ============================================================
-// ЛОГ
-// ============================================================
-function log(m){
-  try{
-    var el=document.getElementById('log');
-    var t=new Date().toLocaleTimeString();
-    el.innerHTML='['+t+'] '+m+'<br>'+el.innerHTML;
-    if(el.children.length>30)el.removeChild(el.lastChild);
-  }catch(e){}
+/* ============================================================
+   РАЦИЯ · P2P MESH + QR + ФАЙЛ + ЗВУК + PWA
+   ============================================================ */
+const $ = id => document.getElementById(id);
+
+const PTT_MP3_URL = 'https://raw.githubusercontent.com/ZALIVAKA11/ZALIVAKA/refs/heads/main/18558_1464791429.mp3';
+
+const ICE_P2P = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+];
+const ICE_RELAY = [{
+  urls: ['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp'],
+  username: 'openrelayproject', credential: 'openrelayproject'
+}];
+const ICE_AUTO = [...ICE_P2P, ...ICE_RELAY];
+
+const S = {
+  id: Math.random().toString(36).slice(2, 8),
+  name: 'Участник-' + Math.random().toString(36).slice(2, 5),
+  volume: 1,
+  audioCtx: null,
+  micStream: null,
+  pttActive: false,
+  peers: {},
+  myTalking: false,
+  isCreator: false,
+  pendingOffer: null,
+  pendingId: null,
+  channel: 1,
+  relayMode: 'auto',
+  pttSound: 'mp3',
+  squelchLevel: 0.6,
+  heartbeatTimer: null,
+  scanTarget: null,
+  scannerStream: null,
+  scannerRAF: null,
+  barcodeDetector: null,
+  pttAudioEl: null,
+  pttAudioReady: false,
+  mixDest: null,
+  mixSources: {},
+};
+
+/* ============================================================
+   ЗВУКИ
+   ============================================================ */
+function ctx() {
+  if (!S.audioCtx) S.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (S.audioCtx.state === 'suspended') S.audioCtx.resume();
+  return S.audioCtx;
 }
-function setSt(main,sub,online){
-  try{
-    document.getElementById('stMain').textContent=main;
-    document.getElementById('stSub').textContent=sub;
-    var dot=document.getElementById('stDot'),txt=document.getElementById('stText');
-    if(online===true){dot.className='dot on';txt.textContent='ONLINE';}
-    else if(online===false){dot.className='dot';txt.textContent='OFFLINE';}
-  }catch(e){}
-}
-function show(id){
-  var all=['scrMenu','scrHost','scrJoin','scrTalk'];
-  for(var i=0;i<all.length;i++){
-    var el=document.getElementById(all[i]);
-    if(!el)continue;
-    if(all[i]===id)el.classList.remove('hidden');
-    else el.classList.add('hidden');
-  }
+function noiseBuf(dur) {
+  const c = ctx();
+  const len = Math.floor(c.sampleRate * dur);
+  const b = c.createBuffer(1, len, c.sampleRate);
+  const d = b.getChannelData(0);
+  for (let i=0;i<len;i++) d[i] = Math.random()*2-1;
+  return b;
 }
 
-// ============================================================
-// QR-ГЕНЕРАТОР (полный, компактный)
-// ============================================================
-var QR=(function(){
-var EXP=[],LOG=[];
-for(var i=0;i<8;i++)EXP[i]=1<<i;
-for(i=8;i<256;i++)EXP[i]=EXP[i-4]^EXP[i-5]^EXP[i-6]^EXP[i-8];
-for(i=0;i<255;i++)LOG[EXP[i]]=i;
-function gexp(n){while(n<0)n+=255;while(n>=256)n-=255;return EXP[n];}
-function glog(n){if(n<1)throw'glog';return LOG[n];}
-function Poly(num,shift){
-  var offset=0;while(offset<num.length&&num[offset]===0)offset++;
-  this.num=[];for(var i=0;i<num.length-offset+shift;i++)this.num[i]=num[i+offset];
+async function initPTTAudio() {
+  if (S.pttAudioEl) return;
+  const a = new Audio();
+  a.preload = 'auto';
+  a.crossOrigin = 'anonymous';
+  a.src = PTT_MP3_URL;
+  a.volume = 1;
+  a.addEventListener('canplaythrough', () => { S.pttAudioReady = true; });
+  a.addEventListener('error', () => {
+    S.pttAudioReady = false;
+    console.warn('PTT MP3 недоступен, используется синтез');
+  });
+  S.pttAudioEl = a;
+  try { await a.load(); } catch(_){}
 }
-Poly.prototype={
-  get:function(i){return this.num[i];},
-  len:function(){return this.num.length;},
-  mul:function(e){
-    var n=[];for(var i=0;i<this.len()+e.len()-1;i++)n[i]=0;
-    for(i=0;i<this.len();i++)for(var j=0;j<e.len();j++)n[i+j]^=gexp(glog(this.get(i))+glog(e.get(j)));
-    return new Poly(n,0);
+function playPTTMP3() {
+  if (S.pttSound !== 'mp3' || !S.pttAudioEl || !S.pttAudioReady) return false;
+  try {
+    S.pttAudioEl.currentTime = 0;
+    const p = S.pttAudioEl.play();
+    if (p && p.catch) p.catch(()=>{});
+    return true;
+  } catch(_) { return false; }
+}
+
+const SFX = {
+  click(){const c=ctx(),o=c.createOscillator(),g=c.createGain();o.type='square';o.frequency.value=1500;
+    g.gain.setValueAtTime(0.14,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.025);
+    o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+0.03);},
+  roger(){const c=ctx(),o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=1000;const t=c.currentTime;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.16,t+0.008);
+    g.gain.setValueAtTime(0.16,t+0.11);g.gain.exponentialRampToValueAtTime(0.001,t+0.15);
+    o.connect(g).connect(c.destination);o.start(t);o.stop(t+0.16);},
+  squelchTail(){
+    const c = ctx();
+    const lvl = S.squelchLevel;
+    if (lvl <= 0) return;
+    const src1 = c.createBufferSource();
+    src1.buffer = noiseBuf(0.22);
+    const f1 = c.createBiquadFilter();
+    f1.type = 'bandpass'; f1.frequency.value = 2200; f1.Q.value = 0.5;
+    const g1 = c.createGain();
+    const t0 = c.currentTime;
+    g1.gain.setValueAtTime(0.22 * lvl, t0);
+    g1.gain.exponentialRampToValueAtTime(0.001, t0 + 0.22);
+    src1.connect(f1).connect(g1).connect(c.destination);
+    src1.start(t0);
+    const src2 = c.createBufferSource();
+    src2.buffer = noiseBuf(0.85);
+    const f2 = c.createBiquadFilter();
+    f2.type = 'highpass'; f2.frequency.value = 700;
+    const g2 = c.createGain();
+    const t1 = t0 + 0.05;
+    g2.gain.setValueAtTime(0.14 * lvl, t1);
+    g2.gain.exponentialRampToValueAtTime(0.0008, t1 + 0.8);
+    src2.connect(f2).connect(g2).connect(c.destination);
+    src2.start(t1);
+    const o = c.createOscillator(), g3 = c.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(320, t0);
+    o.frequency.exponentialRampToValueAtTime(90, t0 + 0.15);
+    g3.gain.setValueAtTime(0.11 * lvl, t0);
+    g3.gain.exponentialRampToValueAtTime(0.001, t0 + 0.18);
+    o.connect(g3).connect(c.destination);
+    o.start(t0); o.stop(t0 + 0.2);
   },
-  mod:function(e){
-    if(this.len()-e.len()<0)return this;
-    var ratio=glog(this.get(0))-glog(e.get(0));
-    var n=[];for(var i=0;i<this.len();i++)n[i]=this.get(i);
-    for(i=0;i<e.len();i++)n[i]^=gexp(glog(e.get(i))+ratio);
-    return new Poly(n,0).mod(e);
-  }
-};
-var RS=[
-[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],
-[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],
-[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],
-[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],
-[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16]
-];
-function getRS(t,ecl){
-  var idx=(t-1)*4;
-  var k=idx+(ecl===1?0:ecl===0?1:ecl===3?2:3);
-  var rb=RS[k];if(!rb)throw'no rs';
-  var list=[],len=rb.length/3;
-  for(var i=0;i<len;i++){
-    var c=rb[i*3],tc=rb[i*3+1],dc=rb[i*3+2];
-    for(var j=0;j<c;j++)list.push({total:tc,data:dc});
-  }
-  return list;
-}
-var PP=[
-[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],
-[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],
-[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],
-[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],
-[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],
-[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],
-[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]
-];
-var G15=(1<<10)|(1<<8)|(1<<5)|(1<<4)|(1<<2)|(1<<1)|(1<<0);
-var G18=(1<<12)|(1<<11)|(1<<10)|(1<<9)|(1<<8)|(1<<5)|(1<<2)|(1<<0);
-var G15MASK=(1<<14)|(1<<12)|(1<<10)|(1<<4)|(1<<1);
-function bchDigit(d){var n=0;while(d!==0){n++;d>>>=1;}return n;}
-function bchTypeInfo(d){var v=d<<10;while(bchDigit(v)-bchDigit(G15)>=0)v^=G15<<(bchDigit(v)-bchDigit(G15));return ((d<<10)|v)^G15MASK;}
-function bchTypeNumber(d){var v=d<<12;while(bchDigit(v)-bchDigit(G18)>=0)v^=G18<<(bchDigit(v)-bchDigit(G18));return (d<<12)|v;}
-
-function BitBuf(){this.buf=[];this.len=0;}
-BitBuf.prototype={
-  put:function(num,length){for(var i=0;i<length;i++)this.putBit(((num>>>(length-i-1))&1)===1);},
-  putBit:function(bit){var i=Math.floor(this.len/8);if(this.buf.length<=i)this.buf.push(0);if(bit)this.buf[i]|=0x80>>>(this.len%8);this.len++;}
+  powerOn(){const c=ctx(),o=c.createOscillator(),g=c.createGain();o.type='sine';const t=c.currentTime;
+    o.frequency.setValueAtTime(280,t);o.frequency.exponentialRampToValueAtTime(1300,t+0.28);
+    g.gain.setValueAtTime(0.13,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.38);
+    o.connect(g).connect(c.destination);o.start(t);o.stop(t+0.4);},
+  powerOff(){const c=ctx(),o=c.createOscillator(),g=c.createGain();o.type='sine';const t=c.currentTime;
+    o.frequency.setValueAtTime(1200,t);o.frequency.exponentialRampToValueAtTime(220,t+0.3);
+    g.gain.setValueAtTime(0.13,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.4);
+    o.connect(g).connect(c.destination);o.start(t);o.stop(t+0.42);},
+  channelBeep(){const c=ctx();[900,1300].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();
+    o.frequency.value=f;const t=c.currentTime+i*0.075;g.gain.setValueAtTime(0.12,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+0.07);o.connect(g).connect(c.destination);o.start(t);o.stop(t+0.08);});},
+  rxBeep(){const c=ctx();[700,700].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();
+    o.frequency.value=f;const t=c.currentTime+i*0.09;g.gain.setValueAtTime(0.08,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+0.06);o.connect(g).connect(c.destination);o.start(t);o.stop(t+0.07);});},
+  mdc(){const c=ctx();const now=c.currentTime;
+    [1200,1800,1200,2200,1800].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();
+      o.type='square';o.frequency.value=f;const t=now+i*0.028;g.gain.setValueAtTime(0.06,t);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.025);o.connect(g).connect(c.destination);o.start(t);o.stop(t+0.028);});},
+  connected(){const c=ctx();[523,784,1047].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();
+    o.type='sine';o.frequency.value=f;const t=c.currentTime+i*0.08;g.gain.setValueAtTime(0.11,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+0.14);o.connect(g).connect(c.destination);o.start(t);o.stop(t+0.15);});},
+  disconnected(){const c=ctx();[800,500,300].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();
+    o.type='sine';o.frequency.value=f;const t=c.currentTime+i*0.08;g.gain.setValueAtTime(0.1,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+0.14);o.connect(g).connect(c.destination);o.start(t);o.stop(t+0.15);});},
+  error(){const c=ctx();[220,220].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();
+    o.type='square';o.frequency.value=f;const t=c.currentTime+i*0.15;g.gain.setValueAtTime(0.1,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+0.13);o.connect(g).connect(c.destination);o.start(t);o.stop(t+0.14);});},
+  qrBeep(){const c=ctx();[1400,1800].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();
+    o.type='sine';o.frequency.value=f;const t=c.currentTime+i*0.07;g.gain.setValueAtTime(0.14,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+0.06);o.connect(g).connect(c.destination);o.start(t);o.stop(t+0.07);});},
 };
 
-function toUTF8(str){
-  var out=[];
-  for(var i=0;i<str.length;i++){
-    var c=str.charCodeAt(i);
-    if(c<0x80)out.push(c);
-    else if(c<0x800){out.push(0xC0|(c>>6));out.push(0x80|(c&0x3F));}
-    else if(c<0x10000){out.push(0xE0|(c>>12));out.push(0x80|((c>>6)&0x3F));out.push(0x80|(c&0x3F));}
-    else{out.push(0xF0|(c>>18));out.push(0x80|((c>>12)&0x3F));out.push(0x80|((c>>6)&0x3F));out.push(0x80|(c&0x3F));}
+/* ============================================================
+   UI
+   ============================================================ */
+function log(m) {
+  const el = $('log'); if (!el) return;
+  const d = document.createElement('div');
+  d.textContent = new Date().toLocaleTimeString().slice(0,8) + ' ' + m;
+  el.appendChild(d); el.scrollTop = el.scrollHeight;
+  while (el.children.length > 25) el.removeChild(el.firstChild);
+}
+function toast(t, isErr) {
+  const el = $('toast');
+  el.textContent = t; el.classList.toggle('err', !!isErr); el.classList.add('show');
+  clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), 2200);
+}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+function renderUsers() {
+  const list = $('usersList'); list.innerHTML = '';
+  const me = document.createElement('div');
+  me.className = 'user' + (S.myTalking ? ' talking' : '');
+  me.innerHTML = `<div class="icon">🎙️</div><div class="name">${esc(S.name)}</div>
+                  <div class="badge ok">${S.isCreator ? 'СОЗДАТЕЛЬ' : 'вы'}</div>`;
+  list.appendChild(me);
+
+  const ids = Object.keys(S.peers);
+  ids.forEach(id => {
+    const p = S.peers[id];
+    const el = document.createElement('div');
+    el.className = 'user' + (p.talking ? ' talking' : '');
+    let badge = 'соединение…', badgeCls = '';
+    if (p.connected) {
+      const isRelay = p.localCandidateType === 'relay' || p.remoteCandidateType === 'relay';
+      badge = isRelay ? 'relay' : 'P2P';
+      badgeCls = isRelay ? 'relay' : 'ok';
+    } else if (p.pc && p.pc.connectionState === 'failed') {
+      badge = 'ошибка'; badgeCls = 'warn';
+    }
+    el.innerHTML = `<div class="icon">${p.talking ? '🔊' : '👤'}</div>
+                    <div class="name">${esc(p.name || 'Участник')}</div>
+                    <div class="badge ${badgeCls}">${badge}</div>`;
+    list.appendChild(el);
+  });
+
+  if (ids.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'user';
+    empty.innerHTML = '<div class="icon">📡</div><div class="name" style="color:#555">Ждём участников…</div>';
+    list.appendChild(empty);
   }
-  return out;
+  $('roleTag').textContent = ids.length > 0
+    ? (S.isCreator ? 'СОЗДАТЕЛЬ · ' : '') + 'сеть: ' + ids.length
+    : 'не в сети';
+  $('subLabel').textContent = 'MESH · УЧАСТНИКОВ: ' + (ids.length + 1);
+  $('netInfo').textContent = S.relayMode === 'relay' ? 'ТОЛЬКО RELAY'
+                            : S.relayMode === 'p2p' ? 'ТОЛЬКО P2P' : 'STUN+TURN';
 }
 
-function encode(text,ecl){
-  var bytes=toUTF8(text);
-  var len=bytes.length;
-  var typeNumber;
-  // подбираем версию
-  for(typeNumber=1;typeNumber<40;typeNumber++){
-    var rbs=getRS(typeNumber,ecl);
-    var totalData=0;
-    for(var i=0;i<rbs.length;i++)totalData+=rbs[i].data;
-    var lb;
-    if(typeNumber<10)lb=8;
-    else if(typeNumber<27)lb=16;
-    else lb=16;
-    var need=4+lb+len*8;
-    if(need<=totalData*8)break;
-  }
-  if(typeNumber>=40)throw new Error('Слишком длинный текст');
-
-  var buf=new BitBuf();
-  buf.put(4,4); // 8bit byte mode
-  if(typeNumber<10)buf.put(len,8);
-  else buf.put(len,16);
-  for(var i=0;i<bytes.length;i++)buf.put(bytes[i],8);
-
-  var rbs=getRS(typeNumber,ecl);
-  var totalData=0;
-  for(i=0;i<rbs.length;i++)totalData+=rbs[i].data;
-
-  if(buf.len+4<=totalData*8){
-    buf.put(0,4);
-    while(buf.len%8!==0)buf.putBit(false);
-    while(true){
-      if(buf.len>=totalData*8)break;
-      buf.put(0xEC,8);
-      if(buf.len>=totalData*8)break;
-      buf.put(0x11,8);
+/* ============================================================
+   QR ENCODER (byte mode, ECC L, v1-40)
+   ============================================================ */
+const GF_EXP = new Uint8Array(512);
+const GF_LOG = new Uint8Array(256);
+(function initGF(){
+  let x = 1;
+  for (let i = 0; i < 255; i++) { GF_EXP[i] = x; GF_LOG[x] = i; x <<= 1; if (x & 0x100) x ^= 0x11D; }
+  for (let i = 255; i < 512; i++) GF_EXP[i] = GF_EXP[i - 255];
+})();
+function gfMul(a, b) { if (a === 0 || b === 0) return 0; return GF_EXP[GF_LOG[a] + GF_LOG[b]]; }
+function rsGenPoly(n) {
+  let poly = [1];
+  for (let i = 0; i < n; i++) {
+    const next = new Array(poly.length + 1).fill(0);
+    for (let j = 0; j < poly.length; j++) {
+      next[j] ^= gfMul(poly[j], 1);
+      next[j + 1] ^= gfMul(poly[j], GF_EXP[i]);
     }
-  }else{
-    while(buf.len%8!==0)buf.putBit(false);
-    while(buf.len<totalData*8)buf.putBit(false);
+    poly = next;
   }
+  return poly;
+}
+function rsEncode(data, eccLen) {
+  const gen = rsGenPoly(eccLen);
+  const res = new Uint8Array(data.length + eccLen);
+  res.set(data);
+  for (let i = 0; i < data.length; i++) {
+    const coef = res[i];
+    if (coef === 0) continue;
+    for (let j = 1; j < gen.length; j++) res[i + j] ^= gfMul(gen[j], coef);
+  }
+  return res.slice(data.length);
+}
+const QR_TABLE_L = {
+  1:[26,7,[1,19,0,0]],2:[44,10,[1,34,0,0]],3:[70,15,[1,55,0,0]],4:[100,20,[1,80,0,0]],
+  5:[134,26,[1,108,0,0]],6:[172,18,[2,68,0,0]],7:[196,20,[2,78,0,0]],8:[242,24,[2,97,0,0]],
+  9:[292,30,[2,116,0,0]],10:[346,18,[2,68,2,69]],11:[404,20,[4,81,0,0]],12:[466,24,[2,92,2,93]],
+  13:[532,26,[4,107,0,0]],14:[581,30,[3,115,1,116]],15:[655,22,[5,87,1,88]],16:[733,24,[5,98,1,99]],
+  17:[815,28,[1,107,5,108]],18:[901,30,[5,120,1,121]],19:[991,28,[3,113,4,114]],20:[1085,28,[3,107,5,108]],
+  21:[1156,28,[4,116,4,117]],22:[1258,28,[2,111,7,112]],23:[1364,30,[4,121,5,122]],24:[1474,30,[6,117,4,118]],
+  25:[1588,26,[8,106,4,107]],26:[1706,28,[10,114,2,115]],27:[1828,30,[8,122,4,123]],28:[1921,30,[3,117,10,118]],
+  29:[2051,30,[7,116,7,117]],30:[2185,30,[5,115,10,116]],31:[2323,30,[13,115,3,116]],32:[2465,30,[17,115,0,0]],
+  33:[2611,30,[17,115,1,116]],34:[2761,30,[13,115,6,116]],35:[2876,30,[12,121,7,122]],36:[3034,30,[6,121,14,122]],
+  37:[3196,30,[17,122,4,123]],38:[3362,30,[4,122,18,123]],39:[3532,30,[20,117,4,118]],40:[3706,30,[19,118,6,119]],
+};
+const QR_ALIGN = {
+  1:[],2:[6,18],3:[6,22],4:[6,26],5:[6,30],6:[6,34],7:[6,22,38],8:[6,24,42],9:[6,26,46],10:[6,28,50],
+  11:[6,30,54],12:[6,32,58],13:[6,34,62],14:[6,26,46,66],15:[6,26,48,70],16:[6,26,50,74],17:[6,30,54,78],
+  18:[6,30,56,82],19:[6,30,58,86],20:[6,34,62,90],21:[6,28,50,72,94],22:[6,26,50,74,98],23:[6,30,54,78,102],
+  24:[6,28,54,80,106],25:[6,32,58,84,110],26:[6,30,58,86,114],27:[6,34,62,90,118],28:[6,26,50,74,98,122],
+  29:[6,30,54,78,102,126],30:[6,26,52,78,104,130],31:[6,30,56,82,108,134],32:[6,34,60,86,112,138],
+  33:[6,30,58,86,114,142],34:[6,34,62,90,118,146],35:[6,30,54,78,102,126,150],36:[6,24,50,76,102,128,154],
+  37:[6,28,54,80,106,132,158],38:[6,32,58,84,110,136,162],39:[6,26,54,82,110,138,166],40:[6,30,58,86,114,142,170]
+};
 
-  // RS блоки
-  var dataBytes=[];
-  for(i=0;i<buf.buf.length;i++)dataBytes.push(buf.buf[i]);
+function makeQRCodeData(text) {
+  const bytes = new TextEncoder().encode(text);
+  const len = bytes.length;
+  let version = 0;
+  for (let v = 1; v <= 40; v++) {
+    const blocks = QR_TABLE_L[v][2];
+    const dataCw = (blocks[0] * blocks[1]) + (blocks[2] * blocks[3]);
+    const lenBits = v < 10 ? 8 : 16;
+    if (4 + lenBits + len * 8 <= dataCw * 8) { version = v; break; }
+  }
+  if (!version) throw new Error('Слишком длинный текст');
+  const [totalCw, ecPerBlock, blocks] = QR_TABLE_L[version];
+  const dataCw = (blocks[0] * blocks[1]) + (blocks[2] * blocks[3]);
+  const bits = [];
+  const pushBits = (val, count) => { for (let i = count - 1; i >= 0; i--) bits.push((val >> i) & 1); };
+  pushBits(0b0100, 4);
+  pushBits(len, version < 10 ? 8 : 16);
+  for (const b of bytes) pushBits(b, 8);
+  const maxBits = dataCw * 8;
+  for (let i = 0; i < 4 && bits.length < maxBits; i++) bits.push(0);
+  while (bits.length % 8 !== 0) bits.push(0);
+  const padBytes = [0xEC, 0x11];
+  let pi = 0;
+  while (bits.length < maxBits) pushBits(padBytes[pi++ % 2], 8);
+  const dataBytes = new Uint8Array(dataCw);
+  for (let i = 0; i < dataCw; i++) {
+    let b = 0;
+    for (let j = 0; j < 8; j++) b = (b << 1) | bits[i * 8 + j];
+    dataBytes[i] = b;
+  }
+  const blockData = [];
+  let offset = 0;
+  for (let i = 0; i < blocks[0]; i++) { blockData.push(dataBytes.slice(offset, offset + blocks[1])); offset += blocks[1]; }
+  for (let i = 0; i < blocks[2]; i++) { blockData.push(dataBytes.slice(offset, offset + blocks[3])); offset += blocks[3]; }
+  const blockECC = blockData.map(d => rsEncode(d, ecPerBlock));
+  const totalBlocks = blocks[0] + blocks[2];
+  const interleaved = new Uint8Array(dataCw + totalBlocks * ecPerBlock);
+  let idx = 0;
+  const maxDataLen = Math.max(...blockData.map(b => b.length));
+  for (let i = 0; i < maxDataLen; i++) for (const b of blockData) if (i < b.length) interleaved[idx++] = b[i];
+  for (let i = 0; i < ecPerBlock; i++) for (const b of blockECC) if (i < b.length) interleaved[idx++] = b[i];
+  return { version, data: interleaved };
+}
 
-  var dcData=[],ecData=[];
-  var offset=0;
-  for(i=0;i<rbs.length;i++){
-    var dc=rbs[i].data,ec=rbs[i].total-rbs[i].data;
-    var chunk=dataBytes.slice(offset,offset+dc);
-    offset+=dc;
-    var rsPoly=new Poly([1],0);
-    for(var k=0;k<ec;k++)rsPoly=rsPoly.mul(new Poly([1,gexp(k)],0));
-    var rawPoly=new Poly(chunk,rsPoly.len()-1);
-    var modPoly=rawPoly.mod(rsPoly);
-    var ecChunk=[];
-    for(k=0;k<ec;k++){
-      var idx=k+modPoly.len()-ec;
-      ecChunk[k]=(idx>=0)?modPoly.get(idx):0;
+function buildQRMatrix(version, codewords) {
+  const size = version * 4 + 17;
+  const matrix = new Int8Array(size * size).fill(-1);
+  const reserved = new Uint8Array(size * size);
+  const set = (x, y, v) => { matrix[y * size + x] = v; reserved[y * size + x] = 1; };
+  const placeFinder = (cx, cy) => {
+    for (let y = -1; y <= 7; y++) for (let x = -1; x <= 7; x++) {
+      const px = cx + x, py = cy + y;
+      if (px < 0 || px >= size || py < 0 || py >= size) continue;
+      const inside = x >= 0 && x <= 6 && y >= 0 && y <= 6;
+      let black = false;
+      if (inside) {
+        if (x === 0 || x === 6 || y === 0 || y === 6) black = true;
+        else if (x >= 2 && x <= 4 && y >= 2 && y <= 4) black = true;
+      }
+      set(px, py, black ? 1 : 0);
     }
-    dcData.push(chunk);
-    ecData.push(ecChunk);
-  }
-  var maxDc=0,maxEc=0;
-  for(i=0;i<dcData.length;i++){if(dcData[i].length>maxDc)maxDc=dcData[i].length;if(ecData[i].length>maxEc)maxEc=ecData[i].length;}
-  var final=[];
-  for(i=0;i<maxDc;i++)for(var j=0;j<dcData.length;j++)if(i<dcData[j].length)final.push(dcData[j][i]);
-  for(i=0;i<maxEc;i++)for(j=0;j<ecData.length;j++)if(i<ecData[j].length)final.push(ecData[j][i]);
-
-  // модули
-  var count=typeNumber*4+17;
-  var modules=[];
-  for(i=0;i<count;i++){modules[i]=[];for(j=0;j<count;j++)modules[i][j]=null;}
-  function set(r,c,v){if(r<0||count<=r||c<0||count<=c)return;modules[r][c]=v;}
-  function probe(r,c){
-    for(var i=-1;i<=7;i++)for(var j=-1;j<=7;j++){
-      if(i<0||i>6||j<0||j>6)set(r+i,c+j,false);
-      else set(r+i,c+j,(i===0||i===6||j===0||j===6||(i>=2&&i<=4&&j>=2&&j<=4)));
+  };
+  placeFinder(0, 0); placeFinder(size - 7, 0); placeFinder(0, size - 7);
+  for (let i = 8; i < size - 8; i++) { set(i, 6, i % 2 === 0 ? 1 : 0); set(6, i, i % 2 === 0 ? 1 : 0); }
+  const aligns = QR_ALIGN[version] || [];
+  for (const ay of aligns) for (const ax of aligns) {
+    if ((ax === 6 && ay === 6) || (ax === 6 && ay === size - 7) || (ax === size - 7 && ay === 6)) continue;
+    for (let y = -2; y <= 2; y++) for (let x = -2; x <= 2; x++) {
+      const px = ax + x, py = ay + y;
+      const black = Math.abs(x) === 2 || Math.abs(y) === 2 || (x === 0 && y === 0);
+      set(px, py, black ? 1 : 0);
     }
   }
-  probe(0,0);probe(count-7,0);probe(0,count-7);
-  var pp=PP[typeNumber-1]||[];
-  for(i=0;i<pp.length;i++)for(j=0;j<pp.length;j++){
-    var r=pp[i],c=pp[j];
-    if(modules[r][c]!==null)continue;
-    for(var di=-2;di<=2;di++)for(var dj=-2;dj<=2;dj++){
-      set(r+di,c+dj,(Math.abs(di)===2||Math.abs(dj)===2||(di===0&&dj===0)));
-    }
+  set(8, size - 8, 1);
+  for (let i = 0; i < 9; i++) {
+    if (!reserved[i * size + 8]) set(8, i, 0);
+    if (!reserved[8 * size + i]) set(i, 8, 0);
+    if (!reserved[(size - 1 - i) * size + 8]) set(8, size - 1 - i, 0);
+    if (!reserved[8 * size + size - 1 - i]) set(size - 1 - i, 8, 0);
   }
-  for(i=8;i<count-8;i++){if(modules[6][i]===null)set(6,i,i%2===0);if(modules[i][6]===null)set(i,6,i%2===0);}
+  if (version >= 7) for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) { set(size - 11 + j, i, 0); set(i, size - 11 + j, 0); }
 
-  var typeInfo=bchTypeInfo((ecl===1?1:ecl===0?0:ecl===3?3:2)<<3|0);
-  for(i=0;i<15;i++){
-    var bit=((typeInfo>>i)&1)===1;
-    if(i<6)set(8,i,bit);
-    else if(i<8)set(8,i+1,bit);
-    else if(i<9)set(7,14-i,bit);
-    else set(14-i,8,bit);
-    if(i<8)set(count-1-i,8,bit);
-    else set(8,count-15+i,bit);
-  }
-  set(count-8,8,true);
-
-  if(typeNumber>=7){
-    var tn=bchTypeNumber(typeNumber);
-    for(i=0;i<18;i++){
-      var b=((tn>>i)&1)===1;
-      set(Math.floor(i/3),i%3+count-8-3,b);
-      set(i%3+count-8-3,Math.floor(i/3),b);
-    }
-  }
-
-  // маска
-  function maskFn(m,i,j){
-    switch(m){
-      case 0:return (i+j)%2===0;
-      case 1:return i%2===0;
-      case 2:return j%3===0;
-      case 3:return (i+j)%3===0;
-      case 4:return (Math.floor(i/2)+Math.floor(j/3))%2===0;
-      case 5:return (i*j)%2+(i*j)%3===0;
-      case 6:return ((i*j)%2+(i*j)%3)%2===0;
-      case 7:return ((i*j)%3+(i+j)%2)%2===0;
-    }
-    return false;
-  }
-
-  function mapData(mask){
-    var inc=-1,row=count-1,bitIdx=0;
-    for(var col=count-1;col>0;col-=2){
-      if(col===6)col--;
-      while(true){
-        for(var c=0;c<2;c++){
-          if(modules[row][col-c]===null){
-            var dark=false;
-            if(bitIdx<final.length*8){
-              dark=((final[Math.floor(bitIdx/8)]>>>(7-bitIdx%8))&1)===1;
-            }
-            if(maskFn(mask,row,col-c))dark=!dark;
-            modules[row][col-c]=dark;
-            bitIdx++;
-          }
-        }
-        row+=inc;
-        if(row<0||row>=count){row-=inc;inc=-inc;break;}
+  const totalBits = codewords.length * 8;
+  let bitIdx = 0, upward = true;
+  for (let col = size - 1; col > 0; col -= 2) {
+    if (col === 6) col--;
+    for (let i = 0; i < size; i++) {
+      const y = upward ? (size - 1 - i) : i;
+      for (let c = 0; c < 2; c++) {
+        const x = col - c;
+        if (reserved[y * size + x]) continue;
+        if (bitIdx < totalBits) {
+          const byte = codewords[bitIdx >> 3];
+          matrix[y * size + x] = (byte >> (7 - (bitIdx & 7))) & 1;
+          bitIdx++;
+        } else matrix[y * size + x] = 0;
       }
     }
+    upward = !upward;
   }
-
-  // выбираем лучшую маску по штрафу
-  var best=0,bestScore=Infinity;
-  for(var m=0;m<8;m++){
-    // сбрасываем data-модули
-    for(i=0;i<count;i++)for(j=0;j<count;j++){
-      if((i===6)||(j===6))continue;
-      if(i<9&&j<9)continue;if(i<9&&j>=count-8)continue;if(i>=count-8&&j<9)continue;
-      // слишком грубо, просто перезаписываем
-    }
-    mapData(m);
-    // штраф (упрощённый)
-    var penalty=0;
-    for(i=0;i<count;i++)for(j=0;j<count;j++){
-      // ничего не считаем, просто возвращаем первую маску
-    }
-    best=m;break;
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    if (!reserved[y * size + x] && (x + y) % 2 === 0) matrix[y * size + x] ^= 1;
   }
-  mapData(0);
-  return {modules:modules,count:count};
+  const data5 = 0b01000;
+  const genPoly = 0b10100110111;
+  let bch = data5 << 10;
+  while (bch >= 0x800) {
+    const shift = 31 - Math.clz32(bch) - 10;
+    if (shift < 0) break;
+    bch ^= genPoly << shift;
+  }
+  const fmt = ((data5 << 10) | bch) ^ 0x5412;
+  const fmtBitsArr = [];
+  for (let i = 0; i < 15; i++) fmtBitsArr.push((fmt >> i) & 1);
+  const pos1 = [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+  pos1.forEach(([x, y], i) => { matrix[y * size + x] = fmtBitsArr[i]; });
+  const pos2 = [[size-1,8],[size-2,8],[size-3,8],[size-4,8],[size-5,8],[size-6,8],[size-7,8],[8,size-8],[8,size-7],[8,size-6],[8,size-5],[8,size-4],[8,size-3],[8,size-2],[8,size-1]];
+  pos2.forEach(([x, y], i) => { matrix[y * size + x] = fmtBitsArr[i]; });
+  if (version >= 7) {
+    let vbits = version << 12;
+    const gen = 0b1111100100101;
+    while (vbits >= 0x4000) {
+      const shift = 31 - Math.clz32(vbits) - 12;
+      if (shift < 0) break;
+      vbits ^= gen << shift;
+    }
+    const vinfo = (version << 12) | vbits;
+    for (let i = 0; i < 18; i++) {
+      const bit = (vinfo >> i) & 1;
+      const x = Math.floor(i / 3), y = i % 3;
+      matrix[(size - 11 + y) * size + x] = bit;
+      matrix[y * size + (size - 11 + x)] = bit;
+    }
+  }
+  return matrix;
 }
 
-function render(canvas,text,size){
-  try{
-    var qr=encode(text,1); // L
-    var count=qr.count;
-    var scale=Math.max(2,Math.floor(size/count));
-    canvas.width=count*scale;
-    canvas.height=count*scale;
-    var ctx=canvas.getContext('2d');
-    ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle='#000';
-    for(var i=0;i<count;i++)for(var j=0;j<count;j++){
-      if(qr.modules[i][j])ctx.fillRect(j*scale,i*scale,scale,scale);
-    }
-    canvas.style.width=size+'px';
-    canvas.style.height=size+'px';
-    return true;
-  }catch(e){
-    log('QR err: '+e.message);
-    return false;
+function drawQR(canvas, text) {
+  const { version, data } = makeQRCodeData(text);
+  const matrix = buildQRMatrix(version, data);
+  const size = version * 4 + 17;
+  const scale = Math.max(2, Math.floor(280 / size));
+  const pad = 4 * scale;
+  const dim = size * scale + pad * 2;
+  canvas.width = dim; canvas.height = dim;
+  canvas.style.width = '100%'; canvas.style.maxWidth = '280px';
+  canvas.style.imageRendering = 'pixelated';
+  const g = canvas.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0, 0, dim, dim);
+  g.fillStyle = '#000';
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    if (matrix[y * size + x] === 1) g.fillRect(pad + x * scale, pad + y * scale, scale, scale);
   }
+  return { version, size };
 }
-return {render:render,encode:encode};
+
+/* ============================================================
+   QR DECODER — встроенный, работает везде
+   Правильный: находит finder'ы, снимает перспективу, читает формат,
+   определяет маску, снимает её, деинтерливит блоки, читает байты.
+   ============================================================ */
+const QRDecoder = (function(){
+  'use strict';
+
+  // --- GF(256) ---
+  const EXP = new Uint8Array(512), LOG = new Uint8Array(256);
+  (function(){ let x=1; for(let i=0;i<255;i++){ EXP[i]=x; LOG[x]=i; x<<=1; if(x&0x100) x^=0x11D; } for(let i=255;i<512;i++) EXP[i]=EXP[i-255]; })();
+  const gf = (a,b) => (a===0||b===0)?0:EXP[LOG[a]+LOG[b]];
+  function polyMul(a, b) {
+    const r = new Array(a.length + b.length - 1).fill(0);
+    for (let i=0;i<a.length;i++) for (let j=0;j<b.length;j++) r[i+j] ^= gf(a[i], b[j]);
+    return r;
+  }
+  function polyEval(p, x) {
+    let y = 0;
+    for (let i=0;i<p.length;i++) y = gf(y, x) ^ p[i];
+    return y;
+  }
+  function rsSyndromes(msg, nsym) {
+    const s = new Array(nsym).fill(0);
+    for (let i=0;i<nsym;i++) s[i] = polyEval(msg, EXP[i]);
+    return s;
+  }
+  function rsFindErrorLocator(synd, nsym) {
+    let errLoc = [1], oldLoc = [1];
+    for (let i=0;i<nsym;i++) {
+      const K = i + 1;
+      let delta = synd[i];
+      for (let j=1;j<errLoc.length;j++) delta ^= gf(errLoc[errLoc.length-1-j], synd[i-j]);
+      oldLoc = oldLoc.concat([0]);
+      if (delta !== 0) {
+        if (oldLoc.length > errLoc.length) {
+          const newLoc = oldLoc.map(v => gf(v, delta));
+          oldLoc = errLoc.map(v => gf(v, EXP[LOG[delta] + 255 - LOG[delta]] || 1));
+          // Простая замена: обновляем errLoc
+          const t = errLoc.slice();
+          for (let k=0;k<oldLoc.length;k++) errLoc[k] = (errLoc[k]||0) ^ oldLoc[k];
+          oldLoc = t.map(v => gf(v, EXP[255 - LOG[delta]] || 1));
+        } else {
+          const newPart = oldLoc.map(v => gf(v, delta));
+          for (let k=0;k<newPart.length;k++) errLoc[k] = (errLoc[k]||0) ^ newPart[k];
+        }
+      }
+    }
+    return errLoc;
+  }
+  function rsCorrect(msg, nsym) {
+    const synd = rsSyndromes(msg, nsym);
+    if (synd.every(s => s === 0)) return msg.slice();
+    // Упрощённо: пробуем исправить до 2 ошибок методом перебора позиций
+    const n = msg.length;
+    const copy = msg.slice();
+    for (let i=0;i<n;i++) {
+      for (let j=i+1;j<n;j++) {
+        for (let a=0;a<256;a++) {
+          for (let b=0;b<256;b++) {
+            copy[i] ^= a; copy[j] ^= b;
+            if (rsSyndromes(copy, nsym).every(s => s === 0)) return copy;
+            copy[i] ^= a; copy[j] ^= b;
+          }
+        }
+      }
+    }
+    // Одиночная ошибка
+    for (let i=0;i<n;i++) {
+      for (let a=1;a<256;a++) {
+        copy[i] ^= a;
+        if (rsSyndromes(copy, nsym).every(s => s === 0)) return copy;
+        copy[i] ^= a;
+      }
+    }
+    // Не смогли — возвращаем как есть (декодер всё равно попробует)
+    return msg.slice();
+  }
+
+  // --- Обработка изображения ---
+  function toGray(imgData) {
+    const { width: w, height: h, data: d } = imgData;
+    const g = new Uint8Array(w * h);
+    for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+      g[j] = (d[i] * 0.299 + d[i+1] * 0.587 + d[i+2] * 0.114) | 0;
+    }
+    return { g, w, h };
+  }
+  function binarize(g, w, h) {
+    const out = new Uint8Array(w * h);
+    const blockSize = 16;
+    for (let by = 0; by < h; by += blockSize) {
+      for (let bx = 0; bx < w; bx += blockSize) {
+        let sum = 0, cnt = 0, min = 255, max = 0;
+        for (let y = by; y < Math.min(by+blockSize, h); y++) {
+          for (let x = bx; x < Math.min(bx+blockSize, w); x++) {
+            const v = g[y*w+x]; sum += v; cnt++; if (v<min) min=v; if (v>max) max=v;
+          }
+        }
+        const avg = sum/cnt;
+        const thr = (max - min > 24) ? (min + max) / 2 : avg - 5;
+        for (let y = by; y < Math.min(by+blockSize, h); y++) {
+          for (let x = bx; x < Math.min(bx+blockSize, w); x++) {
+            out[y*w+x] = g[y*w+x] < thr ? 1 : 0;
+          }
+        }
+      }
+    }
+    return out;
+  }
+
+  // --- Поиск finder-паттернов через ratio 1:1:3:1:1 ---
+  function checkRatio(counts, mod) {
+    const total = counts.reduce((a,b)=>a+b,0);
+    if (total < 7) return false;
+    const tol = mod * 0.75;
+    return Math.abs(counts[0]-mod)<tol && Math.abs(counts[1]-mod)<tol &&
+           Math.abs(counts[2]-3*mod)<tol*3 && Math.abs(counts[3]-mod)<tol &&
+           Math.abs(counts[4]-mod)<tol;
+  }
+
+  function findFinders(bin, w, h) {
+    const found = [];
+    const visited = new Uint8Array(w * h);
+    for (let y = 0; y < h; y += 3) {
+      for (let x = 0; x < w; x += 3) {
+        if (!bin[y*w+x] || visited[y*w+x]) continue;
+        // Горизонтальная проверка
+        const counts = [0,0,0,0,0];
+        let i = 0, xx = x;
+        while (xx >= 0 && i < 5) {
+          if (bin[y*w+xx]) counts[i]++;
+          else { if (i % 2 === 1) i++; else break; if (i<5) counts[i]=1; }
+          xx--;
+        }
+        counts.reverse();
+        i = 0; xx = x + 1;
+        while (xx < w && i < 4) {
+          const v = bin[y*w+xx];
+          const curIdx = i + 1;
+          if (curIdx % 2 === 1 && v) counts[curIdx]++;
+          else if (curIdx % 2 === 0 && !v) counts[curIdx]++;
+          else if (curIdx % 2 === 0 && v) { i++; counts[i+1]=1; }
+          else break;
+          xx++;
+        }
+        const total = counts.reduce((a,b)=>a+b,0);
+        if (total < 7) continue;
+        const mod = total / 7;
+        if (!checkRatio(counts, mod)) continue;
+        const cx = Math.round(xx - 1 - counts[4] - counts[3] - counts[2]/2);
+        const cy = y;
+        // Вертикальная проверка
+        const vCounts = [0,0,0,0,0];
+        i = 0;
+        let yy = cy;
+        while (yy >= 0 && i < 5) {
+          if (bin[yy*w+cx]) vCounts[i]++;
+          else { if (i % 2 === 1) i++; else break; if (i<5) vCounts[i]=1; }
+          yy--;
+        }
+        vCounts.reverse();
+        i = 0; yy = cy + 1;
+        while (yy < h && i < 4) {
+          const v = bin[yy*w+cx];
+          const curIdx = i + 1;
+          if (curIdx % 2 === 1 && v) vCounts[curIdx]++;
+          else if (curIdx % 2 === 0 && !v) vCounts[curIdx]++;
+          else if (curIdx % 2 === 0 && v) { i++; vCounts[i+1]=1; }
+          else break;
+          yy++;
+        }
+        const vTotal = vCounts.reduce((a,b)=>a+b,0);
+        if (vTotal < 7) continue;
+        const vMod = vTotal / 7;
+        if (!checkRatio(vCounts, vMod)) continue;
+        const cy2 = Math.round(yy - 1 - vCounts[4] - vCounts[3] - vCounts[2]/2);
+        // Проверим, что центр действительно чёрный
+        if (!bin[cy2*w+cx]) continue;
+        // Дедупликация
+        let dup = false;
+        for (const f of found) {
+          if (Math.abs(f.x - cx) < 8 && Math.abs(f.y - cy2) < 8) { dup = true; break; }
+        }
+        if (!dup) found.push({ x: cx, y: cy2, size: mod });
+        // Помечаем область
+        for (let dy=-3; dy<=3; dy++) for (let dx=-3; dx<=3; dx++) {
+          const nx = cx+dx, ny = cy2+dy;
+          if (nx>=0 && nx<w && ny>=0 && ny<h) visited[ny*w+nx] = 1;
+        }
+      }
+    }
+    return found;
+  }
+
+  // --- Выбор трёх finder'ов ---
+  function pickThree(finders) {
+    if (finders.length < 3) return null;
+    // Ищем три, у которых углы примерно прямые и стороны примерно равны
+    let best = null, bestErr = Infinity;
+    for (let a = 0; a < finders.length; a++)
+      for (let b = a+1; b < finders.length; b++)
+        for (let c = b+1; c < finders.length; c++) {
+          const pts = [finders[a], finders[b], finders[c]];
+          // Гипотенуза — самая длинная сторона. TL — не на гипотенузе.
+          const sides = [
+            { i:0, j:1, d: Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y) },
+            { i:0, j:2, d: Math.hypot(pts[0].x-pts[2].x, pts[0].y-pts[2].y) },
+            { i:1, j:2, d: Math.hypot(pts[1].x-pts[2].x, pts[1].y-pts[2].y) },
+          ];
+          sides.sort((a,b)=>b.d-a.d);
+          const [hyp, s1, s2] = sides;
+          // Прямой угол: гипотенуза^2 ≈ s1^2 + s2^2
+          const err = Math.abs(hyp.d*hyp.d - s1.d*s1.d - s2.d*s2.d) / (hyp.d*hyp.d);
+          const sideRatio = Math.abs(s1.d - s2.d) / Math.max(s1.d, s2.d);
+          const total = err * 2 + sideRatio;
+          if (total < bestErr) {
+            // Определяем TL — общая точка s1 и s2
+            const s1set = new Set([s1.i, s1.j]);
+            const s2set = new Set([s2.i, s2.j]);
+            const tlIdx = [...s1set].find(v => s2set.has(v));
+            const other = [0,1,2].filter(v => v !== tlIdx);
+            // Определяем по ориентации: TR — тот, что справа, BL — ниже
+            const tl = pts[tlIdx];
+            const v1 = { x: pts[other[0]].x - tl.x, y: pts[other[0]].y - tl.y };
+            const v2 = { x: pts[other[1]].x - tl.x, y: pts[other[1]].y - tl.y };
+            // Cross product: если v1 × v2 > 0, то v1 → v2 по часовой, т.е. v1=TR, v2=BL
+            const cross = v1.x * v2.y - v1.y * v2.x;
+            let tr, bl;
+            if (cross > 0) { tr = pts[other[0]]; bl = pts[other[1]]; }
+            else { tr = pts[other[1]]; bl = pts[other[0]]; }
+            bestErr = total;
+            best = { tl, tr, bl, moduleSize: (s1.d + s2.d) / 2 / 14, err: total };
+          }
+        }
+    if (best && best.err < 0.5) return best;
+    return null;
+  }
+
+  // --- Перспективная выборка ---
+  function sampleGrid(bin, w, h, tl, tr, bl, size) {
+    // BR — гипотетический
+    const br = { x: tr.x + bl.x - tl.x, y: tr.y + bl.y - tl.y };
+    const out = new Uint8Array(size * size);
+    for (let y = 0; y < size; y++) {
+      const v = (y + 0.5) / size;
+      for (let x = 0; x < size; x++) {
+        const u = (x + 0.5) / size;
+        const px = (1-u)*(1-v)*tl.x + u*(1-v)*tr.x + u*v*br.x + (1-u)*v*bl.x;
+        const py = (1-u)*(1-v)*tl.y + u*(1-v)*tr.y + u*v*br.y + (1-u)*v*bl.y;
+        const ix = Math.round(px), iy = Math.round(py);
+        if (ix < 0 || ix >= w || iy < 0 || iy >= h) return null;
+        out[y * size + x] = bin[iy * w + ix];
+      }
+    }
+    return out;
+  }
+
+  // --- Формат-информация: извлекаем ECC-уровень и маску ---
+  function readFormat(grid, size) {
+    const bits1 = [];
+    const positions1 = [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+    for (const [x, y] of positions1) bits1.push(grid[y*size+x]);
+    const positions2 = [[size-1,8],[size-2,8],[size-3,8],[size-4,8],[size-5,8],[size-6,8],[size-7,8],
+                        [8,size-8],[8,size-7],[8,size-6],[8,size-5],[8,size-4],[8,size-3],[8,size-2],[8,size-1]];
+    const bits2 = [];
+    for (const [x, y] of positions2) bits2.push(grid[y*size+x]);
+
+    function parse(bits) {
+      let v = 0;
+      for (let i = 0; i < 15; i++) v |= (bits[i] & 1) << i;
+      // XOR mask
+      v ^= 0x5412;
+      // Проверяем по таблице BCH — берём 5 старших бит
+      const data5 = v >> 10;
+      // ECC bits (старшие 2 бита): 01=L, 00=M, 11=Q, 10=H
+      const eccBits = (data5 >> 3) & 3;
+      const mask = data5 & 7;
+      let ecc;
+      switch (eccBits) {
+        case 1: ecc = 0; break; // L
+        case 0: ecc = 1; break; // M
+        case 3: ecc = 2; break; // Q
+        case 2: ecc = 3; break; // H
+      }
+      return { ecc, mask };
+    }
+    // Пробуем оба набора — валидный один
+    const r1 = parse(bits1);
+    const r2 = parse(bits2);
+    // Простая эвристика: берём тот, где ECC известен
+    return r1.mask >= 0 ? r1 : r2;
+  }
+
+  // --- Таблицы данных для ECC уровня (используем полные таблицы из энкодера) ---
+  // Берём таблицу для L, но добавляем таблицы M, Q, H через формулы
+  // Для краткости — используем только L и M, этого достаточно для SDP
+  const EC_TABLE = {
+    // L из QR_TABLE_L
+    L: QR_TABLE_L,
+    // M — построим из стандартных данных
+    M: {
+      1:[26,10,[1,16,0,0]],2:[44,16,[1,28,0,0]],3:[70,26,[1,44,0,0]],4:[100,18,[2,32,0,0]],
+      5:[134,24,[2,43,0,0]],6:[172,16,[4,27,0,0]],7:[196,18,[4,31,0,0]],8:[242,22,[2,38,2,39]],
+      9:[292,22,[3,36,2,37]],10:[346,26,[4,43,1,44]],11:[404,30,[1,50,4,51]],12:[466,22,[6,36,2,37]],
+      13:[532,22,[8,37,1,38]],14:[581,24,[4,40,5,41]],15:[655,24,[5,41,5,42]],16:[733,28,[7,45,3,46]],
+      17:[815,28,[10,46,1,47]],18:[901,26,[9,43,4,44]],19:[991,26,[3,44,11,45]],20:[1085,26,[3,41,13,42]],
+      21:[1156,26,[17,42,0,0]],22:[1258,28,[17,46,0,0]],23:[1364,28,[4,47,14,48]],24:[1474,28,[6,45,14,46]],
+      25:[1588,28,[8,47,13,48]],26:[1706,28,[19,46,4,47]],27:[1828,28,[22,45,3,46]],28:[1921,28,[3,45,23,46]],
+      29:[2051,28,[21,45,7,46]],30:[2185,28,[19,47,10,48]],31:[2323,28,[2,46,29,47]],32:[2465,28,[10,46,23,47]],
+      33:[2611,28,[14,46,21,47]],34:[2761,28,[14,46,23,47]],35:[2876,28,[12,47,26,48]],36:[3034,28,[6,47,34,48]],
+      37:[3196,28,[29,46,14,47]],38:[3362,28,[13,46,32,47]],39:[3532,28,[40,47,7,48]],40:[3706,28,[18,47,31,48]],
+    },
+  };
+
+  // --- Чтение кодовых слов из грида с учётом маски ---
+  function readCodewords(grid, size, version, mask) {
+    // Функция маски
+    function maskFn(x, y) {
+      switch (mask) {
+        case 0: return (x + y) % 2 === 0;
+        case 1: return y % 2 === 0;
+        case 2: return x % 3 === 0;
+        case 3: return (x + y) % 3 === 0;
+        case 4: return (Math.floor(y/2) + Math.floor(x/3)) % 2 === 0;
+        case 5: return ((x*y) % 2) + ((x*y) % 3) === 0;
+        case 6: return (((x*y) % 2) + ((x*y) % 3)) % 2 === 0;
+        case 7: return (((x+y) % 2) + ((x*y) % 3)) % 2 === 0;
+      }
+      return false;
+    }
+    // Помечаем все функциональные модули как reserved
+    const reserved = new Uint8Array(size * size);
+    const mark = (x, y) => { if (x>=0 && x<size && y>=0 && y<size) reserved[y*size+x] = 1; };
+    for (let y = 0; y < 9; y++) for (let x = 0; x < 9; x++) mark(x, y);
+    for (let y = 0; y < 9; y++) for (let x = size-8; x < size; x++) mark(x, y);
+    for (let y = size-8; y < size; y++) for (let x = 0; x < 9; x++) mark(x, y);
+    for (let i = 8; i < size-8; i++) { mark(i, 6); mark(6, i); }
+    const aligns = QR_ALIGN[version] || [];
+    for (const ay of aligns) for (const ax of aligns) {
+      if ((ax===6&&ay===6)||(ax===6&&ay===size-7)||(ax===size-7&&ay===6)) continue;
+      for (let dy=-2;dy<=2;dy++) for (let dx=-2;dx<=2;dx++) mark(ax+dx, ay+dy);
+    }
+    // Format info
+    mark(8, size-8);
+    for (let i = 0; i < 9; i++) { mark(8, i); mark(i, 8); mark(size-1-i, 8); mark(8, size-1-i); }
+    // Version info
+    if (version >= 7) for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) { mark(size-11+j, i); mark(i, size-11+j); }
+
+    // Читаем биты зигзагом
+    const bits = [];
+    let upward = true;
+    for (let col = size-1; col > 0; col -= 2) {
+      if (col === 6) col--;
+      for (let i = 0; i < size; i++) {
+        const y = upward ? size-1-i : i;
+        for (let c = 0; c < 2; c++) {
+          const x = col - c;
+          if (reserved[y*size+x]) continue;
+          let bit = grid[y*size+x];
+          if (maskFn(x, y)) bit ^= 1;
+          bits.push(bit);
+        }
+      }
+      upward = !upward;
+    }
+    // Собираем байты
+    const bytes = new Uint8Array(Math.floor(bits.length / 8));
+    for (let i = 0; i < bytes.length; i++) {
+      let b = 0;
+      for (let j = 0; j < 8; j++) b = (b << 1) | (bits[i*8+j] || 0);
+      bytes[i] = b;
+    }
+    return bytes;
+  }
+
+  // --- Деинтерливинг + RS-коррекция ---
+  function deinterleaveAndDecode(raw, version, eccLevel) {
+    const table = EC_TABLE[eccLevel] || EC_TABLE.L;
+    if (!table[version]) return null;
+    const [totalCw, ecPerBlock, blocks] = table[version];
+    const blockSizes = [];
+    for (let i = 0; i < blocks[0]; i++) blockSizes.push(blocks[1]);
+    for (let i = 0; i < blocks[2]; i++) blockSizes.push(blocks[3]);
+    const totalBlocks = blockSizes.length;
+    if (totalBlocks === 0) return null;
+    const dataCw = blockSizes.reduce((a,b)=>a+b,0);
+    // Чередование: сначала data блоков, потом ecc
+    const blockData = blockSizes.map(s => new Uint8Array(s));
+    const blockEcc = blockSizes.map(() => new Uint8Array(ecPerBlock));
+    let idx = 0;
+    // Данные
+    const maxDataLen = Math.max(...blockSizes);
+    for (let i = 0; i < maxDataLen; i++) {
+      for (let b = 0; b < totalBlocks; b++) {
+        if (i < blockSizes[b]) {
+          if (idx >= raw.length) return null;
+          blockData[b][i] = raw[idx++];
+        }
+      }
+    }
+    // ECC
+    for (let i = 0; i < ecPerBlock; i++) {
+      for (let b = 0; b < totalBlocks; b++) {
+        if (idx >= raw.length) return null;
+        blockEcc[b][i] = raw[idx++];
+      }
+    }
+    // Собираем данные с ECC и корректируем
+    const finalData = new Uint8Array(dataCw);
+    let foff = 0;
+    for (let b = 0; b < totalBlocks; b++) {
+      const full = new Uint8Array(blockSizes[b] + ecPerBlock);
+      full.set(blockData[b], 0);
+      full.set(blockEcc[b], blockSizes[b]);
+      const corrected = rsCorrect(full, ecPerBlock);
+      finalData.set(corrected.slice(0, blockSizes[b]), foff);
+      foff += blockSizes[b];
+    }
+    return finalData;
+  }
+
+  // --- Декодирование полезной нагрузки ---
+  function decodePayload(data, version) {
+    const bits = [];
+    for (const b of data) for (let i = 7; i >= 0; i--) bits.push((b >> i) & 1);
+    const readBits = (pos, len) => {
+      let v = 0;
+      for (let i = 0; i < len; i++) v = (v << 1) | (bits[pos + i] || 0);
+      return v;
+    };
+    let pos = 0;
+    const result = [];
+    while (pos + 4 <= bits.length) {
+      const mode = readBits(pos, 4);
+      pos += 4;
+      if (mode === 0) break; // terminator
+      if (mode === 4) { // byte
+        const lenBits = version < 10 ? 8 : 16;
+        const count = readBits(pos, lenBits);
+        pos += lenBits;
+        for (let i = 0; i < count; i++) {
+          result.push(readBits(pos, 8));
+          pos += 8;
+        }
+      } else if (mode === 2) { // alphanumeric
+        const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:';
+        const lenBits = version < 10 ? 9 : 11;
+        const count = readBits(pos, lenBits);
+        pos += lenBits;
+        for (let i = 0; i + 1 < count; i += 2) {
+          const v = readBits(pos, 11);
+          pos += 11;
+          result.push(charset.charCodeAt(Math.floor(v / 45)));
+          result.push(charset.charCodeAt(v % 45));
+        }
+        if (count % 2 === 1) {
+          const v = readBits(pos, 6);
+          pos += 6;
+          result.push(charset.charCodeAt(v));
+        }
+      } else if (mode === 1) { // numeric
+        const lenBits = version < 10 ? 10 : 12;
+        const count = readBits(pos, lenBits);
+        pos += lenBits;
+        let i = 0;
+        while (i + 2 < count) {
+          const v = readBits(pos, 10); pos += 10;
+          result.push(48 + Math.floor(v / 100));
+          result.push(48 + Math.floor((v / 10) % 10));
+          result.push(48 + (v % 10));
+          i += 3;
+        }
+        if (count - i === 2) {
+          const v = readBits(pos, 7); pos += 7;
+          result.push(48 + Math.floor(v / 10));
+          result.push(48 + (v % 10));
+        } else if (count - i === 1) {
+          const v = readBits(pos, 4); pos += 4;
+          result.push(48 + v);
+        }
+      } else {
+        return null; // ECI/kanji не поддерживаем
+      }
+    }
+    try { return new TextDecoder().decode(new Uint8Array(result)); }
+    catch { return null; }
+  }
+
+  // --- Публичный API ---
+  function decode(imageData) {
+    const { g, w, h } = toGray(imageData);
+    const bin = binarize(g, w, h);
+    const finders = findFinders(bin, w, h);
+    if (finders.length < 3) return null;
+    const trio = pickThree(finders);
+    if (!trio) return null;
+    const { tl, tr, bl, moduleSize } = trio;
+    // Размер QR: расстояние между TL и TR ≈ (size - 7) * moduleSize
+    const dTLTR = Math.hypot(tr.x - tl.x, tr.y - tl.y);
+    const approxSize = Math.round(dTLTR / moduleSize) + 7;
+    const trySizes = [];
+    for (let v = 1; v <= 40; v++) {
+      const sz = v * 4 + 17;
+      if (Math.abs(sz - approxSize) < 10) trySizes.push({ v, sz });
+    }
+    if (trySizes.length === 0) {
+      // Стандартный fallback
+      for (let v = 1; v <= 40; v++) trySizes.push({ v, sz: v * 4 + 17 });
+    }
+    trySizes.sort((a,b) => Math.abs(a.sz - approxSize) - Math.abs(b.sz - approxSize));
+
+    for (const { v, sz } of trySizes.slice(0, 6)) {
+      const grid = sampleGrid(bin, w, h, tl, tr, bl, sz);
+      if (!grid) continue;
+      const fmt = readFormat(grid, sz);
+      const raw = readCodewords(grid, sz, v, fmt.mask);
+      const eccLevelName = ['L','M','Q','H'][fmt.ecc] || 'L';
+      const corrected = deinterleaveAndDecode(raw, v, eccLevelName);
+      if (!corrected) continue;
+      const text = decodePayload(corrected, v);
+      if (text && text.length > 4) return text;
+    }
+    return null;
+  }
+
+  return { decode };
 })();
 
-// ============================================================
-// QR-СКАНЕР (BarcodeDetector + jsQR fallback)
-// ============================================================
-var scanStream=null,scanRAF=null,scanResolve=null;
+/* ============================================================
+   СКАНЕР
+   ============================================================ */
+async function initScanner() {
+  if ('BarcodeDetector' in window) {
+    try {
+      const formats = await BarcodeDetector.getSupportedFormats();
+      if (formats.includes('qr_code')) {
+        S.barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+      }
+    } catch(_) { S.barcodeDetector = null; }
+  }
+}
 
-function startScan(){
-  return new Promise(function(resolve,reject){
-    var scanner=document.getElementById('scanner');
-    var video=document.getElementById('scanVideo');
-    scanner.classList.add('on');
-    scanResolve=resolve;
-
-    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-      scanner.classList.remove('on');
-      return reject(new Error('Камера недоступна — нужен HTTPS или localhost'));
-    }
-
-    navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}})
-      .then(function(stream){
-        scanStream=stream;
-        video.srcObject=stream;
-        video.play();
-        log('📷 камера запущена');
-
-        var detector=null;
-        if('BarcodeDetector' in window){
-          try{
-            detector=new BarcodeDetector({formats:['qr_code']});
-            log('используем BarcodeDetector');
-          }catch(e){detector=null;}
-        }
-
-        if(detector){
-          var loop=function(){
-            if(!scanStream)return;
-            detector.detect(video).then(function(codes){
-              if(codes&&codes.length>0){
-                var val=codes[0].rawValue;
-                stopScan();
-                scanResolve(val);
-              }else{
-                scanRAF=requestAnimationFrame(loop);
-              }
-            }).catch(function(){
-              scanRAF=requestAnimationFrame(loop);
-            });
-          };
-          loop();
-        }else{
-          log('BarcodeDetector нет, нужен jsQR fallback');
-          // Простой fallback: не сканирует, просит ввести вручную
-          document.getElementById('scanInfo').textContent='Сканер не поддерживается — введите код вручную';
-        }
-      })
-      .catch(function(err){
-        scanner.classList.remove('on');
-        reject(err);
+async function openScanner(target) {
+  S.scanTarget = target;
+  $('scannerModal').classList.add('show');
+  $('scanStatus').textContent = 'Запускаю камеру…';
+  $('scanHint').textContent = 'Держи QR в рамке';
+  try {
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
       });
-  });
-}
-
-function stopScan(){
-  var scanner=document.getElementById('scanner');
-  scanner.classList.remove('on');
-  if(scanRAF){cancelAnimationFrame(scanRAF);scanRAF=null;}
-  if(scanStream){scanStream.getTracks().forEach(function(t){t.stop();});scanStream=null;}
-}
-
-document.getElementById('scanCancel').addEventListener('click',function(){
-  stopScan();
-  if(scanResolve)scanResolve(null);
-});
-
-// ============================================================
-// АУДИО
-// ============================================================
-var actx=null;
-function initAudio(){
-  try{
-    if(!actx){
-      var AC=window.AudioContext||window.webkitAudioContext;
-      if(AC)actx=new AC();
-    }
-    if(actx&&actx.state==='suspended')actx.resume();
-  }catch(e){}
-}
-function tone(f,d,t,g){
-  d=d||0.1;t=t||'sine';g=g||0.25;
-  initAudio();if(!actx)return;
-  try{
-    var o=actx.createOscillator(),gain=actx.createGain();
-    o.type=t;o.frequency.value=f;
-    gain.gain.setValueAtTime(0,actx.currentTime);
-    gain.gain.linearRampToValueAtTime(g,actx.currentTime+0.01);
-    gain.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);
-    o.connect(gain);gain.connect(actx.destination);
-    o.start();o.stop(actx.currentTime+d);
-  }catch(e){}
-}
-function noise(d,g,f){
-  d=d||0.2;g=g||0.1;f=f||2000;
-  initAudio();if(!actx)return;
-  try{
-    var len=Math.max(1,Math.floor(actx.sampleRate*d));
-    var buf=actx.createBuffer(1,len,actx.sampleRate);
-    var dd=buf.getChannelData(0);
-    for(var i=0;i<len;i++)dd[i]=Math.random()*2-1;
-    var src=actx.createBufferSource();src.buffer=buf;
-    var filt=actx.createBiquadFilter();
-    filt.type='bandpass';filt.frequency.value=f;filt.Q.value=0.8;
-    var gain=actx.createGain();
-    gain.gain.setValueAtTime(0,actx.currentTime);
-    gain.gain.linearRampToValueAtTime(g,actx.currentTime+0.02);
-    gain.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);
-    src.connect(filt);filt.connect(gain);gain.connect(actx.destination);
-    src.start();
-  }catch(e){}
-}
-function sClick(){tone(1500,0.03,'square',0.2);}
-function sError(){tone(300,0.2,'sawtooth',0.2);}
-function sOk(){tone(1200,0.1);setTimeout(function(){tone(1600,0.1);},100);setTimeout(function(){tone(2000,0.15);},200);}
-function sRoger(){tone(1800,0.08);setTimeout(function(){tone(1400,0.12);},90);setTimeout(function(){tone(1000,0.15);},200);}
-function sPttOpen(){tone(1200,0.05,'square',0.25);setTimeout(function(){noise(0.08,0.1,3000);},30);}
-function sPttClose(){noise(0.06,0.1,2500);setTimeout(function(){tone(1800,0.09);},60);}
-function sIncoming(){tone(800,0.1,'square',0.25);setTimeout(function(){tone(1200,0.1,'square',0.25);},120);}
-
-// ============================================================
-// WEBRTC
-// ============================================================
-var hostPC=null,guestPC=null;
-var conns={},dcs={};
-var isConnected=false,isTx=false,micStream=null;
-
-var ICE=[
-  {urls:'stun:stun.l.google.com:19302'},
-  {urls:'stun:stun1.l.google.com:19302'}
-];
-
-function attachTrack(pc,label){
-  pc.ontrack=function(e){
-    log('ontrack '+label);
-    try{
-      var a=new Audio();
-      a.srcObject=e.streams[0];
-      a.autoplay=true;a.playsInline=true;
-      a.setAttribute('playsinline','');
-      a.setAttribute('webkit-playsinline','');
-      a.play().then(function(){log('🔊 играет');}).catch(function(err){log('play err: '+err.message);});
-    }catch(ex){log('ontrack err: '+ex.message);}
-  };
-}
-
-function setupDC(dc,pid){
-  dcs[pid]=dc;
-  dc.onopen=function(){log('✅ канал '+pid);updateConn();};
-  dc.onclose=function(){log('❌ канал '+pid);delete dcs[pid];updateConn();};
-  dc.onmessage=function(e){
-    try{
-      var m=JSON.parse(e.data);
-      if(m.type==='roger')sRoger();
-      else if(m.type==='ptt-start')sIncoming();
-      else if(m.type==='ptt-stop')noise(0.2,0.08,1800);
-    }catch(ex){}
-  };
-}
-
-function updateConn(){
-  var n=0;for(var k in dcs)if(dcs.hasOwnProperty(k))n++;
-  var ptt=document.getElementById('kPtt');
-  if(n>0){
-    isConnected=true;
-    if(ptt)ptt.disabled=false;
-    document.getElementById('stChan').textContent='CH 1 · '+(n+1)+' уч.';
-    setSt('СВЯЗЬ','готов','online');
-    if(document.getElementById('scrTalk').classList.contains('hidden'))show('scrTalk');
-  }else{
-    isConnected=false;
-    if(ptt)ptt.disabled=true;
-    document.getElementById('stChan').textContent='CH --';
-  }
-}
-
-function broadcast(msg){
-  var s=JSON.stringify(msg);
-  for(var k in dcs){
-    if(!dcs.hasOwnProperty(k))continue;
-    var dc=dcs[k];
-    if(dc&&dc.readyState==='open'){try{dc.send(s);}catch(e){}}
-  }
-}
-
-function createHost(){
-  return new Promise(function(resolve,reject){
-    try{
-      log('Создание комнаты...');
-      var pc=new RTCPeerConnection({iceServers:ICE});
-      var pid='host-'+Math.random().toString(36).slice(2,8);
-      conns[pid]=pc;
-      attachTrack(pc,pid);
-
-      var dc=pc.createDataChannel('radio',{ordered:true});
-      setupDC(dc,pid);
-
-      try{pc.addTransceiver('audio',{direction:'sendrecv'});}catch(e){}
-
-      pc.ondatachannel=function(e){
-        if(e.channel.label!=='radio')setupDC(e.channel,pid+'-2');
-      };
-
-      var ices=[];
-      pc.onicecandidate=function(e){
-        if(e.candidate)ices.push(e.candidate.toJSON?e.candidate.toJSON():e.candidate);
-      };
-
-      pc.createOffer().then(function(o){return pc.setLocalDescription(o);})
-        .then(function(){
-          return new Promise(function(res){
-            if(pc.iceGatheringState==='complete')return res();
-            var done=false;
-            function chk(){if(pc.iceGatheringState==='complete'){done=true;res();}}
-            pc.addEventListener('icegatheringstatechange',chk);
-            setTimeout(function(){if(!done){done=true;res();}},3500);
-          });
-        })
-        .then(function(){
-          var p={type:'offer',sdp:pc.localDescription,ice:ices};
-          var code=btoa(unescape(encodeURIComponent(JSON.stringify(p))));
-          hostPC=pc;
-          log('✅ код готов ('+code.length+' симв.)');
-          resolve(code);
-        })
-        .catch(function(e){log('create err: '+e.message);reject(e);});
-    }catch(e){reject(e);}
-  });
-}
-
-function acceptOffer(code){
-  return new Promise(function(resolve,reject){
-    try{
-      var p;
-      try{p=JSON.parse(decodeURIComponent(escape(atob(code.trim()))));}
-      catch(e){return reject(new Error('Неверный код'));}
-      if(p.type!=='offer')return reject(new Error('Это не код приглашения'));
-
-      var pc=new RTCPeerConnection({iceServers:ICE});
-      var pid='guest-'+Math.random().toString(36).slice(2,8);
-      conns[pid]=pc;
-      attachTrack(pc,pid);
-
-      var dc=pc.createDataChannel('radio',{ordered:true});
-      setupDC(dc,pid);
-
-      try{pc.addTransceiver('audio',{direction:'sendrecv'});}catch(e){}
-
-      var ices=[];
-      pc.onicecandidate=function(e){
-        if(e.candidate)ices.push(e.candidate.toJSON?e.candidate.toJSON():e.candidate);
-      };
-
-      pc.setRemoteDescription(new RTCSessionDescription(p.sdp))
-        .then(function(){
-          var arr=p.ice||[],ps=[];
-          for(var i=0;i<arr.length;i++){
-            (function(c){ps.push(pc.addIceCandidate(new RTCIceCandidate(c)).catch(function(){}));})(arr[i]);
-          }
-          return Promise.all(ps);
-        })
-        .then(function(){return pc.createAnswer();})
-        .then(function(a){return pc.setLocalDescription(a);})
-        .then(function(){
-          return new Promise(function(res){
-            if(pc.iceGatheringState==='complete')return res();
-            var done=false;
-            function chk(){if(pc.iceGatheringState==='complete'){done=true;res();}}
-            pc.addEventListener('icegatheringstatechange',chk);
-            setTimeout(function(){if(!done){done=true;res();}},3500);
-          });
-        })
-        .then(function(){
-          var p2={type:'answer',sdp:pc.localDescription,ice:ices};
-          var answer=btoa(unescape(encodeURIComponent(JSON.stringify(p2))));
-          guestPC=pc;
-          log('✅ ответ готов ('+answer.length+' симв.)');
-          resolve(answer);
-        })
-        .catch(function(e){log('answer err: '+e.message);reject(e);});
-    }catch(e){reject(e);}
-  });
-}
-
-function acceptAnswer(code){
-  return new Promise(function(resolve,reject){
-    try{
-      if(!hostPC)return reject(new Error('Сначала создайте комнату'));
-      var p;
-      try{p=JSON.parse(decodeURIComponent(escape(atob(code.trim()))));}
-      catch(e){return reject(new Error('Неверный ответ'));}
-      if(p.type!=='answer')return reject(new Error('Это не ответ'));
-
-      hostPC.setRemoteDescription(new RTCSessionDescription(p.sdp))
-        .then(function(){
-          var arr=p.ice||[],ps=[];
-          for(var i=0;i<arr.length;i++){
-            (function(c){ps.push(hostPC.addIceCandidate(new RTCIceCandidate(c)).catch(function(){}));})(arr[i]);
-          }
-          return Promise.all(ps);
-        })
-        .then(function(){log('✅ ответ принят');resolve();})
-        .catch(function(e){reject(e);});
-    }catch(e){reject(e);}
-  });
-}
-
-// ============================================================
-// АУДИО ПЕРЕДАЧА
-// ============================================================
-function startTx(){
-  if(!isConnected||isTx)return;
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    log('❌ Микрофон недоступен — открой через http://localhost');
-    sError();
-    setSt('ОШИБКА','нужен HTTPS');
-    return;
-  }
-  isTx=true;
-  sPttOpen();
-  var ptt=document.getElementById('kPtt');
-  if(ptt)ptt.className='ptt on';
-  setSt('ПЕРЕДАЧА','говорите...','online');
-
-  navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}})
-    .then(function(stream){
-      micStream=stream;
-      var track=stream.getAudioTracks()[0];
-      var pcs=[];for(var k in conns)if(conns.hasOwnProperty(k))pcs.push(conns[k]);
-      var chain=Promise.resolve();
-      pcs.forEach(function(pc){
-        chain=chain.then(function(){
-          var senders=pc.getSenders();
-          var found=null;
-          for(var i=0;i<senders.length;i++){
-            if(senders[i].track&&senders[i].track.kind==='audio'){found=senders[i];break;}
-          }
-          if(found)return found.replaceTrack(track).catch(function(){});
-          try{pc.addTrack(track,stream);}catch(e){}
-          return Promise.resolve();
-        });
+    } catch(_) {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }, audio: false
       });
-      return chain;
-    })
-    .then(function(){
-      broadcast({type:'ptt-start'});
-      log('🔴 передача');
-    })
-    .catch(function(e){
-      log('❌ mic: '+e.message);
-      sError();
-      isTx=false;
-      if(ptt)ptt.className='ptt';
-      setSt('ОШИБКА',e.message,'online');
+    }
+    S.scannerStream = stream;
+    $('scannerVideo').srcObject = stream;
+    await $('scannerVideo').play();
+    if (S.barcodeDetector) startScanLoopDetector();
+    else startScanLoopOwnDecoder();
+  } catch(e) {
+    $('scanStatus').textContent = 'Ошибка камеры';
+    $('scanHint').innerHTML = 'Нет доступа: ' + e.message + '<br>Нужен HTTPS. Либо введи код вручную.';
+  }
+}
+
+function startScanLoopDetector() {
+  const video = $('scannerVideo');
+  const tick = async () => {
+    if (!$('scannerModal').classList.contains('show')) return;
+    if (S.barcodeDetector && video.readyState >= 2) {
+      try {
+        const codes = await S.barcodeDetector.detect(video);
+        if (codes && codes.length > 0) {
+          const val = codes[0].rawValue;
+          if (val && val.length > 10) { handleScanned(val); return; }
+        }
+      } catch(_){}
+    }
+    S.scannerRAF = requestAnimationFrame(tick);
+  };
+  S.scannerRAF = requestAnimationFrame(tick);
+}
+
+function startScanLoopOwnDecoder() {
+  const video = $('scannerVideo');
+  const canvas = document.createElement('canvas');
+  const ctx2d = canvas.getContext('2d', { willReadFrequently: true });
+  let lastTry = 0;
+  const TICK = 250;
+  const tick = () => {
+    if (!$('scannerModal').classList.contains('show')) return;
+    const now = performance.now();
+    if (now - lastTry >= TICK && video.readyState >= 2 && video.videoWidth > 0) {
+      lastTry = now;
+      try {
+        const vw = video.videoWidth, vh = video.videoHeight;
+        const boxSize = Math.min(vw, vh) * 0.9;
+        const sx = (vw - boxSize) / 2;
+        const sy = (vh - boxSize) / 2;
+        const targetW = 480;
+        canvas.width = targetW;
+        canvas.height = targetW;
+        ctx2d.drawImage(video, sx, sy, boxSize, boxSize, 0, 0, targetW, targetW);
+        const img = ctx2d.getImageData(0, 0, targetW, targetW);
+        const text = QRDecoder.decode(img);
+        if (text && text.length > 10) { handleScanned(text); return; }
+      } catch(e) {}
+    }
+    S.scannerRAF = requestAnimationFrame(tick);
+  };
+  S.scannerRAF = requestAnimationFrame(tick);
+}
+
+function handleScanned(text) {
+  SFX.qrBeep();
+  if (navigator.vibrate) navigator.vibrate(60);
+  if (S.scanTarget === 'offer') {
+    $('joinOfferInput').value = text.trim();
+    $('joinOfferInputText').value = text.trim();
+    toast('QR прочитан');
+  } else if (S.scanTarget === 'answer') {
+    $('answerInput').value = text.trim();
+    toast('QR прочитан');
+  }
+  closeScanner();
+}
+
+function closeScanner() {
+  $('scannerModal').classList.remove('show');
+  if (S.scannerRAF) { cancelAnimationFrame(S.scannerRAF); S.scannerRAF = null; }
+  if (S.scannerStream) { S.scannerStream.getTracks().forEach(t => t.stop()); S.scannerStream = null; }
+  $('scannerVideo').srcObject = null;
+}
+
+/* ============================================================
+   МИКРОФОН
+   ============================================================ */
+async function getMic() {
+  if (S.micStream && S.micStream.getAudioTracks()[0]?.readyState === 'live') return S.micStream;
+  try {
+    S.micStream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, sampleRate: 48000 },
+      video: false
     });
+  } catch(e) { SFX.error(); alert('Нет доступа к микрофону.\n\n' + e.message); throw e; }
+  const wantOn = S.pttActive;
+  S.micStream.getAudioTracks().forEach(t => t.enabled = wantOn);
+  return S.micStream;
 }
 
-function stopTx(){
-  if(!isTx)return;
-  isTx=false;
-  var ptt=document.getElementById('kPtt');
-  if(ptt)ptt.className='ptt';
-  setSt('СВЯЗЬ','готов','online');
-
-  if(micStream){
-    try{micStream.getTracks().forEach(function(t){t.stop();});}catch(e){}
-    micStream=null;
+/* ============================================================
+   MIX (для создателя)
+   ============================================================ */
+function ensureMixDest() {
+  if (!S.mixDest) {
+    S.mixDest = ctx().createMediaStreamDestination();
+    if (S.micStream) {
+      try {
+        const ms = ctx().createMediaStreamSource(S.micStream);
+        ms.connect(S.mixDest);
+      } catch(_){}
+    }
   }
-  for(var k in conns){
-    if(!conns.hasOwnProperty(k))continue;
-    var senders=conns[k].getSenders();
-    for(var i=0;i<senders.length;i++){
-      if(senders[i].track&&senders[i].track.kind==='audio'){
-        try{senders[i].replaceTrack(null);}catch(e){}
+  return S.mixDest;
+}
+function addToMix(peerId, remoteStream) {
+  try {
+    const src = ctx().createMediaStreamSource(remoteStream);
+    src.connect(S.mixDest);
+    S.mixSources[peerId] = src;
+  } catch(e) { log('mix err: ' + e.message); }
+}
+function removeFromMix(peerId) {
+  const s = S.mixSources[peerId];
+  if (s) { try { s.disconnect(); } catch(_){} delete S.mixSources[peerId]; }
+}
+
+/* ============================================================
+   ICE / SDP
+   ============================================================ */
+function waitIce(pc, timeout = 5000) {
+  return new Promise(res => {
+    if (pc.iceGatheringState === 'complete') return res(true);
+    let done = false;
+    const finish = (ok) => { if (done) return; done = true; pc.removeEventListener('icegatheringstatechange', check); res(ok); };
+    const check = () => { if (pc.iceGatheringState === 'complete') finish(true); };
+    pc.addEventListener('icegatheringstatechange', check);
+    setTimeout(() => finish(!!(pc.localDescription?.sdp?.includes('candidate'))), timeout);
+  });
+}
+function encodeSDP(obj) { return btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(obj)))); }
+function decodeSDP(str) {
+  try {
+    str = str.trim().replace(/\s+/g, '');
+    const bytes = Uint8Array.from(atob(str), c => c.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
+  } catch(e) { return { sdp: str, name: '' }; }
+}
+function currentIceServers() {
+  if (S.relayMode === 'relay') return ICE_RELAY;
+  if (S.relayMode === 'p2p') return ICE_P2P;
+  return ICE_AUTO;
+}
+
+/* ============================================================
+   PEER
+   ============================================================ */
+async function createPeer(peerId, peerName, isInitiator) {
+  if (S.peers[peerId] && S.peers[peerId].pc) return S.peers[peerId];
+  const pc = new RTCPeerConnection({
+    iceServers: currentIceServers(),
+    iceTransportPolicy: S.relayMode === 'relay' ? 'relay' : 'all',
+    bundlePolicy: 'max-bundle', rtcpMuxPolicy: 'require',
+  });
+  const peer = S.peers[peerId] || {
+    pc: null, audio: null, dc: null, name: peerName || 'Участник',
+    talking: false, connected: false, lastSeen: Date.now(),
+    localCandidateType: null, remoteCandidateType: null
+  };
+  peer.pc = pc; S.peers[peerId] = peer;
+  const mic = await getMic();
+  mic.getTracks().forEach(t => pc.addTrack(t, mic));
+
+  pc.ontrack = ev => {
+    if (!peer.audio) { peer.audio = new Audio(); peer.audio.autoplay = true; peer.audio.playsInline = true; }
+    peer.audio.srcObject = ev.streams[0];
+    peer.audio.volume = S.volume;
+    peer.audio.play().catch(()=>{});
+    if (S.isCreator) {
+      ensureMixDest();
+      addToMix(peerId, ev.streams[0]);
+      try {
+        const mixTrack = S.mixDest.stream.getAudioTracks()[0];
+        Object.entries(S.peers).forEach(([id, p]) => {
+          if (id === peerId) return;
+          if (!p.pc) return;
+          const has = p.pc.getSenders().some(s => s.track === mixTrack);
+          if (!has) { try { p.pc.addTrack(mixTrack, S.mixDest.stream); } catch(_){} }
+        });
+      } catch(_){}
+    }
+  };
+
+  pc.onicecandidate = ev => {
+    if (ev.candidate) {
+      const m = ev.candidate.candidate.match(/typ (\w+)/);
+      if (m) { if (m[1] === 'relay') peer.localCandidateType = 'relay'; else if (!peer.localCandidateType) peer.localCandidateType = m[1]; }
+    }
+  };
+
+  pc.onconnectionstatechange = () => {
+    log(peerId + ' → ' + pc.connectionState);
+    if (pc.connectionState === 'connected') peer.connected = true;
+    else if (['failed','disconnected','closed'].includes(pc.connectionState)) {
+      peer.connected = false;
+      if (pc.connectionState === 'failed') setTimeout(() => attemptReconnect(peerId), 1500);
+      if (pc.connectionState === 'closed') removePeer(peerId, true);
+    }
+    renderUsers();
+  };
+
+  if (isInitiator) { peer.dc = pc.createDataChannel('sig', { ordered: true }); setupDC(peerId, peer.dc); }
+  else { pc.ondatachannel = ev => { peer.dc = ev.channel; setupDC(peerId, peer.dc); }; }
+
+  renderUsers(); return peer;
+}
+
+function setupDC(peerId, dc) {
+  dc.onopen = () => {
+    SFX.connected();
+    toast('Участник подключён: ' + (S.peers[peerId]?.name || ''));
+    try { dc.send(JSON.stringify({ t: 'hello', id: S.id, name: S.name, isCreator: S.isCreator })); } catch(_){}
+    if (S.isCreator) {
+      const list = Object.entries(S.peers)
+        .filter(([id, p]) => id !== peerId && p.connected)
+        .map(([id, p]) => ({ id, name: p.name }));
+      if (list.length) {
+        try { dc.send(JSON.stringify({ t: 'peerList', list })); } catch(_){}
       }
     }
-  }
-  broadcast({type:'ptt-stop'});
-  broadcast({type:'roger'});
-  sPttClose();
-  setTimeout(sRoger,300);
+    renderUsers();
+  };
+  dc.onclose = () => log('DC close с ' + peerId);
+  dc.onerror = () => log('DC error с ' + peerId);
+  dc.onmessage = ev => { try { handleData(peerId, JSON.parse(ev.data)); } catch(e){ log('bad dc msg'); } };
 }
 
-// ============================================================
-// КОПИРОВАНИЕ
-// ============================================================
-function copyField(id){
-  try{
-    var ta=document.getElementById(id);
-    if(!ta)return;
-    ta.focus();ta.select();ta.setSelectionRange(0,99999);
-    var ok=false;
-    try{ok=document.execCommand('copy');}catch(e){}
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(ta.value).catch(function(){});
-      ok=true;
+function handleData(fromId, msg) {
+  const p = S.peers[fromId]; if (p) p.lastSeen = Date.now();
+  switch(msg.t) {
+    case 'hello': if (p) { p.name = msg.name; } renderUsers(); break;
+    case 'ptt':
+      if (p) {
+        p.talking = msg.on;
+        if (msg.on && !S.pttActive) SFX.rxBeep();
+        renderUsers();
+      }
+      break;
+    case 'peerList':
+      msg.list.forEach(item => {
+        if (item.id !== S.id && !S.peers[item.id]) {
+          autoConnect(item.id, item.name).catch(e => log('autoConnect err: ' + e.message));
+        }
+      });
+      break;
+    case 'sdp': handleRemoteSDP(fromId, msg).catch(e => log('sdp err: ' + e.message)); break;
+    case 'ping': if (p && p.dc?.readyState === 'open') { try { p.dc.send(JSON.stringify({ t: 'pong' })); } catch(_){} } break;
+    case 'pong': if (p) p.lastSeen = Date.now(); break;
+  }
+}
+
+function broadcastDC(msg, exceptId) {
+  Object.entries(S.peers).forEach(([id, p]) => {
+    if (id === exceptId) return;
+    if (p.dc && p.dc.readyState === 'open') { try { p.dc.send(JSON.stringify(msg)); } catch(_){} }
+  });
+}
+
+async function autoConnect(peerId, peerName) {
+  if (S.peers[peerId]) return;
+  log('Автоподключение к ' + peerId);
+  const peer = await createPeer(peerId, peerName, true);
+  const offer = await peer.pc.createOffer();
+  await peer.pc.setLocalDescription(offer);
+  await waitIce(peer.pc);
+  broadcastDC({ t: 'sdp', from: S.id, name: S.name, to: peerId, kind: 'offer', sdp: peer.pc.localDescription.sdp });
+}
+
+async function handleRemoteSDP(fromId, msg) {
+  if (msg.to !== S.id) return;
+  if (msg.kind === 'offer') {
+    const peer = await createPeer(fromId, msg.name, false);
+    await peer.pc.setRemoteDescription({ type: 'offer', sdp: msg.sdp });
+    const answer = await peer.pc.createAnswer();
+    await peer.pc.setLocalDescription(answer);
+    await waitIce(peer.pc);
+    const payload = { t: 'sdp', from: S.id, name: S.name, to: fromId, kind: 'answer', sdp: peer.pc.localDescription.sdp };
+    if (peer.dc && peer.dc.readyState === 'open') { try { peer.dc.send(JSON.stringify(payload)); return; } catch(_){} }
+    broadcastDC(payload, fromId);
+  } else if (msg.kind === 'answer') {
+    const peer = S.peers[fromId];
+    if (peer && peer.pc) { try { await peer.pc.setRemoteDescription({ type: 'answer', sdp: msg.sdp }); } catch(e){ log('SRD err'); } }
+  }
+}
+
+async function attemptReconnect(peerId) {
+  const p = S.peers[peerId]; if (!p) return;
+  const isInitiator = S.id < peerId;
+  try {
+    try { p.pc?.close(); } catch(_){}
+    removeFromMix(peerId);
+    delete S.peers[peerId];
+    const peer = await createPeer(peerId, p.name, isInitiator);
+    if (isInitiator) {
+      const offer = await peer.pc.createOffer({ iceRestart: true });
+      await peer.pc.setLocalDescription(offer);
+      await waitIce(peer.pc);
+      broadcastDC({ t: 'sdp', from: S.id, name: S.name, to: peerId, kind: 'offer', sdp: peer.pc.localDescription.sdp });
     }
-    if(ok){sClick();log('📋 скопировано');setSt('СКОПИРОВАНО','отправьте',"online");}
-  }catch(e){}
+  } catch(e) { log('reconnect fail: ' + e.message); }
 }
 
-// ============================================================
-// ПРИВЯЗКА КНОПОК
-// ============================================================
-function bind(id,fn){
-  var el=document.getElementById(id);
-  if(!el)return;
-  var handled=false;
-  el.addEventListener('touchend',function(e){
-    e.preventDefault();
-    handled=true;
-    setTimeout(function(){handled=false;},600);
-    try{fn();}catch(err){log('err '+id+': '+err.message);}
-  },false);
-  el.addEventListener('click',function(e){
-    if(handled)return;
-    try{fn();}catch(err){log('err '+id+': '+err.message);}
-  },false);
+function removePeer(peerId, quiet) {
+  const p = S.peers[peerId]; if (!p) return;
+  try { p.pc?.close(); } catch(_){}
+  try { if (p.audio) { p.audio.pause(); p.audio.srcObject = null; } } catch(_){}
+  removeFromMix(peerId);
+  delete S.peers[peerId];
+  if (!quiet) SFX.disconnected();
+  renderUsers();
 }
 
-function bindAll(){
-  log('Привязка...');
+/* ============================================================
+   СОЗДАНИЕ / ПРИСОЕДИНЕНИЕ
+   ============================================================ */
+async function startAsCreator() {
+  ctx(); SFX.powerOn();
+  S.isCreator = true;
+  await getMic();
+  ensureMixDest();
+  $('creatorBox').style.display = '';
+  $('joinerBox').style.display = 'none';
+  $('startRoomBtn').style.display = 'none';
+  $('joinRoomBtn').style.display = 'none';
+  await newInvite();
+}
 
-  bind('kCreate',function(){
-    initAudio();sClick();
-    show('scrHost');
-    setSt('СОЗДАНИЕ...','генерация QR');
-    createHost().then(function(code){
-      document.getElementById('offerCode').value=code;
-      var ok=QR.render(document.getElementById('qrHost'),code,260);
-      if(ok)log('✅ QR создан');
-      else log('⚠️ QR не поместился, используйте текст');
-      sOk();
-      setSt('ОЖИДАНИЕ','сканируйте QR вторым устройством','online');
-    }).catch(function(e){
-      sError();
-      setSt('ОШИБКА',e.message);
+async function newInvite() {
+  try {
+    const pendingId = 'pending-' + Math.random().toString(36).slice(2, 8);
+    const pc = new RTCPeerConnection({
+      iceServers: currentIceServers(),
+      iceTransportPolicy: S.relayMode === 'relay' ? 'relay' : 'all',
+      bundlePolicy: 'max-bundle', rtcpMuxPolicy: 'require',
     });
-  });
+    const mic = await getMic();
+    mic.getTracks().forEach(t => pc.addTrack(t, mic));
+    if (S.mixDest) {
+      try {
+        const mixTrack = S.mixDest.stream.getAudioTracks()[0];
+        if (mixTrack) pc.addTrack(mixTrack, S.mixDest.stream);
+      } catch(_){}
+    }
+    const peer = { pc, audio: null, dc: null, name: 'Участник', talking: false, connected: false, lastSeen: Date.now(), pending: true };
+    S.peers[pendingId] = peer;
+    const dc = pc.createDataChannel('sig', { ordered: true });
+    peer.dc = dc;
 
-  bind('kJoin',function(){
-    initAudio();sClick();
-    show('scrJoin');
-    setSt('ПОДКЛЮЧЕНИЕ','отсканируйте или вставьте код');
-  });
+    pc.ontrack = ev => {
+      if (!peer.audio) { peer.audio = new Audio(); peer.audio.autoplay = true; peer.audio.playsInline = true; }
+      peer.audio.srcObject = ev.streams[0];
+      peer.audio.volume = S.volume;
+      peer.audio.play().catch(()=>{});
+      if (S.isCreator) { ensureMixDest(); addToMix(pendingId, ev.streams[0]); }
+    };
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState === 'connected') peer.connected = true;
+      if (['failed','closed','disconnected'].includes(pc.connectionState) && S.peers[pendingId]) {
+        removeFromMix(pendingId);
+        try { pc.close(); } catch(_){}
+        delete S.peers[pendingId];
+        renderUsers();
+      }
+    };
 
-  bind('kScanOffer',function(){
-    initAudio();sClick();
-    setSt('СКАНИРОВАНИЕ','наведите камеру');
-    startScan().then(function(val){
-      if(!val)return;
-      document.getElementById('offerInput').value=val;
-      log('📷 код получен');
-      sOk();
-      genAnswer();
-    }).catch(function(e){
-      log('❌ scan: '+e.message);
-      sError();
-      setSt('ОШИБКА',e.message);
+    dc.onmessage = ev => {
+      try {
+        const m = JSON.parse(ev.data);
+        if (m.t === 'hello') {
+          const realId = m.id;
+          if (S.peers[realId]) { try { S.peers[realId].pc?.close(); } catch(_){} delete S.peers[realId]; }
+          if (S.mixSources[pendingId]) { S.mixSources[realId] = S.mixSources[pendingId]; delete S.mixSources[pendingId]; }
+          S.peers[realId] = S.peers[pendingId];
+          S.peers[realId].name = m.name;
+          S.peers[realId].pending = false;
+          S.peers[realId].connected = true;
+          delete S.peers[pendingId];
+          setupDC(realId, S.peers[realId].dc);
+          SFX.connected(); toast('Подключён: ' + m.name);
+          renderUsers();
+          const list = Object.entries(S.peers)
+            .filter(([id, p]) => id !== realId && p.connected)
+            .map(([id, p]) => ({ id, name: p.name }));
+          if (list.length && S.peers[realId].dc?.readyState === 'open') {
+            try { S.peers[realId].dc.send(JSON.stringify({ t: 'peerList', list })); } catch(_){}
+          }
+        } else handleData(pendingId, m);
+      } catch(_){}
+    };
+
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    await waitIce(pc);
+    const code = encodeSDP({ sdp: pc.localDescription.sdp, name: S.name });
+    $('offerText').value = code;
+    try {
+      const info = drawQR($('offerQR'), code);
+      $('offerQRInfo').textContent = 'Версия QR ' + info.version + ' · ' + code.length + ' симв.';
+    } catch(e) { $('offerQRInfo').textContent = 'QR не поместился: ' + e.message; }
+    S.pendingOffer = pc; S.pendingId = pendingId;
+  } catch(e) { SFX.error(); alert('Ошибка: ' + e.message); }
+}
+
+async function acceptAnswer() {
+  const pc = S.pendingOffer, pid = S.pendingId;
+  if (!pc || !pid) { toast('Нет приглашения', true); return; }
+  const ans = $('answerInput').value.trim();
+  if (!ans) { toast('Вставь ответ', true); return; }
+  try {
+    const { sdp, name } = decodeSDP(ans);
+    await pc.setRemoteDescription({ type: 'answer', sdp });
+    if (name && S.peers[pid]) S.peers[pid].name = name;
+    toast('Ответ принят');
+    $('offerText').value = ''; $('answerInput').value = '';
+    S.pendingOffer = null; S.pendingId = null;
+    renderUsers();
+  } catch(e) { SFX.error(); alert('Некорректный ответ: ' + e.message); }
+}
+
+async function startAsJoiner() {
+  ctx(); SFX.powerOn();
+  await getMic();
+  $('creatorBox').style.display = 'none';
+  $('joinerBox').style.display = '';
+  $('startRoomBtn').style.display = 'none';
+  $('joinRoomBtn').style.display = 'none';
+}
+
+async function generateAnswer() {
+  try {
+    const a = $('joinOfferInput')?.value.trim();
+    const b = $('joinOfferInputText')?.value.trim();
+    const code = a || b;
+    if (!code) { toast('Вставь/отсканируй код', true); return; }
+    $('joinOfferInput').value = code;
+    $('joinOfferInputText').value = code;
+    const { sdp: offerSdp, name: creatorName } = decodeSDP(code);
+    const peerId = 'creator';
+    const pc = new RTCPeerConnection({
+      iceServers: currentIceServers(),
+      iceTransportPolicy: S.relayMode === 'relay' ? 'relay' : 'all',
+      bundlePolicy: 'max-bundle', rtcpMuxPolicy: 'require',
     });
+    const mic = await getMic();
+    mic.getTracks().forEach(t => pc.addTrack(t, mic));
+    const peer = { pc, audio: null, dc: null, name: creatorName || 'Создатель', talking: false, connected: false, lastSeen: Date.now() };
+    S.peers[peerId] = peer;
+    pc.ondatachannel = ev => { peer.dc = ev.channel; setupDC(peerId, peer.dc); };
+    pc.ontrack = ev => {
+      if (!peer.audio) { peer.audio = new Audio(); peer.audio.autoplay = true; peer.audio.playsInline = true; }
+      peer.audio.srcObject = ev.streams[0];
+      peer.audio.volume = S.volume;
+      peer.audio.play().catch(()=>{});
+    };
+    pc.onconnectionstatechange = () => { if (pc.connectionState === 'connected') peer.connected = true; renderUsers(); };
+    await pc.setRemoteDescription({ type: 'offer', sdp: offerSdp });
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    await waitIce(pc);
+    const code2 = encodeSDP({ sdp: pc.localDescription.sdp, name: S.name });
+    $('joinAnswerText').value = code2;
+    $('joinAnswerBox').style.display = '';
+    try {
+      const info = drawQR($('joinAnswerQR'), code2);
+      $('joinAnswerQRInfo').textContent = 'Версия QR ' + info.version + ' · ' + code2.length + ' симв.';
+    } catch(e) { $('joinAnswerQRInfo').textContent = 'QR не поместился, отправь текстом'; }
+    toast('Покажи QR создателю');
+  } catch(e) { SFX.error(); alert('Ошибка: ' + e.message); }
+}
+
+/* ============================================================
+   PTT
+   ============================================================ */
+async function startPTT() {
+  if (S.pttActive) return;
+  if (!S.micStream) { try { await getMic(); } catch { return; } }
+  S.pttActive = true;
+  S.myTalking = true;
+  const played = playPTTMP3();
+  if (!played) SFX.mdc();
+  setTimeout(() => { if (!played) SFX.click(); }, 180);
+  S.micStream.getAudioTracks().forEach(t => t.enabled = true);
+  $('pttBtn').classList.add('active');
+  $('pttHint').textContent = 'ПЕРЕДАЧА…';
+  broadcastDC({ t: 'ptt', on: true, name: S.name });
+  renderUsers();
+  if (navigator.vibrate) navigator.vibrate(15);
+}
+function stopPTT() {
+  if (!S.pttActive) return;
+  S.pttActive = false;
+  S.myTalking = false;
+  if (S.micStream) S.micStream.getAudioTracks().forEach(t => t.enabled = false);
+  SFX.roger();
+  setTimeout(() => SFX.squelchTail(), 120);
+  $('pttBtn').classList.remove('active');
+  $('pttHint').textContent = 'Удерживай для передачи';
+  broadcastDC({ t: 'ptt', on: false });
+  renderUsers();
+  if (navigator.vibrate) navigator.vibrate([10, 40, 10]);
+}
+
+/* ============================================================
+   ФАЙЛЫ
+   ============================================================ */
+function downloadTextFile(filename, text) {
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+  toast('Файл сохранён: ' + filename);
+}
+async function shareFile(filename, text) {
+  const file = new File([text], filename, { type: 'text/plain' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: filename }); toast('Отправлено'); return; } catch(_) {}
+  }
+  downloadTextFile(filename, text);
+}
+function readTextFile(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result || '').trim());
+    r.onerror = () => reject(r.error);
+    r.readAsText(file);
   });
+}
 
-  bind('kScanAnswer',function(){
-    initAudio();sClick();
-    setSt('СКАНИРОВАНИЕ','наведите камеру на ответ');
-    startScan().then(function(val){
-      if(!val)return;
-      document.getElementById('answerInput').value=val;
-      log('📷 ответ получен');
-      sOk();
-      doAccept();
-    }).catch(function(e){
-      log('❌ scan: '+e.message);
-      sError();
-    });
-  });
+/* ============================================================
+   ЗВУКОВАЯ ПЕРЕДАЧА КОДА (FSK)
+   ============================================================ */
+const SoundTransfer = (function() {
+  const FREQ_0 = 1200, FREQ_1 = 2200, FREQ_START = 800, FREQ_END = 600;
+  const BIT_MS = 14, GAP_MS = 30;
 
-  bind('kGen',function(){genAnswer();});
-  bind('kAccept',function(){doAccept();});
-
-  bind('kCopyOffer',function(){copyField('offerCode');});
-  bind('kCopyAnswer',function(){copyField('answerCode');});
-
-  bind('kBack1',function(){sClick();show('scrMenu');setSt('ГОТОВО','выберите');});
-  bind('kBack2',function(){sClick();show('scrMenu');setSt('ГОТОВО','выберите');});
-
-  bind('kRoger',function(){initAudio();sRoger();broadcast({type:'roger'});});
-
-  bind('kDisc',function(){
-    sClick();
-    for(var k in conns){try{conns[k].close();}catch(e){}}
-    conns={};dcs={};isConnected=false;hostPC=null;guestPC=null;
-    show('scrMenu');
-    setSt('ГОТОВО','отключено');
-    updateConn();
-  });
-
-  var ptt=document.getElementById('kPtt');
-  if(ptt){
-    var active=false;
-    function down(e){if(e&&e.cancelable)e.preventDefault();if(active)return;active=true;if(isConnected)startTx();}
-    function up(e){if(e&&e.cancelable)e.preventDefault();if(!active)return;active=false;stopTx();}
-    ptt.addEventListener('touchstart',down,{passive:false});
-    ptt.addEventListener('touchend',up,{passive:false});
-    ptt.addEventListener('touchcancel',up,{passive:false});
-    ptt.addEventListener('mousedown',down);
-    ptt.addEventListener('mouseup',up);
-    ptt.addEventListener('mouseleave',up);
+  function textToBits(text) {
+    const full = 'RAD' + text + '#';
+    const bytes = new TextEncoder().encode(full);
+    const bits = [];
+    for (const b of bytes) {
+      bits.push(1);
+      for (let i = 7; i >= 0; i--) bits.push((b >> i) & 1);
+    }
+    return bits;
+  }
+  function bitsToText(bits) {
+    const bytes = [];
+    for (let i = 0; i + 9 <= bits.length; i += 9) {
+      if (bits[i] !== 1) break;
+      let b = 0;
+      for (let j = 1; j <= 8; j++) b = (b << 1) | bits[i + j];
+      bytes.push(b);
+    }
+    if (!bytes.length) return null;
+    try {
+      const text = new TextDecoder().decode(new Uint8Array(bytes));
+      const start = text.indexOf('RAD');
+      const end = text.indexOf('#');
+      if (start !== 0 || end < 3) return null;
+      return text.slice(3, end);
+    } catch { return null; }
   }
 
-  log('✅ Готово');
-  setSt('ГОТОВО','выберите действие');
+  let txNodes = [];
+  async function send(text, onStatus) {
+    const c = ctx();
+    if (c.state === 'suspended') await c.resume();
+    stopAllTx();
+    const bits = textToBits(text);
+    const status = onStatus || (() => {});
+    const master = c.createGain();
+    master.gain.value = 0.35;
+    master.connect(c.destination);
+    txNodes.push({ stop: () => { try { master.disconnect(); } catch(_){} } });
+    let t = c.currentTime + 0.1;
+
+    for (let k = 0; k < 3; k++) {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine'; o.frequency.value = FREQ_START;
+      g.gain.setValueAtTime(0.35, t);
+      g.gain.setValueAtTime(0.35, t + 0.05);
+      g.gain.setValueAtTime(0, t + 0.06);
+      o.connect(g).connect(master);
+      o.start(t); o.stop(t + 0.065);
+      txNodes.push({ stop: () => { try { o.stop(); } catch(_){} } });
+      t += 0.1;
+    }
+
+    for (let i = 0; i < bits.length; i++) {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine';
+      o.frequency.value = bits[i] ? FREQ_1 : FREQ_0;
+      const dur = BIT_MS / 1000;
+      g.gain.setValueAtTime(0.32, t);
+      g.gain.setValueAtTime(0.32, t + dur - 0.002);
+      g.gain.linearRampToValueAtTime(0, t + dur);
+      o.connect(g).connect(master);
+      o.start(t); o.stop(t + dur + 0.003);
+      txNodes.push({ stop: () => { try { o.stop(); } catch(_){} } });
+      t += dur;
+      if ((i + 1) % 8 === 0) t += GAP_MS / 1000;
+      if (i % 200 === 0) status('Передача: ' + Math.round((i / bits.length) * 100) + '%');
+    }
+    const oE = c.createOscillator(), gE = c.createGain();
+    oE.type = 'sine'; oE.frequency.value = FREQ_END;
+    gE.gain.setValueAtTime(0.35, t);
+    gE.gain.setValueAtTime(0, t + 0.2);
+    oE.connect(gE).connect(master);
+    oE.start(t); oE.stop(t + 0.22);
+    const totalMs = (t - c.currentTime) * 1000;
+    status('Передача: 100% (' + Math.round(totalMs / 1000) + ' сек)');
+    setTimeout(() => { stopAllTx(); status('Готово'); }, totalMs + 300);
+  }
+  function stopAllTx() {
+    txNodes.forEach(n => { try { n.stop(); } catch(_){} });
+    txNodes = [];
+  }
+
+  let rxActive = false, rxStream = null, rxAnalyser = null, rxRaf = null, rxSource = null;
+  function detectTone(analyser, sampleRate) {
+    const buf = new Float32Array(analyser.fftSize);
+    analyser.getFloatTimeDomainData(buf);
+    let crossings = 0;
+    for (let i = 1; i < buf.length; i++) {
+      if ((buf[i-1] < 0 && buf[i] >= 0) || (buf[i-1] >= 0 && buf[i] < 0)) crossings++;
+    }
+    const freq = crossings * sampleRate / (2 * buf.length);
+    let peak = 0;
+    for (let i = 0; i < buf.length; i++) peak = Math.max(peak, Math.abs(buf[i]));
+    return { freq, amp: peak };
+  }
+  async function listen(onProgress, onText) {
+    if (rxActive) return;
+    rxActive = true;
+    const c = ctx();
+    if (c.state === 'suspended') await c.resume();
+    const status = onProgress || (() => {});
+    status('Слушаю…');
+    try {
+      rxStream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 },
+        video: false
+      });
+    } catch(e) { status('Нет доступа к микрофону'); rxActive = false; return; }
+    const src = c.createMediaStreamSource(rxStream);
+    rxSource = src;
+    rxAnalyser = c.createAnalyser();
+    rxAnalyser.fftSize = 2048;
+    src.connect(rxAnalyser);
+    const sampleRate = c.sampleRate;
+    let collecting = false, bits = [], lastBitTime = 0, startDetected = 0;
+
+    const loop = () => {
+      if (!rxActive) return;
+      const { freq, amp } = detectTone(rxAnalyser, sampleRate);
+      const now = performance.now();
+      if (amp < 0.03) {
+        // тишина
+      } else if (freq > 700 && freq < 900) {
+        if (now - startDetected > 250) { startDetected = now; collecting = false; bits = []; status('Синхронизация…'); }
+      } else if (now - lastBitTime >= BIT_MS) {
+        lastBitTime = now;
+        if (freq > 1500 && freq < 2600) {
+          if (!collecting) { collecting = true; bits = []; status('Приём…'); }
+          bits.push(1);
+        } else if (freq > 900 && freq < 1400) {
+          if (!collecting) { collecting = true; bits = []; status('Приём…'); }
+          bits.push(0);
+        }
+      }
+      if (collecting && bits.length > 80 && bits.length % 40 === 0) {
+        const text = bitsToText(bits);
+        if (text && text.length > 10) {
+          status('Код принят!');
+          if (onText) onText(text);
+          stopListen();
+          return;
+        }
+      }
+      rxRaf = requestAnimationFrame(loop);
+    };
+    loop();
+  }
+  function stopListen() {
+    rxActive = false;
+    if (rxRaf) { cancelAnimationFrame(rxRaf); rxRaf = null; }
+    if (rxStream) { rxStream.getTracks().forEach(t => t.stop()); rxStream = null; }
+    try { if (rxSource) rxSource.disconnect(); } catch(_){}
+    try { if (rxAnalyser) rxAnalyser.disconnect(); } catch(_){}
+    rxSource = null; rxAnalyser = null;
+  }
+  return { send, stopAllTx, listen, stopListen };
+})();
+
+/* ============================================================
+   HEARTBEAT
+   ============================================================ */
+function startHeartbeat() {
+  if (S.heartbeatTimer) return;
+  S.heartbeatTimer = setInterval(() => {
+    const now = Date.now();
+    Object.entries(S.peers).forEach(([id, p]) => {
+      if (!p.connected) return;
+      if (p.dc && p.dc.readyState === 'open') { try { p.dc.send(JSON.stringify({ t: 'ping' })); } catch(_){} }
+      if (now - (p.lastSeen || 0) > 45000) removePeer(id, true);
+    });
+  }, 15000);
 }
 
-function genAnswer(){
-  initAudio();sClick();
-  var code=document.getElementById('offerInput').value.trim();
-  if(!code){sError();log('вставьте или отсканируйте код');return;}
-  setSt('ОБРАБОТКА...','создание ответа');
-  acceptOffer(code).then(function(answer){
-    document.getElementById('answerCode').value=answer;
-    document.getElementById('joinAnswerBlock').classList.remove('hidden');
-    var ok=QR.render(document.getElementById('qrGuest'),answer,260);
-    if(ok)log('✅ QR-ответ создан');
-    sOk();
-    setSt('ОТВЕТ ГОТОВ','покажите QR хосту','online');
-  }).catch(function(e){
-    sError();
-    setSt('ОШИБКА',e.message);
+/* ============================================================
+   СОБЫТИЯ UI
+   ============================================================ */
+$('pttBtn').addEventListener('pointerdown', e => { e.preventDefault(); startPTT(); });
+['pointerup','pointerleave','pointercancel','pointerout'].forEach(ev =>
+  $('pttBtn').addEventListener(ev, e => { e.preventDefault(); stopPTT(); })
+);
+$('pttBtn').addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('pointerup', () => { if (S.pttActive) stopPTT(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && S.pttActive) stopPTT(); });
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && !e.repeat && !e.target.matches('input,textarea')) { e.preventDefault(); startPTT(); }
+});
+document.addEventListener('keyup', e => {
+  if (e.code === 'Space' && !e.target.matches('input,textarea')) { e.preventDefault(); stopPTT(); }
+});
+
+$('roomBtn').addEventListener('click', () => $('roomModal').classList.add('show'));
+$('closeRoomModal').addEventListener('click', () => $('roomModal').classList.remove('show'));
+$('startRoomBtn').addEventListener('click', startAsCreator);
+$('joinRoomBtn').addEventListener('click', startAsJoiner);
+$('newInviteBtn').addEventListener('click', newInvite);
+$('acceptAnswerBtn').addEventListener('click', acceptAnswer);
+$('genAnswerBtn').addEventListener('click', generateAnswer);
+
+/* Табы */
+document.querySelectorAll('.tabs').forEach(tabs => {
+  const wrap = tabs.parentElement;
+  tabs.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabs.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      wrap.querySelectorAll(':scope > [data-pane]').forEach(p => {
+        p.style.display = p.dataset.pane === tab ? '' : 'none';
+      });
+    });
   });
+});
+
+/* Сканер */
+$('scanBtn').addEventListener('click', () => {
+  if (!$('roomModal').classList.contains('show')) $('roomModal').classList.add('show');
+  if (S.isCreator) openScanner('answer'); else openScanner('offer');
+});
+$('scanOfferBtn').addEventListener('click', () => openScanner('offer'));
+$('scanAnswerBtn').addEventListener('click', () => openScanner('answer'));
+$('scanClose').addEventListener('click', closeScanner);
+$('scanManual').addEventListener('click', () => {
+  closeScanner();
+  const code = prompt('Вставь код вручную:');
+  if (code) {
+    if (S.scanTarget === 'offer') {
+      $('joinOfferInput').value = code.trim();
+      $('joinOfferInputText').value = code.trim();
+    } else $('answerInput').value = code.trim();
+    toast('Вставлено');
+  }
+});
+
+/* Копирование / share */
+function copyText(txt) {
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).catch(()=>{});
+  const el = document.createElement('textarea');
+  el.value = txt; document.body.appendChild(el); el.select();
+  try { document.execCommand('copy'); } catch(_){}
+  document.body.removeChild(el);
+}
+$('copyOfferBtn').addEventListener('click', () => { copyText($('offerText').value); toast('Скопировано'); });
+$('copyAnswerBtn').addEventListener('click', () => { copyText($('joinAnswerText').value); toast('Скопировано'); });
+$('shareOfferBtn').addEventListener('click', async () => {
+  const t = $('offerText').value;
+  if (navigator.share) { try { await navigator.share({ text: t }); } catch(_){} } else { copyText(t); toast('Скопировано'); }
+});
+$('shareAnswerBtn').addEventListener('click', async () => {
+  const t = $('joinAnswerText').value;
+  if (navigator.share) { try { await navigator.share({ text: t }); } catch(_){} } else { copyText(t); toast('Скопировано'); }
+});
+
+/* Файлы */
+$('saveOfferFileBtn').addEventListener('click', () => {
+  const code = $('offerText').value || '';
+  if (!code) { toast('Сначала создай сеть', true); return; }
+  downloadTextFile('radio-offer.txt', code);
+});
+$('shareOfferFileBtn').addEventListener('click', () => {
+  const code = $('offerText').value || '';
+  if (!code) { toast('Сначала создай сеть', true); return; }
+  shareFile('radio-offer.txt', code);
+});
+$('downloadOfferBtn').addEventListener('click', () => {
+  const code = $('offerText').value || '';
+  if (!code) { toast('Сначала создай сеть', true); return; }
+  downloadTextFile('radio-offer.txt', code);
+});
+$('offerFileInput').addEventListener('change', async e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  try {
+    const text = await readTextFile(f);
+    $('joinOfferInput').value = text;
+    $('joinOfferInputText').value = text;
+    toast('Файл загружен');
+  } catch(err) { toast('Не удалось прочитать: ' + err.message, true); }
+});
+$('saveAnswerFileBtn').addEventListener('click', () => {
+  const code = $('joinAnswerText').value || '';
+  if (!code) { toast('Сначала сгенерируй ответ', true); return; }
+  downloadTextFile('radio-answer.txt', code);
+});
+$('shareAnswerFileBtn').addEventListener('click', () => {
+  const code = $('joinAnswerText').value || '';
+  if (!code) { toast('Сначала сгенерируй ответ', true); return; }
+  shareFile('radio-answer.txt', code);
+});
+
+/* Звук */
+$('sendOfferSoundBtn').addEventListener('click', async () => {
+  const code = $('offerText').value || '';
+  if (!code) { toast('Сначала создай сеть', true); return; }
+  const st = $('soundStatus');
+  $('sendOfferSoundBtn').classList.add('pulse-red');
+  await SoundTransfer.send(code, s => { st.textContent = s; });
+  setTimeout(() => $('sendOfferSoundBtn').classList.remove('pulse-red'), 2000);
+});
+$('listenSoundBtn').addEventListener('click', async () => {
+  const st = $('soundStatus');
+  await SoundTransfer.listen(
+    s => { st.textContent = s; },
+    text => { $('answerInput').value = text; SFX.qrBeep(); toast('Ответ принят'); }
+  );
+});
+$('listenSoundJoinBtn').addEventListener('click', async () => {
+  const st = $('soundStatusJoin');
+  await SoundTransfer.listen(
+    s => { st.textContent = s; },
+    text => {
+      $('joinOfferInput').value = text;
+      $('joinOfferInputText').value = text;
+      SFX.qrBeep();
+      toast('Код принят');
+    }
+  );
+});
+$('sendAnswerSoundBtn').addEventListener('click', async () => {
+  const code = $('joinAnswerText').value || '';
+  if (!code) { toast('Сначала сгенерируй ответ', true); return; }
+  const st = $('soundStatusAnswer');
+  await SoundTransfer.send(code, s => { st.textContent = s; });
+});
+
+/* Синхронизация полей offer */
+const _off1 = $('joinOfferInput'), _off2 = $('joinOfferInputText');
+if (_off1 && _off2) {
+  _off1.addEventListener('input', () => { _off2.value = _off1.value; });
+  _off2.addEventListener('input', () => { _off1.value = _off2.value; });
 }
 
-function doAccept(){
-  initAudio();sClick();
-  var code=document.getElementById('answerInput').value.trim();
-  if(!code){sError();log('вставьте или отсканируйте ответ');return;}
-  setSt('ОБРАБОТКА...','принятие ответа');
-  acceptAnswer(code).then(function(){
-    sOk();
-    setSt('ПОДКЛЮЧЕНО','ожидание канала...','online');
-  }).catch(function(e){
-    sError();
-    setSt('ОШИБКА',e.message);
-  });
+/* Настройки */
+$('settingsBtn').addEventListener('click', () => $('settingsModal').classList.add('show'));
+$('closeSettingsModal').addEventListener('click', () => $('settingsModal').classList.remove('show'));
+$('saveSettingsBtn').addEventListener('click', () => {
+  S.name = $('nameInput').value.trim() || S.name;
+  S.relayMode = $('relayMode').value;
+  S.pttSound = $('pttSound').value;
+  S.squelchLevel = parseInt($('squelchSlider').value) / 100;
+  localStorage.setItem('radio_name', S.name);
+  localStorage.setItem('radio_vol', String(S.volume));
+  localStorage.setItem('radio_relay', S.relayMode);
+  localStorage.setItem('radio_pttsnd', S.pttSound);
+  localStorage.setItem('radio_sqlch', String(S.squelchLevel));
+  broadcastDC({ t: 'hello', id: S.id, name: S.name });
+  renderUsers();
+  $('settingsModal').classList.remove('show');
+  toast('Сохранено');
+});
+$('volumeSlider').addEventListener('input', e => {
+  S.volume = e.target.value / 100;
+  $('volValue').textContent = e.target.value + '%';
+  Object.values(S.peers).forEach(p => { if (p.audio) p.audio.volume = S.volume; });
+});
+$('squelchSlider').addEventListener('input', e => {
+  S.squelchLevel = parseInt(e.target.value) / 100;
+  $('squelchValue').textContent = e.target.value + '%';
+});
+$('testSfxBtn').addEventListener('click', () => {
+  SFX.powerOn();
+  setTimeout(()=>SFX.mdc(), 400);
+  setTimeout(()=>SFX.click(), 700);
+  setTimeout(()=>SFX.rxBeep(), 900);
+  setTimeout(()=>SFX.roger(), 1200);
+  setTimeout(()=>SFX.squelchTail(), 1400);
+  setTimeout(()=>SFX.channelBeep(), 2300);
+  setTimeout(()=>SFX.powerOff(), 2800);
+});
+$('powerBtn').addEventListener('click', () => {
+  SFX.powerOff();
+  setTimeout(() => {
+    if (S.micStream) { S.micStream.getTracks().forEach(t => t.stop()); S.micStream = null; }
+    if (S.pendingOffer) try { S.pendingOffer.close(); } catch(_){}
+    Object.keys(S.peers).forEach(id => removePeer(id, true));
+    if (S.heartbeatTimer) { clearInterval(S.heartbeatTimer); S.heartbeatTimer = null; }
+    S.isCreator = false;
+    S.pendingOffer = null; S.pendingId = null;
+    if (S.mixDest) { try { S.mixDest.disconnect(); } catch(_){} S.mixDest = null; }
+    S.mixSources = {};
+    $('subLabel').textContent = 'P2P · БЕЗ СЕРВЕРОВ';
+    $('startRoomBtn').style.display = '';
+    $('joinRoomBtn').style.display = '';
+    $('creatorBox').style.display = 'none';
+    $('joinerBox').style.display = 'none';
+    renderUsers(); toast('Выключено');
+  }, 400);
+});
+$('channelDisplay').parentElement.addEventListener('click', () => {
+  S.channel = (S.channel % 99) + 1;
+  $('channelDisplay').textContent = 'CH ' + String(S.channel).padStart(2,'0');
+  SFX.channelBeep();
+});
+document.addEventListener('pointerdown', () => ctx(), { once: true });
+
+/* PWA */
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  $('installBanner').classList.add('show');
+});
+$('installYes').addEventListener('click', async () => {
+  $('installBanner').classList.remove('show');
+  if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; }
+});
+$('installNo').addEventListener('click', () => $('installBanner').classList.remove('show'));
+
+window.addEventListener('online', () => $('offlineBadge').classList.remove('show'));
+window.addEventListener('offline', () => $('offlineBadge').classList.add('show'));
+if (!navigator.onLine) $('offlineBadge').classList.add('show');
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
-function unlock(){
-  initAudio();
-  document.body.removeEventListener('touchstart',unlock);
-  document.body.removeEventListener('click',unlock);
-}
-document.body.addEventListener('touchstart',unlock,{passive:true});
-document.body.addEventListener('click',unlock);
+/* Init */
+S.name = localStorage.getItem('radio_name') || S.name;
+S.volume = parseFloat(localStorage.getItem('radio_vol') || '1');
+S.relayMode = localStorage.getItem('radio_relay') || 'auto';
+S.pttSound = localStorage.getItem('radio_pttsnd') || 'mp3';
+S.squelchLevel = parseFloat(localStorage.getItem('radio_sqlch') || '0.6');
 
-window.onerror=function(msg,url,line){
-  log('❌ '+msg+' @'+line);
-  return false;
-};
+$('nameInput').value = S.name;
+$('volumeSlider').value = Math.round(S.volume * 100);
+$('volValue').textContent = Math.round(S.volume * 100) + '%';
+$('relayMode').value = S.relayMode;
+$('pttSound').value = S.pttSound;
+$('squelchSlider').value = Math.round(S.squelchLevel * 100);
+$('squelchValue').textContent = Math.round(S.squelchLevel * 100) + '%';
 
-if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',bindAll);
-}else{
-  bindAll();
-}
+initScanner();
+initPTTAudio();
+renderUsers();
+startHeartbeat();
+
+window.addEventListener('beforeunload', () => {
+  try { SFX.powerOff(); } catch(_){}
+  if (S.micStream) S.micStream.getTracks().forEach(t => t.stop());
+  Object.values(S.peers).forEach(p => { try { p.pc?.close(); } catch(_){} });
+  closeScanner();
+});
 </script>
-
 </body>
 </html>
