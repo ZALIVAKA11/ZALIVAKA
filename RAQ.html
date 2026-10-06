@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="Рация">
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%D0%A0%D0%B0%D1%86%D0%B8%D1%8F%22%2C%22short_name%22%3A%22%D0%A0%D0%B0%D1%86%D0%B8%D1%8F%22%2C%22start_url%22%3A%22.%22%2C%22scope%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230a0a0a%22%2C%22theme_color%22%3A%22%230a0a0a%22%7D">
 <title>РАЦИЯ · P2P Mesh</title>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
@@ -38,7 +39,6 @@
   .user .badge{font-size:9px;padding:2px 6px;border-radius:4px;background:#222;color:#777}
   .user .badge.ok{background:#14331a;color:#4ade80}
   .user .badge.warn{background:#332414;color:#f59e0b}
-  .user .badge.relay{background:#1a1a3a;color:#7c9cff}
   .ptt-wrap{display:flex;flex-direction:column;align-items:center;padding:2px 0}
   .ptt{width:130px;height:130px;border-radius:50%;border:4px solid #2a2a2a;
     background:radial-gradient(circle at 30% 30%,#444,#161616);color:#e0e0e0;
@@ -74,12 +74,25 @@
   .btn{width:100%;background:#16a34a;border:none;color:#fff;padding:11px;border-radius:8px;
     font-size:12px;font-weight:600;cursor:pointer;margin-top:5px;letter-spacing:1px}
   .btn:active{background:#15803d}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
   .btn.secondary{background:#222}.btn.secondary:active{background:#333}
   .copy-row{display:flex;gap:6px;margin-top:6px}
   .copy-row .btn{margin-top:0}
+  .code-display{font-size:44px;font-weight:800;letter-spacing:8px;color:#4ade80;text-align:center;
+    font-family:'Courier New',monospace;padding:14px;background:#0a1f0a;border:2px dashed #4ade80;
+    border-radius:10px;margin:10px 0;text-shadow:0 0 14px #4ade80;user-select:text;-webkit-user-select:text}
+  .code-input{font-size:28px;font-weight:700;letter-spacing:6px;text-align:center;text-transform:uppercase;
+    background:#0a0a0a;border:2px solid #2a2a2a;color:#4ade80;padding:14px;border-radius:10px;
+    font-family:'Courier New',monospace;width:100%;outline:none}
+  .code-input:focus{border-color:#4ade80}
   .qr-wrap{background:#fff;padding:10px;border-radius:8px;margin:8px 0;text-align:center}
   .qr-wrap canvas{display:block;margin:0 auto;image-rendering:pixelated;max-width:100%;height:auto}
   .qr-hint{font-size:10px;color:#666;text-align:center;margin-top:6px;letter-spacing:1px}
+  .qr-pager{text-align:center;margin-top:6px;font-size:11px;color:#4ade80;font-weight:700}
+  .qr-buttons{display:flex;gap:6px;margin-top:6px}
+  .qr-buttons button{flex:1;background:#222;border:1px solid #2a2a2a;color:#e0e0e0;
+    padding:8px;border-radius:6px;font-size:11px;cursor:pointer}
+  .qr-buttons button:active{background:#333}
   .scanner{position:fixed;inset:0;background:#000;z-index:300;display:none;flex-direction:column}
   .scanner.show{display:flex}
   .scanner video{flex:1;object-fit:cover;width:100%;height:100%}
@@ -97,12 +110,15 @@
     font-size:12px;text-align:center;line-height:1.5}
   .scanner-btn{background:#16a34a;border:none;color:#fff;padding:10px 16px;border-radius:8px;
     font-size:12px;font-weight:600;cursor:pointer;margin-top:8px;width:100%;letter-spacing:1px}
+  .scanner-progress{background:rgba(22,163,74,.25);border:1px solid #16a34a;border-radius:8px;
+    padding:6px 10px;font-size:11px;color:#4ade80;margin-top:6px;display:none}
+  .scanner-progress.show{display:block}
   .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#16a34a;
     color:#fff;padding:10px 18px;border-radius:8px;font-size:12px;opacity:0;
     transition:.3s;pointer-events:none;z-index:400;max-width:90%}
   .toast.show{opacity:1}
   .toast.err{background:#b91c1c}
-  #log{font-size:9px;color:#555;max-height:60px;overflow-y:auto;padding:5px;
+  #log{font-size:9px;color:#555;max-height:80px;overflow-y:auto;padding:5px;
     font-family:monospace;margin-top:8px;background:#0a0a0a;border-radius:6px;line-height:1.5}
   .row{display:flex;gap:8px;align-items:center;font-size:11px;color:#888;margin-top:6px}
   .row input[type=range]{flex:1;accent-color:#4ade80}
@@ -120,21 +136,22 @@
     background:#b91c1c;color:#fff;padding:4px 10px;border-radius:10px;font-size:10px;
     display:none;z-index:500}
   .offline-badge.show{display:block}
-  .pulse-red{animation:pulseRed 1s infinite}
-  @keyframes pulseRed{0%,100%{box-shadow:0 0 0 rgba(239,68,68,0)}50%{box-shadow:0 0 20px rgba(239,68,68,.6)}}
+  .status-line{font-size:10px;color:#f59e0b;text-align:center;margin-top:6px;min-height:14px}
+  .badge-count{background:#1a1a1a;color:#4ade80;padding:4px 8px;border-radius:6px;font-size:10px;
+    font-weight:700;letter-spacing:1px}
 </style>
 </head>
 <body>
 
-<div class="offline-badge" id="offlineBadge">⚡ Оффлайн-режим</div>
+<div class="offline-badge" id="offlineBadge">⚡ Оффлайн</div>
 
 <header>
-  <div class="logo">📻 РАЦИЯ · MESH</div>
+  <div class="logo">📻 РАЦИЯ · P2P</div>
   <div class="role" id="roleTag">не в сети</div>
 </header>
 
 <div class="display">
-  <div class="net" id="netInfo">STUN+TURN</div>
+  <div class="net" id="netInfo">—</div>
   <div class="signal" id="sigDisplay">●●●●●</div>
   <div class="channel" id="channelDisplay">CH 01</div>
   <div class="channel-label" id="subLabel">P2P · БЕЗ СЕРВЕРОВ</div>
@@ -160,151 +177,137 @@
 
 <div class="modal" id="roomModal">
   <div class="modal-content">
-    <h2>СЕТЬ MESH</h2>
-    <p>Создай сеть или присоединись. Обмен кодами — QR, текст, файл или звук.</p>
-    <button class="btn" id="startRoomBtn">🆕 СОЗДАТЬ СЕТЬ</button>
-    <button class="btn secondary" id="joinRoomBtn" style="margin-top:6px">🔗 ПРИСОЕДИНИТЬСЯ</button>
+    <h2 id="roomTitle">СЕТЬ MESH</h2>
 
-    <div id="creatorBox" style="display:none;margin-top:12px">
-      <div class="tabs">
-        <button class="active" data-tab="qr">📷 QR</button>
-        <button data-tab="text">📋 ТЕКСТ</button>
-        <button data-tab="file">📎 ФАЙЛ</button>
-        <button data-tab="sound">🔊 ЗВУК</button>
-      </div>
-      <div data-pane="qr">
-        <p style="text-align:center;color:#888">Покажи этот QR новому участнику</p>
-        <div class="qr-wrap"><canvas id="offerQR"></canvas></div>
-        <div class="qr-hint" id="offerQRInfo"></div>
-      </div>
-      <div data-pane="text" style="display:none">
-        <div class="field">
-          <label>1. ОТПРАВЬ ЭТОТ КОД НОВОМУ УЧАСТНИКУ</label>
-          <textarea id="offerText" readonly></textarea>
-          <div class="copy-row">
-            <button class="btn secondary" id="copyOfferBtn">📋 Копировать</button>
-            <button class="btn secondary" id="shareOfferBtn">📤 Поделиться</button>
-          </div>
-          <button class="btn secondary" id="downloadOfferBtn" style="margin-top:6px">💾 Сохранить в файл</button>
-        </div>
-      </div>
-      <div data-pane="file" style="display:none">
-        <div class="field">
-          <label>СОХРАНИ ФАЙЛ С КОДОМ И ПЕРЕДАЙ ЛЮБЫМ СПОСОБОМ</label>
-          <p style="font-size:11px;color:#888;line-height:1.5;margin-bottom:8px">
-            Файл radio-offer.txt (~3 КБ). Передай через AirDrop, WhatsApp, Telegram,
-            Bluetooth, email.
-          </p>
-          <button class="btn" id="saveOfferFileBtn">💾 СОХРАНИТЬ ФАЙЛ</button>
-          <button class="btn secondary" id="shareOfferFileBtn" style="margin-top:6px">📤 ПОДЕЛИТЬСЯ ФАЙЛОМ</button>
-        </div>
-      </div>
-      <div data-pane="sound" style="display:none">
-        <div class="field">
-          <label>ПЕРЕДАЙ КОД ЗВУКОМ (БЕЗ ИНТЕРНЕТА, БЕЗ КАМЕРЫ)</label>
-          <p style="font-size:11px;color:#888;line-height:1.5;margin-bottom:8px">
-            Поднеси телефоны близко (10–30 см). Нажми «Передать». На втором устройстве
-            открой «🔊 ЗВУК» → «Слушать». Код сам вставится.
-          </p>
-          <button class="btn" id="sendOfferSoundBtn">🔊 ПЕРЕДАТЬ ЗВУКОМ</button>
-          <button class="btn secondary" id="listenSoundBtn" style="margin-top:6px">👂 СЛУШАТЬ (принять ответ)</button>
-          <div id="soundStatus" style="text-align:center;font-size:11px;color:#4ade80;margin-top:8px;min-height:16px"></div>
-        </div>
-      </div>
-      <div class="field" style="margin-top:12px">
-        <label>2. ОТВЕТ УЧАСТНИКА (QR или код)</label>
-        <textarea id="answerInput" placeholder="Вставь ответный код…"></textarea>
-        <div class="copy-row">
-          <button class="btn secondary" id="scanAnswerBtn">📷 Сканировать QR</button>
-        </div>
-        <button class="btn" id="acceptAnswerBtn" style="margin-top:6px">✅ ПОДКЛЮЧИТЬ</button>
-      </div>
-      <button class="btn secondary" style="margin-top:8px" id="newInviteBtn">➕ ЕЩЁ ОДНОГО УЧАСТНИКА</button>
+    <div id="menuBox">
+      <p>Создай лобби или присоединись.</p>
+      <button class="btn" id="startRoomBtn">🆕 СОЗДАТЬ ЛОББИ</button>
+      <button class="btn secondary" id="joinRoomBtn" style="margin-top:6px">🔗 ПРИСОЕДИНИТЬСЯ</button>
+      <div class="status-line" id="serverStatus"></div>
     </div>
 
-    <div id="joinerBox" style="display:none;margin-top:12px">
-      <div class="tabs">
-        <button class="active" data-tab="qr">📷 QR</button>
-        <button data-tab="text">📋 ТЕКСТ</button>
-        <button data-tab="file">📎 ФАЙЛ</button>
-        <button data-tab="sound">🔊 ЗВУК</button>
-      </div>
-
-      <div data-pane="qr">
-        <div class="field">
-          <label>1. КОД ОТ СОЗДАТЕЛЯ</label>
-          <textarea id="joinOfferInput" placeholder="Вставь код от создателя…"></textarea>
-          <div class="copy-row">
-            <button class="btn secondary" id="scanOfferBtn">📷 Сканировать QR</button>
-          </div>
+    <div id="creatorBox" style="display:none">
+      <div id="creatorPeer" style="display:none">
+        <p style="text-align:center">Режим: <b>короткий код</b></p>
+        <div class="code-display" id="myCodeDisplay">------</div>
+        <div class="badge-count" style="display:block;text-align:center;margin-bottom:8px">
+          УЧАСТНИКОВ: <span id="userCount">1</span> / 10
         </div>
-      </div>
 
-      <div data-pane="text" style="display:none">
-        <div class="field">
-          <label>1. ВСТАВЬ КОД ОТ СОЗДАТЕЛЯ</label>
-          <textarea id="joinOfferInputText" placeholder="Вставь код…"></textarea>
-        </div>
-      </div>
-
-      <div data-pane="file" style="display:none">
-        <div class="field">
-          <label>1. ВЫБЕРИ ФАЙЛ С КОДОМ ОТ СОЗДАТЕЛЯ</label>
-          <input type="file" id="offerFileInput" accept=".txt,text/plain,application/octet-stream" style="font-family:inherit">
-        </div>
-      </div>
-
-      <div data-pane="sound" style="display:none">
-        <div class="field">
-          <label>СЛУШАЙ ЗВУК ОТ СОЗДАТЕЛЯ</label>
-          <p style="font-size:11px;color:#888;line-height:1.5;margin-bottom:8px">
-            Поднеси телефон близко к передающему. Нажми «Слушать».
-          </p>
-          <button class="btn" id="listenSoundJoinBtn">👂 СЛУШАТЬ ЗВУК</button>
-          <div id="soundStatusJoin" style="text-align:center;font-size:11px;color:#4ade80;margin-top:8px;min-height:16px"></div>
-        </div>
-      </div>
-
-      <button class="btn" id="genAnswerBtn" style="margin-top:10px">ГЕНЕРИРОВАТЬ ОТВЕТ</button>
-
-      <div class="field" id="joinAnswerBox" style="display:none;margin-top:10px">
-        <label>2. ОТВЕТ ДЛЯ СОЗДАТЕЛЯ</label>
         <div class="tabs">
           <button class="active" data-tab="qr">📷 QR</button>
           <button data-tab="text">📋 ТЕКСТ</button>
-          <button data-tab="file">📎 ФАЙЛ</button>
-          <button data-tab="sound">🔊 ЗВУК</button>
+        </div>
+        <div data-pane="qr">
+          <div class="qr-wrap"><canvas id="offerQR"></canvas></div>
+          <div class="qr-hint" id="offerQRInfo"></div>
+        </div>
+        <div data-pane="text" style="display:none">
+          <div class="field" style="margin-top:8px">
+            <label>КОД ЛОББИ</label>
+            <input id="codeText" readonly style="font-size:20px;text-align:center;letter-spacing:6px;color:#4ade80">
+            <div class="copy-row">
+              <button class="btn secondary" id="copyCodeBtn">📋 Копировать</button>
+              <button class="btn secondary" id="shareCodeBtn">📤 Поделиться</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="creatorQR" style="display:none">
+        <p style="text-align:center;font-size:11px;color:#f59e0b">
+          Режим: <b>QR-обмен</b> (сервер недоступен). Код автоматически сжимается,
+          при необходимости разбивается на несколько QR.
+        </p>
+
+        <div class="tabs">
+          <button class="active" data-tab="qr">📷 QR</button>
+          <button data-tab="text">📋 ТЕКСТ</button>
+        </div>
+        <div data-pane="qr">
+          <div class="qr-wrap"><canvas id="offerQRLong"></canvas></div>
+          <div class="qr-pager" id="offerQRPager"></div>
+          <div class="qr-buttons" id="offerQRBtns" style="display:none">
+            <button id="offerQRPrev">◀ Назад</button>
+            <button id="offerQRNext">Далее ▶</button>
+          </div>
+          <div class="qr-hint" id="offerQRLongInfo"></div>
+        </div>
+        <div data-pane="text" style="display:none">
+          <div class="field" style="margin-top:8px">
+            <label>1. ОТПРАВЬ ЭТОТ КОД НОВОМУ УЧАСТНИКУ</label>
+            <textarea id="offerTextLong" readonly></textarea>
+            <div class="copy-row">
+              <button class="btn secondary" id="copyOfferLongBtn">📋 Копировать</button>
+              <button class="btn secondary" id="shareOfferLongBtn">📤 Поделиться</button>
+            </div>
+          </div>
         </div>
 
+        <div class="field" style="margin-top:12px">
+          <label>2. ОТВЕТ УЧАСТНИКА (QR или текст)</label>
+          <textarea id="answerInputLong" placeholder="Вставь ответный код…"></textarea>
+          <div class="copy-row">
+            <button class="btn secondary" id="scanAnswerBtn">📷 Сканировать QR</button>
+          </div>
+          <button class="btn" id="acceptAnswerBtn" style="margin-top:6px">✅ ПОДКЛЮЧИТЬ</button>
+        </div>
+
+        <button class="btn secondary" style="margin-top:8px" id="newInviteBtn">➕ ЕЩЁ ОДНОГО УЧАСТНИКА</button>
+      </div>
+
+      <button class="btn secondary" style="margin-top:12px" id="leaveCreatorBtn">🚪 ВЫЙТИ ИЗ ЛОББИ</button>
+    </div>
+
+    <div id="joinerBox" style="display:none">
+      <div class="tabs">
+        <button class="active" data-tab="code">🔢 КОД</button>
+        <button data-tab="qr">📷 QR</button>
+      </div>
+
+      <div data-pane="code">
+        <p style="text-align:center;font-size:11px;color:#888">Введи 6-значный код от хоста</p>
+        <input type="text" id="joinCodeInput" class="code-input" placeholder="A1B2C3"
+               maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        <button class="btn" id="joinConfirmBtn" style="margin-top:12px">🔗 ПОДКЛЮЧИТЬСЯ</button>
+        <div class="status-line" id="serverStatusJoin"></div>
+      </div>
+
+      <div data-pane="qr" style="display:none">
+        <p style="text-align:center;font-size:11px;color:#888">Отсканируй QR(ы) хоста — по одному</p>
+        <button class="btn" id="scanOfferBtn" style="margin-top:10px">📷 ОТКРЫТЬ КАМЕРУ</button>
+        <div class="field" style="margin-top:12px">
+          <label>…или вставь код вручную</label>
+          <textarea id="joinOfferInputLong" placeholder="Длинный код из QR хоста…"></textarea>
+          <button class="btn" id="genAnswerBtn" style="margin-top:6px">ГЕНЕРИРОВАТЬ ОТВЕТ</button>
+        </div>
+      </div>
+
+      <div class="field" id="joinAnswerBox" style="display:none;margin-top:10px">
+        <label>ПОКАЖИ ЭТОТ QR ХОСТУ</label>
+        <div class="tabs">
+          <button class="active" data-tab="qr">📷 QR</button>
+          <button data-tab="text">📋 ТЕКСТ</button>
+        </div>
         <div data-pane="qr">
           <div class="qr-wrap"><canvas id="joinAnswerQR"></canvas></div>
+          <div class="qr-pager" id="joinAnswerQRPager"></div>
+          <div class="qr-buttons" id="joinAnswerQRBtns" style="display:none">
+            <button id="joinAnswerQRPrev">◀ Назад</button>
+            <button id="joinAnswerQRNext">Далее ▶</button>
+          </div>
           <div class="qr-hint" id="joinAnswerQRInfo"></div>
         </div>
-
         <div data-pane="text" style="display:none">
-          <textarea id="joinAnswerText" readonly style="margin-top:8px"></textarea>
+          <textarea id="joinAnswerText" readonly></textarea>
           <div class="copy-row">
             <button class="btn secondary" id="copyAnswerBtn">📋 Копировать</button>
             <button class="btn secondary" id="shareAnswerBtn">📤 Поделиться</button>
           </div>
         </div>
-
-        <div data-pane="file" style="display:none">
-          <p style="font-size:11px;color:#888;line-height:1.5;margin:8px 0">
-            Сохрани файл radio-answer.txt и передай создателю.
-          </p>
-          <button class="btn" id="saveAnswerFileBtn">💾 СОХРАНИТЬ ФАЙЛ</button>
-          <button class="btn secondary" id="shareAnswerFileBtn" style="margin-top:6px">📤 ПОДЕЛИТЬСЯ ФАЙЛОМ</button>
-        </div>
-
-        <div data-pane="sound" style="display:none">
-          <p style="font-size:11px;color:#888;line-height:1.5;margin:8px 0">
-            Передай ответ создателю звуком.
-          </p>
-          <button class="btn" id="sendAnswerSoundBtn">🔊 ПЕРЕДАТЬ ЗВУКОМ</button>
-          <div id="soundStatusAnswer" style="text-align:center;font-size:11px;color:#4ade80;margin-top:8px;min-height:16px"></div>
-        </div>
       </div>
+
+      <button class="btn secondary" id="backMenuBtn" style="margin-top:8px">← Назад</button>
     </div>
 
     <button class="btn secondary" style="margin-top:12px" id="closeRoomModal">Закрыть</button>
@@ -327,17 +330,9 @@
       </div>
     </div>
     <div class="field">
-      <label>РЕЖИМ СОЕДИНЕНИЯ</label>
-      <select id="relayMode">
-        <option value="auto">Авто (STUN → TURN при неудаче)</option>
-        <option value="relay">Только TURN (через relay)</option>
-        <option value="p2p">Только P2P (без TURN)</option>
-      </select>
-    </div>
-    <div class="field">
       <label>ЗВУК PTT</label>
       <select id="pttSound">
-        <option value="mp3">MP3 (радио-писк из файла)</option>
+        <option value="mp3">MP3 (радио-писк)</option>
         <option value="synth">Синтезированный</option>
       </select>
     </div>
@@ -350,7 +345,7 @@
     </div>
     <button class="btn" id="saveSettingsBtn">СОХРАНИТЬ</button>
     <button class="btn secondary" id="testSfxBtn" style="margin-top:6px">🔊 ТЕСТ ЗВУКОВ</button>
-    <button class="btn secondary" style="margin-top:6px" id="closeSettingsModal">Закрыть</button>
+    <button class="btn secondary" id="closeSettingsModal" style="margin-top:6px">Закрыть</button>
   </div>
 </div>
 
@@ -364,6 +359,7 @@
     <div class="scanner-frame"></div>
     <div class="scanner-bottom">
       <div id="scanHint">Держи QR в рамке.</div>
+      <div class="scanner-progress" id="scanProgress"></div>
       <button class="scanner-btn" id="scanManual">✍️ Ввести вручную</button>
     </div>
   </div>
@@ -377,21 +373,34 @@
 
 <script>
 /* ============================================================
-   РАЦИЯ · P2P MESH + QR + ФАЙЛ + ЗВУК + PWA
+   РАЦИЯ · PeerJS + QR (сжатие + части) + Mesh + Микшер
    ============================================================ */
 const $ = id => document.getElementById(id);
 
 const PTT_MP3_URL = 'https://raw.githubusercontent.com/ZALIVAKA11/ZALIVAKA/refs/heads/main/18558_1464791429.mp3';
+const MAX_USERS = 10;
 
-const ICE_P2P = [
-  { urls: 'stun:stun.l.google.com:19302' },
-  { urls: 'stun:stun1.l.google.com:19302' },
+const PEER_ICE = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    {
+      urls: ['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp'],
+      username: 'openrelayproject', credential: 'openrelayproject'
+    }
+  ],
+  bundlePolicy: 'max-bundle',
+  rtcpMuxPolicy: 'require',
+};
+
+const PEER_SERVERS = [
+  { host: '0.peerjs.com', port: 443, path: '/', secure: true },
+  { host: 'peerjs.92k.de', port: 443, path: '/', secure: true },
 ];
-const ICE_RELAY = [{
-  urls: ['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp'],
-  username: 'openrelayproject', credential: 'openrelayproject'
-}];
-const ICE_AUTO = [...ICE_P2P, ...ICE_RELAY];
+function peerOpts(idx) {
+  const s = PEER_SERVERS[idx] || PEER_SERVERS[0];
+  return { debug: 0, host: s.host, port: s.port, path: s.path, secure: s.secure, config: PEER_ICE };
+}
 
 const S = {
   id: Math.random().toString(36).slice(2, 8),
@@ -402,14 +411,15 @@ const S = {
   pttActive: false,
   peers: {},
   myTalking: false,
-  isCreator: false,
+  role: null,
+  mode: null,
+  lobbyCode: null,
+  peer: null,
   pendingOffer: null,
   pendingId: null,
   channel: 1,
-  relayMode: 'auto',
   pttSound: 'mp3',
   squelchLevel: 0.6,
-  heartbeatTimer: null,
   scanTarget: null,
   scannerStream: null,
   scannerRAF: null,
@@ -418,6 +428,8 @@ const S = {
   pttAudioReady: false,
   mixDest: null,
   mixSources: {},
+  // для приёма частей QR
+  parts: { buf: {}, total: 0, timer: null, target: null },
 };
 
 /* ============================================================
@@ -436,30 +448,20 @@ function noiseBuf(dur) {
   for (let i=0;i<len;i++) d[i] = Math.random()*2-1;
   return b;
 }
-
 async function initPTTAudio() {
   if (S.pttAudioEl) return;
   const a = new Audio();
-  a.preload = 'auto';
-  a.crossOrigin = 'anonymous';
-  a.src = PTT_MP3_URL;
-  a.volume = 1;
+  a.preload = 'auto'; a.crossOrigin = 'anonymous';
+  a.src = PTT_MP3_URL; a.volume = 1;
   a.addEventListener('canplaythrough', () => { S.pttAudioReady = true; });
-  a.addEventListener('error', () => {
-    S.pttAudioReady = false;
-    console.warn('PTT MP3 недоступен, используется синтез');
-  });
+  a.addEventListener('error', () => { S.pttAudioReady = false; });
   S.pttAudioEl = a;
   try { await a.load(); } catch(_){}
 }
 function playPTTMP3() {
   if (S.pttSound !== 'mp3' || !S.pttAudioEl || !S.pttAudioReady) return false;
-  try {
-    S.pttAudioEl.currentTime = 0;
-    const p = S.pttAudioEl.play();
-    if (p && p.catch) p.catch(()=>{});
-    return true;
-  } catch(_) { return false; }
+  try { S.pttAudioEl.currentTime = 0; const p = S.pttAudioEl.play(); if (p && p.catch) p.catch(()=>{}); return true; }
+  catch(_) { return false; }
 }
 
 const SFX = {
@@ -471,37 +473,21 @@ const SFX = {
     g.gain.setValueAtTime(0.16,t+0.11);g.gain.exponentialRampToValueAtTime(0.001,t+0.15);
     o.connect(g).connect(c.destination);o.start(t);o.stop(t+0.16);},
   squelchTail(){
-    const c = ctx();
-    const lvl = S.squelchLevel;
-    if (lvl <= 0) return;
-    const src1 = c.createBufferSource();
-    src1.buffer = noiseBuf(0.22);
-    const f1 = c.createBiquadFilter();
-    f1.type = 'bandpass'; f1.frequency.value = 2200; f1.Q.value = 0.5;
-    const g1 = c.createGain();
-    const t0 = c.currentTime;
-    g1.gain.setValueAtTime(0.22 * lvl, t0);
-    g1.gain.exponentialRampToValueAtTime(0.001, t0 + 0.22);
-    src1.connect(f1).connect(g1).connect(c.destination);
-    src1.start(t0);
-    const src2 = c.createBufferSource();
-    src2.buffer = noiseBuf(0.85);
-    const f2 = c.createBiquadFilter();
-    f2.type = 'highpass'; f2.frequency.value = 700;
-    const g2 = c.createGain();
-    const t1 = t0 + 0.05;
-    g2.gain.setValueAtTime(0.14 * lvl, t1);
-    g2.gain.exponentialRampToValueAtTime(0.0008, t1 + 0.8);
-    src2.connect(f2).connect(g2).connect(c.destination);
-    src2.start(t1);
-    const o = c.createOscillator(), g3 = c.createGain();
-    o.type = 'sine';
-    o.frequency.setValueAtTime(320, t0);
-    o.frequency.exponentialRampToValueAtTime(90, t0 + 0.15);
-    g3.gain.setValueAtTime(0.11 * lvl, t0);
-    g3.gain.exponentialRampToValueAtTime(0.001, t0 + 0.18);
-    o.connect(g3).connect(c.destination);
-    o.start(t0); o.stop(t0 + 0.2);
+    const c = ctx(); const lvl = S.squelchLevel; if (lvl <= 0) return;
+    const s1 = c.createBufferSource(); s1.buffer = noiseBuf(0.22);
+    const f1 = c.createBiquadFilter(); f1.type='bandpass'; f1.frequency.value=2200; f1.Q.value=0.5;
+    const g1 = c.createGain(); const t0 = c.currentTime;
+    g1.gain.setValueAtTime(0.22*lvl, t0); g1.gain.exponentialRampToValueAtTime(0.001, t0+0.22);
+    s1.connect(f1).connect(g1).connect(c.destination); s1.start(t0);
+    const s2 = c.createBufferSource(); s2.buffer = noiseBuf(0.85);
+    const f2 = c.createBiquadFilter(); f2.type='highpass'; f2.frequency.value=700;
+    const g2 = c.createGain(); const t1 = t0 + 0.05;
+    g2.gain.setValueAtTime(0.14*lvl, t1); g2.gain.exponentialRampToValueAtTime(0.0008, t1+0.8);
+    s2.connect(f2).connect(g2).connect(c.destination); s2.start(t1);
+    const o = c.createOscillator(), g3 = c.createGain(); o.type='sine';
+    o.frequency.setValueAtTime(320, t0); o.frequency.exponentialRampToValueAtTime(90, t0+0.15);
+    g3.gain.setValueAtTime(0.11*lvl, t0); g3.gain.exponentialRampToValueAtTime(0.001, t0+0.18);
+    o.connect(g3).connect(c.destination); o.start(t0); o.stop(t0+0.2);
   },
   powerOn(){const c=ctx(),o=c.createOscillator(),g=c.createGain();o.type='sine';const t=c.currentTime;
     o.frequency.setValueAtTime(280,t);o.frequency.exponentialRampToValueAtTime(1300,t+0.28);
@@ -543,7 +529,7 @@ function log(m) {
   const d = document.createElement('div');
   d.textContent = new Date().toLocaleTimeString().slice(0,8) + ' ' + m;
   el.appendChild(d); el.scrollTop = el.scrollHeight;
-  while (el.children.length > 25) el.removeChild(el.firstChild);
+  while (el.children.length > 30) el.removeChild(el.firstChild);
 }
 function toast(t, isErr) {
   const el = $('toast');
@@ -557,7 +543,7 @@ function renderUsers() {
   const me = document.createElement('div');
   me.className = 'user' + (S.myTalking ? ' talking' : '');
   me.innerHTML = `<div class="icon">🎙️</div><div class="name">${esc(S.name)}</div>
-                  <div class="badge ok">${S.isCreator ? 'СОЗДАТЕЛЬ' : 'вы'}</div>`;
+                  <div class="badge ok">${S.role === 'host' ? 'ХОСТ' : 'вы'}</div>`;
   list.appendChild(me);
 
   const ids = Object.keys(S.peers);
@@ -566,13 +552,7 @@ function renderUsers() {
     const el = document.createElement('div');
     el.className = 'user' + (p.talking ? ' talking' : '');
     let badge = 'соединение…', badgeCls = '';
-    if (p.connected) {
-      const isRelay = p.localCandidateType === 'relay' || p.remoteCandidateType === 'relay';
-      badge = isRelay ? 'relay' : 'P2P';
-      badgeCls = isRelay ? 'relay' : 'ok';
-    } else if (p.pc && p.pc.connectionState === 'failed') {
-      badge = 'ошибка'; badgeCls = 'warn';
-    }
+    if (p.connected) { badge = 'online'; badgeCls = 'ok'; }
     el.innerHTML = `<div class="icon">${p.talking ? '🔊' : '👤'}</div>
                     <div class="name">${esc(p.name || 'Участник')}</div>
                     <div class="badge ${badgeCls}">${badge}</div>`;
@@ -585,48 +565,68 @@ function renderUsers() {
     empty.innerHTML = '<div class="icon">📡</div><div class="name" style="color:#555">Ждём участников…</div>';
     list.appendChild(empty);
   }
-  $('roleTag').textContent = ids.length > 0
-    ? (S.isCreator ? 'СОЗДАТЕЛЬ · ' : '') + 'сеть: ' + ids.length
-    : 'не в сети';
-  $('subLabel').textContent = 'MESH · УЧАСТНИКОВ: ' + (ids.length + 1);
-  $('netInfo').textContent = S.relayMode === 'relay' ? 'ТОЛЬКО RELAY'
-                            : S.relayMode === 'p2p' ? 'ТОЛЬКО P2P' : 'STUN+TURN';
+
+  const total = ids.length + 1;
+  $('roleTag').textContent = S.role === 'host' ? 'ХОСТ · ' + total
+                            : S.role === 'client' ? 'сеть: ' + total
+                            : 'не в сети';
+  $('subLabel').textContent = S.lobbyCode
+    ? (S.mode === 'peerjs' ? 'КОД: ' + S.lobbyCode : 'QR-РЕЖИМ') + ' · ' + total + '/' + MAX_USERS
+    : 'P2P · БЕЗ СЕРВЕРОВ';
+  $('netInfo').textContent = S.mode === 'peerjs' ? 'PEERJS' : S.mode === 'qr' ? 'QR' : '—';
+  const uc = $('userCount'); if (uc) uc.textContent = total;
 }
 
 /* ============================================================
-   QR ENCODER (byte mode, ECC L, v1-40)
+   Сжатие/распаковка строки (gzip)
    ============================================================ */
-const GF_EXP = new Uint8Array(512);
-const GF_LOG = new Uint8Array(256);
-(function initGF(){
-  let x = 1;
-  for (let i = 0; i < 255; i++) { GF_EXP[i] = x; GF_LOG[x] = i; x <<= 1; if (x & 0x100) x ^= 0x11D; }
-  for (let i = 255; i < 512; i++) GF_EXP[i] = GF_EXP[i - 255];
-})();
-function gfMul(a, b) { if (a === 0 || b === 0) return 0; return GF_EXP[GF_LOG[a] + GF_LOG[b]]; }
-function rsGenPoly(n) {
-  let poly = [1];
-  for (let i = 0; i < n; i++) {
-    const next = new Array(poly.length + 1).fill(0);
-    for (let j = 0; j < poly.length; j++) {
-      next[j] ^= gfMul(poly[j], 1);
-      next[j + 1] ^= gfMul(poly[j], GF_EXP[i]);
-    }
-    poly = next;
-  }
-  return poly;
+function bytesToB64(bytes) {
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 8192)
+    s += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+  return btoa(s);
 }
-function rsEncode(data, eccLen) {
-  const gen = rsGenPoly(eccLen);
-  const res = new Uint8Array(data.length + eccLen);
-  res.set(data);
-  for (let i = 0; i < data.length; i++) {
-    const coef = res[i];
-    if (coef === 0) continue;
-    for (let j = 1; j < gen.length; j++) res[i + j] ^= gfMul(gen[j], coef);
-  }
-  return res.slice(data.length);
+function b64ToBytes(b64) {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
 }
+async function compressString(str) {
+  if (typeof CompressionStream === 'undefined') return null;
+  try {
+    const input = new TextEncoder().encode(str);
+    const cs = new CompressionStream('gzip');
+    const writer = cs.writable.getWriter();
+    writer.write(input); writer.close();
+    const buf = await new Response(cs.readable).arrayBuffer();
+    return bytesToB64(new Uint8Array(buf));
+  } catch(_) { return null; }
+}
+async function decompressString(b64) {
+  if (typeof DecompressionStream === 'undefined') return null;
+  try {
+    const bytes = b64ToBytes(b64);
+    const ds = new DecompressionStream('gzip');
+    const writer = ds.writable.getWriter();
+    writer.write(bytes); writer.close();
+    const buf = await new Response(ds.readable).arrayBuffer();
+    return new TextDecoder().decode(buf);
+  } catch(_) { return null; }
+}
+
+/* ============================================================
+   QR ENCODER
+   ============================================================ */
+const GF_EXP = new Uint8Array(512), GF_LOG = new Uint8Array(256);
+(function(){ let x=1; for(let i=0;i<255;i++){GF_EXP[i]=x;GF_LOG[x]=i;x<<=1;if(x&0x100)x^=0x11D;} for(let i=255;i<512;i++)GF_EXP[i]=GF_EXP[i-255];})();
+function gfMul(a,b){if(!a||!b)return 0;return GF_EXP[GF_LOG[a]+GF_LOG[b]];}
+function rsGenPoly(n){let p=[1];for(let i=0;i<n;i++){const nx=new Array(p.length+1).fill(0);
+  for(let j=0;j<p.length;j++){nx[j]^=gfMul(p[j],1);nx[j+1]^=gfMul(p[j],GF_EXP[i]);}p=nx;}return p;}
+function rsEncode(data,len){const g=rsGenPoly(len);const r=new Uint8Array(data.length+len);r.set(data);
+  for(let i=0;i<data.length;i++){const c=r[i];if(!c)continue;for(let j=1;j<g.length;j++)r[i+j]^=gfMul(g[j],c);}
+  return r.slice(data.length);}
+
 const QR_TABLE_L = {
   1:[26,7,[1,19,0,0]],2:[44,10,[1,34,0,0]],3:[70,15,[1,55,0,0]],4:[100,20,[1,80,0,0]],
   5:[134,26,[1,108,0,0]],6:[172,18,[2,68,0,0]],7:[196,20,[2,78,0,0]],8:[242,24,[2,97,0,0]],
@@ -649,688 +649,502 @@ const QR_ALIGN = {
   37:[6,28,54,80,106,132,158],38:[6,32,58,84,110,136,162],39:[6,26,54,82,110,138,166],40:[6,30,58,86,114,142,170]
 };
 
-function makeQRCodeData(text) {
+function makeQR(text) {
   const bytes = new TextEncoder().encode(text);
   const len = bytes.length;
   let version = 0;
   for (let v = 1; v <= 40; v++) {
     const blocks = QR_TABLE_L[v][2];
-    const dataCw = (blocks[0] * blocks[1]) + (blocks[2] * blocks[3]);
+    const dCw = (blocks[0]*blocks[1]) + (blocks[2]*blocks[3]);
     const lenBits = v < 10 ? 8 : 16;
-    if (4 + lenBits + len * 8 <= dataCw * 8) { version = v; break; }
+    if (4 + lenBits + len*8 <= dCw*8) { version = v; break; }
   }
-  if (!version) throw new Error('Слишком длинный текст');
-  const [totalCw, ecPerBlock, blocks] = QR_TABLE_L[version];
-  const dataCw = (blocks[0] * blocks[1]) + (blocks[2] * blocks[3]);
+  if (!version) throw new Error('Слишком длинный текст для QR (' + len + ' байт)');
+  const [tCw, ec, blocks] = QR_TABLE_L[version];
+  const dCw = (blocks[0]*blocks[1]) + (blocks[2]*blocks[3]);
   const bits = [];
-  const pushBits = (val, count) => { for (let i = count - 1; i >= 0; i--) bits.push((val >> i) & 1); };
-  pushBits(0b0100, 4);
-  pushBits(len, version < 10 ? 8 : 16);
-  for (const b of bytes) pushBits(b, 8);
-  const maxBits = dataCw * 8;
-  for (let i = 0; i < 4 && bits.length < maxBits; i++) bits.push(0);
-  while (bits.length % 8 !== 0) bits.push(0);
-  const padBytes = [0xEC, 0x11];
-  let pi = 0;
-  while (bits.length < maxBits) pushBits(padBytes[pi++ % 2], 8);
-  const dataBytes = new Uint8Array(dataCw);
-  for (let i = 0; i < dataCw; i++) {
-    let b = 0;
-    for (let j = 0; j < 8; j++) b = (b << 1) | bits[i * 8 + j];
-    dataBytes[i] = b;
-  }
-  const blockData = [];
-  let offset = 0;
-  for (let i = 0; i < blocks[0]; i++) { blockData.push(dataBytes.slice(offset, offset + blocks[1])); offset += blocks[1]; }
-  for (let i = 0; i < blocks[2]; i++) { blockData.push(dataBytes.slice(offset, offset + blocks[3])); offset += blocks[3]; }
-  const blockECC = blockData.map(d => rsEncode(d, ecPerBlock));
-  const totalBlocks = blocks[0] + blocks[2];
-  const interleaved = new Uint8Array(dataCw + totalBlocks * ecPerBlock);
+  const push = (v, n) => { for (let i = n-1; i >= 0; i--) bits.push((v>>i)&1); };
+  push(0b0100, 4); push(len, version<10?8:16); for (const b of bytes) push(b, 8);
+  const maxB = dCw*8;
+  for (let i = 0; i < 4 && bits.length < maxB; i++) bits.push(0);
+  while (bits.length % 8) bits.push(0);
+  let pi = 0; const padB = [0xEC, 0x11];
+  while (bits.length < maxB) push(padB[pi++ % 2], 8);
+  const dataBytes = new Uint8Array(dCw);
+  for (let i = 0; i < dCw; i++) { let b=0; for(let j=0;j<8;j++) b=(b<<1)|bits[i*8+j]; dataBytes[i]=b; }
+  const blockData = []; let off = 0;
+  for (let i = 0; i < blocks[0]; i++) { blockData.push(dataBytes.slice(off, off+blocks[1])); off += blocks[1]; }
+  for (let i = 0; i < blocks[2]; i++) { blockData.push(dataBytes.slice(off, off+blocks[3])); off += blocks[3]; }
+  const blockEcc = blockData.map(d => rsEncode(d, ec));
+  const tBlocks = blocks[0] + blocks[2];
+  const inter = new Uint8Array(dCw + tBlocks*ec);
   let idx = 0;
-  const maxDataLen = Math.max(...blockData.map(b => b.length));
-  for (let i = 0; i < maxDataLen; i++) for (const b of blockData) if (i < b.length) interleaved[idx++] = b[i];
-  for (let i = 0; i < ecPerBlock; i++) for (const b of blockECC) if (i < b.length) interleaved[idx++] = b[i];
-  return { version, data: interleaved };
+  const maxDL = Math.max(...blockData.map(b=>b.length));
+  for (let i = 0; i < maxDL; i++) for (const b of blockData) if (i<b.length) inter[idx++]=b[i];
+  for (let i = 0; i < ec; i++) for (const b of blockEcc) if (i<b.length) inter[idx++]=b[i];
+  return { version, data: inter };
 }
-
-function buildQRMatrix(version, codewords) {
-  const size = version * 4 + 17;
-  const matrix = new Int8Array(size * size).fill(-1);
-  const reserved = new Uint8Array(size * size);
-  const set = (x, y, v) => { matrix[y * size + x] = v; reserved[y * size + x] = 1; };
-  const placeFinder = (cx, cy) => {
-    for (let y = -1; y <= 7; y++) for (let x = -1; x <= 7; x++) {
-      const px = cx + x, py = cy + y;
-      if (px < 0 || px >= size || py < 0 || py >= size) continue;
-      const inside = x >= 0 && x <= 6 && y >= 0 && y <= 6;
+function buildMatrix(version, cw) {
+  const size = version*4+17;
+  const m = new Int8Array(size*size).fill(-1);
+  const r = new Uint8Array(size*size);
+  const set = (x,y,v) => { m[y*size+x]=v; r[y*size+x]=1; };
+  const finder = (cx,cy) => {
+    for (let y=-1;y<=7;y++) for (let x=-1;x<=7;x++) {
+      const px=cx+x, py=cy+y;
+      if (px<0||px>=size||py<0||py>=size) continue;
+      const inside = x>=0&&x<=6&&y>=0&&y<=6;
       let black = false;
       if (inside) {
-        if (x === 0 || x === 6 || y === 0 || y === 6) black = true;
-        else if (x >= 2 && x <= 4 && y >= 2 && y <= 4) black = true;
+        if (x===0||x===6||y===0||y===6) black = true;
+        else if (x>=2&&x<=4&&y>=2&&y<=4) black = true;
       }
-      set(px, py, black ? 1 : 0);
+      set(px,py,black?1:0);
     }
   };
-  placeFinder(0, 0); placeFinder(size - 7, 0); placeFinder(0, size - 7);
-  for (let i = 8; i < size - 8; i++) { set(i, 6, i % 2 === 0 ? 1 : 0); set(6, i, i % 2 === 0 ? 1 : 0); }
+  finder(0,0); finder(size-7,0); finder(0,size-7);
+  for (let i=8;i<size-8;i++){ set(i,6,i%2===0?1:0); set(6,i,i%2===0?1:0); }
   const aligns = QR_ALIGN[version] || [];
   for (const ay of aligns) for (const ax of aligns) {
-    if ((ax === 6 && ay === 6) || (ax === 6 && ay === size - 7) || (ax === size - 7 && ay === 6)) continue;
-    for (let y = -2; y <= 2; y++) for (let x = -2; x <= 2; x++) {
-      const px = ax + x, py = ay + y;
-      const black = Math.abs(x) === 2 || Math.abs(y) === 2 || (x === 0 && y === 0);
-      set(px, py, black ? 1 : 0);
+    if ((ax===6&&ay===6)||(ax===6&&ay===size-7)||(ax===size-7&&ay===6)) continue;
+    for (let y=-2;y<=2;y++) for (let x=-2;x<=2;x++) {
+      const px=ax+x, py=ay+y;
+      const black = Math.abs(x)===2||Math.abs(y)===2||(x===0&&y===0);
+      set(px,py,black?1:0);
     }
   }
-  set(8, size - 8, 1);
-  for (let i = 0; i < 9; i++) {
-    if (!reserved[i * size + 8]) set(8, i, 0);
-    if (!reserved[8 * size + i]) set(i, 8, 0);
-    if (!reserved[(size - 1 - i) * size + 8]) set(8, size - 1 - i, 0);
-    if (!reserved[8 * size + size - 1 - i]) set(size - 1 - i, 8, 0);
+  set(8,size-8,1);
+  for (let i=0;i<9;i++){
+    if (!r[i*size+8]) set(8,i,0);
+    if (!r[8*size+i]) set(i,8,0);
+    if (!r[(size-1-i)*size+8]) set(8,size-1-i,0);
+    if (!r[8*size+size-1-i]) set(size-1-i,8,0);
   }
-  if (version >= 7) for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) { set(size - 11 + j, i, 0); set(i, size - 11 + j, 0); }
-
-  const totalBits = codewords.length * 8;
-  let bitIdx = 0, upward = true;
-  for (let col = size - 1; col > 0; col -= 2) {
+  if (version >= 7) for (let i=0;i<6;i++) for (let j=0;j<3;j++){ set(size-11+j,i,0); set(i,size-11+j,0); }
+  const tBits = cw.length*8;
+  let bi = 0, up = true;
+  for (let col = size-1; col > 0; col -= 2) {
     if (col === 6) col--;
     for (let i = 0; i < size; i++) {
-      const y = upward ? (size - 1 - i) : i;
+      const y = up ? size-1-i : i;
       for (let c = 0; c < 2; c++) {
-        const x = col - c;
-        if (reserved[y * size + x]) continue;
-        if (bitIdx < totalBits) {
-          const byte = codewords[bitIdx >> 3];
-          matrix[y * size + x] = (byte >> (7 - (bitIdx & 7))) & 1;
-          bitIdx++;
-        } else matrix[y * size + x] = 0;
+        const x = col-c;
+        if (r[y*size+x]) continue;
+        if (bi < tBits) { m[y*size+x] = (cw[bi>>3] >> (7-(bi&7))) & 1; bi++; }
+        else m[y*size+x] = 0;
       }
     }
-    upward = !upward;
+    up = !up;
   }
-  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    if (!reserved[y * size + x] && (x + y) % 2 === 0) matrix[y * size + x] ^= 1;
+  for (let y=0;y<size;y++) for (let x=0;x<size;x++) {
+    if (!r[y*size+x] && (x+y)%2===0) m[y*size+x] ^= 1;
   }
-  const data5 = 0b01000;
-  const genPoly = 0b10100110111;
-  let bch = data5 << 10;
-  while (bch >= 0x800) {
-    const shift = 31 - Math.clz32(bch) - 10;
-    if (shift < 0) break;
-    bch ^= genPoly << shift;
-  }
-  const fmt = ((data5 << 10) | bch) ^ 0x5412;
-  const fmtBitsArr = [];
-  for (let i = 0; i < 15; i++) fmtBitsArr.push((fmt >> i) & 1);
-  const pos1 = [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
-  pos1.forEach(([x, y], i) => { matrix[y * size + x] = fmtBitsArr[i]; });
-  const pos2 = [[size-1,8],[size-2,8],[size-3,8],[size-4,8],[size-5,8],[size-6,8],[size-7,8],[8,size-8],[8,size-7],[8,size-6],[8,size-5],[8,size-4],[8,size-3],[8,size-2],[8,size-1]];
-  pos2.forEach(([x, y], i) => { matrix[y * size + x] = fmtBitsArr[i]; });
+  const d5 = 0b01000, gp = 0b10100110111;
+  let bch = d5 << 10;
+  while (bch >= 0x800) { const sh = 31-Math.clz32(bch)-10; if (sh<0) break; bch ^= gp<<sh; }
+  const fmt = ((d5<<10)|bch) ^ 0x5412;
+  const fb = []; for (let i=0;i<15;i++) fb.push((fmt>>i)&1);
+  const p1 = [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+  p1.forEach(([x,y],i)=>{ m[y*size+x]=fb[i]; });
+  const p2 = [[size-1,8],[size-2,8],[size-3,8],[size-4,8],[size-5,8],[size-6,8],[size-7,8],
+              [8,size-8],[8,size-7],[8,size-6],[8,size-5],[8,size-4],[8,size-3],[8,size-2],[8,size-1]];
+  p2.forEach(([x,y],i)=>{ m[y*size+x]=fb[i]; });
   if (version >= 7) {
     let vbits = version << 12;
     const gen = 0b1111100100101;
-    while (vbits >= 0x4000) {
-      const shift = 31 - Math.clz32(vbits) - 12;
-      if (shift < 0) break;
-      vbits ^= gen << shift;
-    }
+    while (vbits >= 0x4000) { const sh = 31-Math.clz32(vbits)-12; if (sh<0) break; vbits ^= gen<<sh; }
     const vinfo = (version << 12) | vbits;
     for (let i = 0; i < 18; i++) {
       const bit = (vinfo >> i) & 1;
-      const x = Math.floor(i / 3), y = i % 3;
-      matrix[(size - 11 + y) * size + x] = bit;
-      matrix[y * size + (size - 11 + x)] = bit;
+      const x = Math.floor(i/3), y = i%3;
+      m[(size-11+y)*size + x] = bit;
+      m[y*size + (size-11+x)] = bit;
     }
   }
-  return matrix;
+  return m;
+}
+function drawQRSingle(canvas, text) {
+  try {
+    const { version, data } = makeQR(text);
+    const m = buildMatrix(version, data);
+    const size = version*4+17;
+    const scale = Math.max(3, Math.floor(340/size));
+    const pad = 4*scale;
+    const dim = size*scale + pad*2;
+    canvas.width = dim; canvas.height = dim;
+    canvas.style.width = '100%';
+    canvas.style.maxWidth = '340px';
+    canvas.style.imageRendering = 'pixelated';
+    const g = canvas.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, dim, dim);
+    g.fillStyle = '#000';
+    for (let y=0;y<size;y++) for (let x=0;x<size;x++)
+      if (m[y*size+x] === 1) g.fillRect(pad+x*scale, pad+y*scale, scale, scale);
+    return { version, size, ok: true };
+  } catch(e) {
+    return { ok: false, error: e.message };
+  }
 }
 
-function drawQR(canvas, text) {
-  const { version, data } = makeQRCodeData(text);
-  const matrix = buildQRMatrix(version, data);
-  const size = version * 4 + 17;
-  const scale = Math.max(2, Math.floor(280 / size));
-  const pad = 4 * scale;
-  const dim = size * scale + pad * 2;
-  canvas.width = dim; canvas.height = dim;
-  canvas.style.width = '100%'; canvas.style.maxWidth = '280px';
-  canvas.style.imageRendering = 'pixelated';
-  const g = canvas.getContext('2d');
-  g.fillStyle = '#fff'; g.fillRect(0, 0, dim, dim);
-  g.fillStyle = '#000';
-  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    if (matrix[y * size + x] === 1) g.fillRect(pad + x * scale, pad + y * scale, scale, scale);
+/* Универсальный: сжать → уместить → разбить */
+async function prepareQRPayload(text) {
+  // 1) пробуем сжать
+  let compressedB64 = await compressString(text);
+  let payload;
+  if (compressedB64 && compressedB64.length < text.length * 0.9) {
+    payload = 'C|' + compressedB64;
+  } else {
+    payload = 'R|' + text;
   }
-  return { version, size };
+
+  // 2) пробуем уместить целиком
+  const probeCanvas = document.createElement('canvas');
+  const single = drawQRSingle(probeCanvas, payload);
+  if (single.ok) {
+    return { multi: false, payload, compressed: payload.startsWith('C|'), version: single.version };
+  }
+
+  // 3) не влезает — режем на части
+  // 800 символов payload + header ~8 = безопасно для QR v20-25
+  const PART_SIZE = 800;
+  const total = Math.ceil(payload.length / PART_SIZE);
+  if (total > 6) {
+    return { tooLong: true, size: payload.length, parts: total };
+  }
+  return { multi: true, payload, parts: total, partSize: PART_SIZE, compressed: payload.startsWith('C|') };
+}
+
+function drawQRPartTo(canvas, payload, idx, total, partSize) {
+  const chunk = payload.slice(idx * partSize, (idx + 1) * partSize);
+  const header = 'P' + (idx + 1) + '/' + total + '|';
+  const r = drawQRSingle(canvas, header + chunk);
+  if (!r.ok) throw new Error(r.error);
+  return r;
+}
+
+async function assembleParts(buf) {
+  const total = buf._total;
+  if (!total) return null;
+  let payload = '';
+  for (let i = 1; i <= total; i++) {
+    if (buf[i] == null) return null;
+    payload += buf[i];
+  }
+  if (payload.startsWith('C|')) {
+    const dec = await decompressString(payload.slice(2));
+    return dec;
+  }
+  if (payload.startsWith('R|')) return payload.slice(2);
+  return payload;
+}
+
+/* Рендер QR-серии с кнопками «дальше/назад» */
+let offerQRState = { payload: null, parts: 0, partSize: 0, current: 0 };
+function renderOfferQRSeries(res) {
+  const canvas = $('offerQRLong');
+  const pager = $('offerQRPager');
+  const btns = $('offerQRBtns');
+  const info = $('offerQRLongInfo');
+
+  if (!res.multi) {
+    drawQRSingle(canvas, res.payload);
+    pager.textContent = '';
+    btns.style.display = 'none';
+    info.textContent = 'QR v' + res.version + ' · ' + res.payload.length + ' симв.' +
+      (res.compressed ? ' (сжат)' : '');
+    return;
+  }
+
+  offerQRState = { payload: res.payload, parts: res.parts, partSize: res.partSize, current: 0 };
+  btns.style.display = 'flex';
+
+  const draw = () => {
+    const i = offerQRState.current;
+    const r = drawQRPartTo(canvas, offerQRState.payload, i, offerQRState.parts, offerQRState.partSize);
+    pager.textContent = 'QR ' + (i+1) + ' / ' + offerQRState.parts + ' · v' + r.version +
+      (res.compressed ? ' · сжат' : '');
+    info.textContent = 'Показывай по очереди — участник сканирует каждый';
+  };
+  $('offerQRPrev').onclick = () => {
+    offerQRState.current = Math.max(0, offerQRState.current - 1);
+    draw();
+  };
+  $('offerQRNext').onclick = () => {
+    offerQRState.current = Math.min(offerQRState.parts - 1, offerQRState.current + 1);
+    draw();
+  };
+  draw();
+}
+
+let joinAnswerQRState = { payload: null, parts: 0, partSize: 0, current: 0 };
+function renderJoinAnswerQRSeries(res) {
+  const canvas = $('joinAnswerQR');
+  const pager = $('joinAnswerQRPager');
+  const btns = $('joinAnswerQRBtns');
+  const info = $('joinAnswerQRInfo');
+
+  if (!res.multi) {
+    drawQRSingle(canvas, res.payload);
+    pager.textContent = '';
+    btns.style.display = 'none';
+    info.textContent = 'QR v' + res.version + ' · ' + res.payload.length + ' симв.' +
+      (res.compressed ? ' (сжат)' : '');
+    return;
+  }
+
+  joinAnswerQRState = { payload: res.payload, parts: res.parts, partSize: res.partSize, current: 0 };
+  btns.style.display = 'flex';
+  const draw = () => {
+    const i = joinAnswerQRState.current;
+    const r = drawQRPartTo(canvas, joinAnswerQRState.payload, i, joinAnswerQRState.parts, joinAnswerQRState.partSize);
+    pager.textContent = 'QR ' + (i+1) + ' / ' + joinAnswerQRState.parts + ' · v' + r.version;
+    info.textContent = 'Показывай по очереди — хост сканирует каждый';
+  };
+  $('joinAnswerQRPrev').onclick = () => {
+    joinAnswerQRState.current = Math.max(0, joinAnswerQRState.current - 1); draw();
+  };
+  $('joinAnswerQRNext').onclick = () => {
+    joinAnswerQRState.current = Math.min(joinAnswerQRState.parts - 1, joinAnswerQRState.current + 1); draw();
+  };
+  draw();
 }
 
 /* ============================================================
-   QR DECODER — встроенный, работает везде
-   Правильный: находит finder'ы, снимает перспективу, читает формат,
-   определяет маску, снимает её, деинтерливит блоки, читает байты.
+   QR DECODER — встроенный
    ============================================================ */
 const QRDecoder = (function(){
   'use strict';
-
-  // --- GF(256) ---
-  const EXP = new Uint8Array(512), LOG = new Uint8Array(256);
-  (function(){ let x=1; for(let i=0;i<255;i++){ EXP[i]=x; LOG[x]=i; x<<=1; if(x&0x100) x^=0x11D; } for(let i=255;i<512;i++) EXP[i]=EXP[i-255]; })();
-  const gf = (a,b) => (a===0||b===0)?0:EXP[LOG[a]+LOG[b]];
-  function polyMul(a, b) {
-    const r = new Array(a.length + b.length - 1).fill(0);
-    for (let i=0;i<a.length;i++) for (let j=0;j<b.length;j++) r[i+j] ^= gf(a[i], b[j]);
-    return r;
-  }
-  function polyEval(p, x) {
-    let y = 0;
-    for (let i=0;i<p.length;i++) y = gf(y, x) ^ p[i];
-    return y;
-  }
-  function rsSyndromes(msg, nsym) {
-    const s = new Array(nsym).fill(0);
-    for (let i=0;i<nsym;i++) s[i] = polyEval(msg, EXP[i]);
-    return s;
-  }
-  function rsFindErrorLocator(synd, nsym) {
-    let errLoc = [1], oldLoc = [1];
-    for (let i=0;i<nsym;i++) {
-      const K = i + 1;
-      let delta = synd[i];
-      for (let j=1;j<errLoc.length;j++) delta ^= gf(errLoc[errLoc.length-1-j], synd[i-j]);
-      oldLoc = oldLoc.concat([0]);
-      if (delta !== 0) {
-        if (oldLoc.length > errLoc.length) {
-          const newLoc = oldLoc.map(v => gf(v, delta));
-          oldLoc = errLoc.map(v => gf(v, EXP[LOG[delta] + 255 - LOG[delta]] || 1));
-          // Простая замена: обновляем errLoc
-          const t = errLoc.slice();
-          for (let k=0;k<oldLoc.length;k++) errLoc[k] = (errLoc[k]||0) ^ oldLoc[k];
-          oldLoc = t.map(v => gf(v, EXP[255 - LOG[delta]] || 1));
-        } else {
-          const newPart = oldLoc.map(v => gf(v, delta));
-          for (let k=0;k<newPart.length;k++) errLoc[k] = (errLoc[k]||0) ^ newPart[k];
-        }
-      }
-    }
-    return errLoc;
-  }
-  function rsCorrect(msg, nsym) {
-    const synd = rsSyndromes(msg, nsym);
-    if (synd.every(s => s === 0)) return msg.slice();
-    // Упрощённо: пробуем исправить до 2 ошибок методом перебора позиций
-    const n = msg.length;
-    const copy = msg.slice();
-    for (let i=0;i<n;i++) {
-      for (let j=i+1;j<n;j++) {
-        for (let a=0;a<256;a++) {
-          for (let b=0;b<256;b++) {
-            copy[i] ^= a; copy[j] ^= b;
-            if (rsSyndromes(copy, nsym).every(s => s === 0)) return copy;
-            copy[i] ^= a; copy[j] ^= b;
-          }
-        }
-      }
-    }
-    // Одиночная ошибка
-    for (let i=0;i<n;i++) {
-      for (let a=1;a<256;a++) {
-        copy[i] ^= a;
-        if (rsSyndromes(copy, nsym).every(s => s === 0)) return copy;
-        copy[i] ^= a;
-      }
-    }
-    // Не смогли — возвращаем как есть (декодер всё равно попробует)
-    return msg.slice();
-  }
-
-  // --- Обработка изображения ---
-  function toGray(imgData) {
-    const { width: w, height: h, data: d } = imgData;
-    const g = new Uint8Array(w * h);
-    for (let i = 0, j = 0; i < d.length; i += 4, j++) {
-      g[j] = (d[i] * 0.299 + d[i+1] * 0.587 + d[i+2] * 0.114) | 0;
-    }
+  function toGray(img) {
+    const w=img.width, h=img.height, d=img.data, g=new Uint8Array(w*h);
+    for (let i=0,j=0;i<d.length;i+=4,j++) g[j]=(d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114)|0;
     return { g, w, h };
   }
-  function binarize(g, w, h) {
-    const out = new Uint8Array(w * h);
-    const blockSize = 16;
-    for (let by = 0; by < h; by += blockSize) {
-      for (let bx = 0; bx < w; bx += blockSize) {
-        let sum = 0, cnt = 0, min = 255, max = 0;
-        for (let y = by; y < Math.min(by+blockSize, h); y++) {
-          for (let x = bx; x < Math.min(bx+blockSize, w); x++) {
-            const v = g[y*w+x]; sum += v; cnt++; if (v<min) min=v; if (v>max) max=v;
-          }
-        }
-        const avg = sum/cnt;
-        const thr = (max - min > 24) ? (min + max) / 2 : avg - 5;
-        for (let y = by; y < Math.min(by+blockSize, h); y++) {
-          for (let x = bx; x < Math.min(bx+blockSize, w); x++) {
-            out[y*w+x] = g[y*w+x] < thr ? 1 : 0;
-          }
-        }
+  function binarize(g,w,h){
+    const out = new Uint8Array(w*h);
+    const bs = 16;
+    for (let by=0;by<h;by+=bs) for (let bx=0;bx<w;bx+=bs){
+      let sum=0,cnt=0,mn=255,mx=0;
+      for (let y=by;y<Math.min(by+bs,h);y++) for (let x=bx;x<Math.min(bx+bs,w);x++){
+        const v=g[y*w+x];sum+=v;cnt++;if(v<mn)mn=v;if(v>mx)mx=v;
       }
+      const avg=sum/cnt, thr=(mx-mn>24)?(mn+mx)/2:avg-5;
+      for (let y=by;y<Math.min(by+bs,h);y++) for (let x=bx;x<Math.min(bx+bs,w);x++)
+        out[y*w+x]=g[y*w+x]<thr?1:0;
     }
     return out;
   }
-
-  // --- Поиск finder-паттернов через ratio 1:1:3:1:1 ---
-  function checkRatio(counts, mod) {
-    const total = counts.reduce((a,b)=>a+b,0);
-    if (total < 7) return false;
-    const tol = mod * 0.75;
-    return Math.abs(counts[0]-mod)<tol && Math.abs(counts[1]-mod)<tol &&
-           Math.abs(counts[2]-3*mod)<tol*3 && Math.abs(counts[3]-mod)<tol &&
-           Math.abs(counts[4]-mod)<tol;
+  function ratioOK(c, m) {
+    const t = c.reduce((a,b)=>a+b,0); if (t<7) return false;
+    const tol = m*0.75;
+    return Math.abs(c[0]-m)<tol && Math.abs(c[1]-m)<tol && Math.abs(c[2]-3*m)<tol*3
+        && Math.abs(c[3]-m)<tol && Math.abs(c[4]-m)<tol;
   }
-
-  function findFinders(bin, w, h) {
-    const found = [];
-    const visited = new Uint8Array(w * h);
-    for (let y = 0; y < h; y += 3) {
-      for (let x = 0; x < w; x += 3) {
-        if (!bin[y*w+x] || visited[y*w+x]) continue;
-        // Горизонтальная проверка
-        const counts = [0,0,0,0,0];
-        let i = 0, xx = x;
-        while (xx >= 0 && i < 5) {
-          if (bin[y*w+xx]) counts[i]++;
-          else { if (i % 2 === 1) i++; else break; if (i<5) counts[i]=1; }
-          xx--;
-        }
-        counts.reverse();
-        i = 0; xx = x + 1;
-        while (xx < w && i < 4) {
-          const v = bin[y*w+xx];
-          const curIdx = i + 1;
-          if (curIdx % 2 === 1 && v) counts[curIdx]++;
-          else if (curIdx % 2 === 0 && !v) counts[curIdx]++;
-          else if (curIdx % 2 === 0 && v) { i++; counts[i+1]=1; }
-          else break;
-          xx++;
-        }
-        const total = counts.reduce((a,b)=>a+b,0);
-        if (total < 7) continue;
-        const mod = total / 7;
-        if (!checkRatio(counts, mod)) continue;
-        const cx = Math.round(xx - 1 - counts[4] - counts[3] - counts[2]/2);
-        const cy = y;
-        // Вертикальная проверка
-        const vCounts = [0,0,0,0,0];
-        i = 0;
-        let yy = cy;
-        while (yy >= 0 && i < 5) {
-          if (bin[yy*w+cx]) vCounts[i]++;
-          else { if (i % 2 === 1) i++; else break; if (i<5) vCounts[i]=1; }
-          yy--;
-        }
-        vCounts.reverse();
-        i = 0; yy = cy + 1;
-        while (yy < h && i < 4) {
-          const v = bin[yy*w+cx];
-          const curIdx = i + 1;
-          if (curIdx % 2 === 1 && v) vCounts[curIdx]++;
-          else if (curIdx % 2 === 0 && !v) vCounts[curIdx]++;
-          else if (curIdx % 2 === 0 && v) { i++; vCounts[i+1]=1; }
-          else break;
-          yy++;
-        }
-        const vTotal = vCounts.reduce((a,b)=>a+b,0);
-        if (vTotal < 7) continue;
-        const vMod = vTotal / 7;
-        if (!checkRatio(vCounts, vMod)) continue;
-        const cy2 = Math.round(yy - 1 - vCounts[4] - vCounts[3] - vCounts[2]/2);
-        // Проверим, что центр действительно чёрный
-        if (!bin[cy2*w+cx]) continue;
-        // Дедупликация
-        let dup = false;
-        for (const f of found) {
-          if (Math.abs(f.x - cx) < 8 && Math.abs(f.y - cy2) < 8) { dup = true; break; }
-        }
-        if (!dup) found.push({ x: cx, y: cy2, size: mod });
-        // Помечаем область
-        for (let dy=-3; dy<=3; dy++) for (let dx=-3; dx<=3; dx++) {
-          const nx = cx+dx, ny = cy2+dy;
-          if (nx>=0 && nx<w && ny>=0 && ny<h) visited[ny*w+nx] = 1;
-        }
+  function findFinders(bin,w,h){
+    const found=[],visited=new Uint8Array(w*h);
+    for (let y=0;y<h;y+=3) for (let x=0;x<w;x+=3){
+      if (!bin[y*w+x] || visited[y*w+x]) continue;
+      const c=[0,0,0,0,0]; let i=0,xx=x;
+      while (xx>=0 && i<5) {
+        if (bin[y*w+xx]) c[i]++;
+        else { if (i%2===1) i++; else break; if (i<5) c[i]=1; }
+        xx--;
+      }
+      c.reverse(); i=0; xx=x+1;
+      while (xx<w && i<4){
+        const v=bin[y*w+xx], k=i+1;
+        if (k%2===1 && v) c[k]++;
+        else if (k%2===0 && !v) c[k]++;
+        else if (k%2===0 && v) { i++; c[i+1]=1; }
+        else break;
+        xx++;
+      }
+      const t=c.reduce((a,b)=>a+b,0); if (t<7) continue;
+      const m=t/7; if (!ratioOK(c,m)) continue;
+      const cx=Math.round(xx-1-c[4]-c[3]-c[2]/2), cy=y;
+      const vc=[0,0,0,0,0]; i=0; let yy=cy;
+      while (yy>=0 && i<5) {
+        if (bin[yy*w+cx]) vc[i]++;
+        else { if (i%2===1) i++; else break; if (i<5) vc[i]=1; }
+        yy--;
+      }
+      vc.reverse(); i=0; yy=cy+1;
+      while (yy<h && i<4){
+        const v=bin[yy*w+cx], k=i+1;
+        if (k%2===1 && v) vc[k]++;
+        else if (k%2===0 && !v) vc[k]++;
+        else if (k%2===0 && v) { i++; vc[i+1]=1; }
+        else break;
+        yy++;
+      }
+      const vt=vc.reduce((a,b)=>a+b,0); if (vt<7) continue;
+      const vm=vt/7; if (!ratioOK(vc,vm)) continue;
+      const cy2=Math.round(yy-1-vc[4]-vc[3]-vc[2]/2);
+      if (!bin[cy2*w+cx]) continue;
+      let dup=false;
+      for (const f of found) if (Math.abs(f.x-cx)<8 && Math.abs(f.y-cy2)<8) { dup=true; break; }
+      if (!dup) found.push({ x: cx, y: cy2 });
+      for (let dy=-3;dy<=3;dy++) for (let dx=-3;dx<=3;dx++){
+        const nx=cx+dx, ny=cy2+dy;
+        if (nx>=0&&nx<w&&ny>=0&&ny<h) visited[ny*w+nx]=1;
       }
     }
     return found;
   }
-
-  // --- Выбор трёх finder'ов ---
-  function pickThree(finders) {
-    if (finders.length < 3) return null;
-    // Ищем три, у которых углы примерно прямые и стороны примерно равны
-    let best = null, bestErr = Infinity;
-    for (let a = 0; a < finders.length; a++)
-      for (let b = a+1; b < finders.length; b++)
-        for (let c = b+1; c < finders.length; c++) {
-          const pts = [finders[a], finders[b], finders[c]];
-          // Гипотенуза — самая длинная сторона. TL — не на гипотенузе.
-          const sides = [
-            { i:0, j:1, d: Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y) },
-            { i:0, j:2, d: Math.hypot(pts[0].x-pts[2].x, pts[0].y-pts[2].y) },
-            { i:1, j:2, d: Math.hypot(pts[1].x-pts[2].x, pts[1].y-pts[2].y) },
-          ];
-          sides.sort((a,b)=>b.d-a.d);
-          const [hyp, s1, s2] = sides;
-          // Прямой угол: гипотенуза^2 ≈ s1^2 + s2^2
-          const err = Math.abs(hyp.d*hyp.d - s1.d*s1.d - s2.d*s2.d) / (hyp.d*hyp.d);
-          const sideRatio = Math.abs(s1.d - s2.d) / Math.max(s1.d, s2.d);
-          const total = err * 2 + sideRatio;
-          if (total < bestErr) {
-            // Определяем TL — общая точка s1 и s2
-            const s1set = new Set([s1.i, s1.j]);
-            const s2set = new Set([s2.i, s2.j]);
-            const tlIdx = [...s1set].find(v => s2set.has(v));
-            const other = [0,1,2].filter(v => v !== tlIdx);
-            // Определяем по ориентации: TR — тот, что справа, BL — ниже
-            const tl = pts[tlIdx];
-            const v1 = { x: pts[other[0]].x - tl.x, y: pts[other[0]].y - tl.y };
-            const v2 = { x: pts[other[1]].x - tl.x, y: pts[other[1]].y - tl.y };
-            // Cross product: если v1 × v2 > 0, то v1 → v2 по часовой, т.е. v1=TR, v2=BL
-            const cross = v1.x * v2.y - v1.y * v2.x;
-            let tr, bl;
-            if (cross > 0) { tr = pts[other[0]]; bl = pts[other[1]]; }
-            else { tr = pts[other[1]]; bl = pts[other[0]]; }
-            bestErr = total;
-            best = { tl, tr, bl, moduleSize: (s1.d + s2.d) / 2 / 14, err: total };
-          }
-        }
-    if (best && best.err < 0.5) return best;
-    return null;
+  function pickThree(fs){
+    if (fs.length<3) return null;
+    let best=null,be=Infinity;
+    for (let a=0;a<fs.length;a++) for (let b=a+1;b<fs.length;b++) for (let c=b+1;c<fs.length;c++){
+      const pts=[fs[a],fs[b],fs[c]];
+      const sides=[
+        {i:0,j:1,d:Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y)},
+        {i:0,j:2,d:Math.hypot(pts[0].x-pts[2].x,pts[0].y-pts[2].y)},
+        {i:1,j:2,d:Math.hypot(pts[1].x-pts[2].x,pts[1].y-pts[2].y)},
+      ].sort((a,b)=>b.d-a.d);
+      const [hyp,s1,s2]=sides;
+      const err=Math.abs(hyp.d*hyp.d-s1.d*s1.d-s2.d*s2.d)/(hyp.d*hyp.d);
+      const sr=Math.abs(s1.d-s2.d)/Math.max(s1.d,s2.d);
+      const tot=err*2+sr;
+      if (tot<be){
+        const s1set=new Set([s1.i,s1.j]), s2set=new Set([s2.i,s2.j]);
+        const tlIdx=[...s1set].find(v=>s2set.has(v));
+        const oth=[0,1,2].filter(v=>v!==tlIdx);
+        const tl=pts[tlIdx];
+        const v1={x:pts[oth[0]].x-tl.x,y:pts[oth[0]].y-tl.y};
+        const v2={x:pts[oth[1]].x-tl.x,y:pts[oth[1]].y-tl.y};
+        const cr=v1.x*v2.y-v1.y*v2.x;
+        let tr,bl; if (cr>0){tr=pts[oth[0]];bl=pts[oth[1]];} else {tr=pts[oth[1]];bl=pts[oth[0]];}
+        be=tot; best={tl,tr,bl,moduleSize:(s1.d+s2.d)/2/14,err:tot};
+      }
+    }
+    return (best && best.err<0.6) ? best : null;
   }
-
-  // --- Перспективная выборка ---
-  function sampleGrid(bin, w, h, tl, tr, bl, size) {
-    // BR — гипотетический
-    const br = { x: tr.x + bl.x - tl.x, y: tr.y + bl.y - tl.y };
-    const out = new Uint8Array(size * size);
-    for (let y = 0; y < size; y++) {
-      const v = (y + 0.5) / size;
-      for (let x = 0; x < size; x++) {
-        const u = (x + 0.5) / size;
-        const px = (1-u)*(1-v)*tl.x + u*(1-v)*tr.x + u*v*br.x + (1-u)*v*bl.x;
-        const py = (1-u)*(1-v)*tl.y + u*(1-v)*tr.y + u*v*br.y + (1-u)*v*bl.y;
-        const ix = Math.round(px), iy = Math.round(py);
-        if (ix < 0 || ix >= w || iy < 0 || iy >= h) return null;
-        out[y * size + x] = bin[iy * w + ix];
+  function sampleGrid(bin,w,h,tl,tr,bl,size){
+    const br={x:tr.x+bl.x-tl.x,y:tr.y+bl.y-tl.y};
+    const out=new Uint8Array(size*size);
+    for (let y=0;y<size;y++){
+      const v=(y+0.5)/size;
+      for (let x=0;x<size;x++){
+        const u=(x+0.5)/size;
+        const px=(1-u)*(1-v)*tl.x + u*(1-v)*tr.x + u*v*br.x + (1-u)*v*bl.x;
+        const py=(1-u)*(1-v)*tl.y + u*(1-v)*tr.y + u*v*br.y + (1-u)*v*bl.y;
+        const ix=Math.round(px), iy=Math.round(py);
+        if (ix<0||ix>=w||iy<0||iy>=h) return null;
+        out[y*size+x]=bin[iy*w+ix];
       }
     }
     return out;
   }
-
-  // --- Формат-информация: извлекаем ECC-уровень и маску ---
-  function readFormat(grid, size) {
-    const bits1 = [];
-    const positions1 = [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
-    for (const [x, y] of positions1) bits1.push(grid[y*size+x]);
-    const positions2 = [[size-1,8],[size-2,8],[size-3,8],[size-4,8],[size-5,8],[size-6,8],[size-7,8],
-                        [8,size-8],[8,size-7],[8,size-6],[8,size-5],[8,size-4],[8,size-3],[8,size-2],[8,size-1]];
-    const bits2 = [];
-    for (const [x, y] of positions2) bits2.push(grid[y*size+x]);
-
-    function parse(bits) {
-      let v = 0;
-      for (let i = 0; i < 15; i++) v |= (bits[i] & 1) << i;
-      // XOR mask
+  function readFormat(grid,size){
+    const b1=[], p1=[[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+    for (const [x,y] of p1) b1.push(grid[y*size+x]);
+    function parse(bits){
+      let v=0; for (let i=0;i<15;i++) v |= (bits[i]&1)<<i;
       v ^= 0x5412;
-      // Проверяем по таблице BCH — берём 5 старших бит
-      const data5 = v >> 10;
-      // ECC bits (старшие 2 бита): 01=L, 00=M, 11=Q, 10=H
-      const eccBits = (data5 >> 3) & 3;
-      const mask = data5 & 7;
-      let ecc;
-      switch (eccBits) {
-        case 1: ecc = 0; break; // L
-        case 0: ecc = 1; break; // M
-        case 3: ecc = 2; break; // Q
-        case 2: ecc = 3; break; // H
-      }
-      return { ecc, mask };
+      const d5 = v>>10;
+      const ecc = (d5>>3)&3;
+      const mask = d5&7;
+      let eccIdx;
+      switch(ecc){ case 1: eccIdx=0; break; case 0: eccIdx=1; break; case 3: eccIdx=2; break; case 2: eccIdx=3; break; }
+      return { ecc: eccIdx, mask };
     }
-    // Пробуем оба набора — валидный один
-    const r1 = parse(bits1);
-    const r2 = parse(bits2);
-    // Простая эвристика: берём тот, где ECC известен
-    return r1.mask >= 0 ? r1 : r2;
+    return parse(b1);
   }
-
-  // --- Таблицы данных для ECC уровня (используем полные таблицы из энкодера) ---
-  // Берём таблицу для L, но добавляем таблицы M, Q, H через формулы
-  // Для краткости — используем только L и M, этого достаточно для SDP
-  const EC_TABLE = {
-    // L из QR_TABLE_L
-    L: QR_TABLE_L,
-    // M — построим из стандартных данных
-    M: {
-      1:[26,10,[1,16,0,0]],2:[44,16,[1,28,0,0]],3:[70,26,[1,44,0,0]],4:[100,18,[2,32,0,0]],
-      5:[134,24,[2,43,0,0]],6:[172,16,[4,27,0,0]],7:[196,18,[4,31,0,0]],8:[242,22,[2,38,2,39]],
-      9:[292,22,[3,36,2,37]],10:[346,26,[4,43,1,44]],11:[404,30,[1,50,4,51]],12:[466,22,[6,36,2,37]],
-      13:[532,22,[8,37,1,38]],14:[581,24,[4,40,5,41]],15:[655,24,[5,41,5,42]],16:[733,28,[7,45,3,46]],
-      17:[815,28,[10,46,1,47]],18:[901,26,[9,43,4,44]],19:[991,26,[3,44,11,45]],20:[1085,26,[3,41,13,42]],
-      21:[1156,26,[17,42,0,0]],22:[1258,28,[17,46,0,0]],23:[1364,28,[4,47,14,48]],24:[1474,28,[6,45,14,46]],
-      25:[1588,28,[8,47,13,48]],26:[1706,28,[19,46,4,47]],27:[1828,28,[22,45,3,46]],28:[1921,28,[3,45,23,46]],
-      29:[2051,28,[21,45,7,46]],30:[2185,28,[19,47,10,48]],31:[2323,28,[2,46,29,47]],32:[2465,28,[10,46,23,47]],
-      33:[2611,28,[14,46,21,47]],34:[2761,28,[14,46,23,47]],35:[2876,28,[12,47,26,48]],36:[3034,28,[6,47,34,48]],
-      37:[3196,28,[29,46,14,47]],38:[3362,28,[13,46,32,47]],39:[3532,28,[40,47,7,48]],40:[3706,28,[18,47,31,48]],
-    },
-  };
-
-  // --- Чтение кодовых слов из грида с учётом маски ---
-  function readCodewords(grid, size, version, mask) {
-    // Функция маски
-    function maskFn(x, y) {
-      switch (mask) {
-        case 0: return (x + y) % 2 === 0;
-        case 1: return y % 2 === 0;
-        case 2: return x % 3 === 0;
-        case 3: return (x + y) % 3 === 0;
-        case 4: return (Math.floor(y/2) + Math.floor(x/3)) % 2 === 0;
-        case 5: return ((x*y) % 2) + ((x*y) % 3) === 0;
-        case 6: return (((x*y) % 2) + ((x*y) % 3)) % 2 === 0;
-        case 7: return (((x+y) % 2) + ((x*y) % 3)) % 2 === 0;
+  function readCodewords(grid,size,version,mask){
+    function maskFn(x,y){
+      switch(mask){
+        case 0: return (x+y)%2===0;
+        case 1: return y%2===0;
+        case 2: return x%3===0;
+        case 3: return (x+y)%3===0;
+        case 4: return (Math.floor(y/2)+Math.floor(x/3))%2===0;
+        case 5: return ((x*y)%2)+((x*y)%3)===0;
+        case 6: return (((x*y)%2)+((x*y)%3))%2===0;
+        case 7: return (((x+y)%2)+((x*y)%3))%2===0;
       }
       return false;
     }
-    // Помечаем все функциональные модули как reserved
-    const reserved = new Uint8Array(size * size);
-    const mark = (x, y) => { if (x>=0 && x<size && y>=0 && y<size) reserved[y*size+x] = 1; };
-    for (let y = 0; y < 9; y++) for (let x = 0; x < 9; x++) mark(x, y);
-    for (let y = 0; y < 9; y++) for (let x = size-8; x < size; x++) mark(x, y);
-    for (let y = size-8; y < size; y++) for (let x = 0; x < 9; x++) mark(x, y);
-    for (let i = 8; i < size-8; i++) { mark(i, 6); mark(6, i); }
+    const res=new Uint8Array(size*size);
+    const mark=(x,y)=>{ if(x>=0&&x<size&&y>=0&&y<size) res[y*size+x]=1; };
+    for (let y=0;y<9;y++) for (let x=0;x<9;x++) mark(x,y);
+    for (let y=0;y<9;y++) for (let x=size-8;x<size;x++) mark(x,y);
+    for (let y=size-8;y<size;y++) for (let x=0;x<9;x++) mark(x,y);
+    for (let i=8;i<size-8;i++){ mark(i,6); mark(6,i); }
     const aligns = QR_ALIGN[version] || [];
-    for (const ay of aligns) for (const ax of aligns) {
+    for (const ay of aligns) for (const ax of aligns){
       if ((ax===6&&ay===6)||(ax===6&&ay===size-7)||(ax===size-7&&ay===6)) continue;
-      for (let dy=-2;dy<=2;dy++) for (let dx=-2;dx<=2;dx++) mark(ax+dx, ay+dy);
+      for (let dy=-2;dy<=2;dy++) for (let dx=-2;dx<=2;dx++) mark(ax+dx,ay+dy);
     }
-    // Format info
-    mark(8, size-8);
-    for (let i = 0; i < 9; i++) { mark(8, i); mark(i, 8); mark(size-1-i, 8); mark(8, size-1-i); }
-    // Version info
-    if (version >= 7) for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) { mark(size-11+j, i); mark(i, size-11+j); }
-
-    // Читаем биты зигзагом
-    const bits = [];
-    let upward = true;
-    for (let col = size-1; col > 0; col -= 2) {
-      if (col === 6) col--;
-      for (let i = 0; i < size; i++) {
-        const y = upward ? size-1-i : i;
-        for (let c = 0; c < 2; c++) {
-          const x = col - c;
-          if (reserved[y*size+x]) continue;
+    mark(8,size-8);
+    for (let i=0;i<9;i++){ mark(8,i); mark(i,8); mark(size-1-i,8); mark(8,size-1-i); }
+    if (version >= 7) for (let i=0;i<6;i++) for (let j=0;j<3;j++){ mark(size-11+j,i); mark(i,size-11+j); }
+    const bits=[];
+    let up=true;
+    for (let col=size-1;col>0;col-=2){
+      if (col===6) col--;
+      for (let i=0;i<size;i++){
+        const y = up ? size-1-i : i;
+        for (let c=0;c<2;c++){
+          const x=col-c;
+          if (res[y*size+x]) continue;
           let bit = grid[y*size+x];
-          if (maskFn(x, y)) bit ^= 1;
+          if (maskFn(x,y)) bit ^= 1;
           bits.push(bit);
         }
       }
-      upward = !upward;
+      up=!up;
     }
-    // Собираем байты
-    const bytes = new Uint8Array(Math.floor(bits.length / 8));
-    for (let i = 0; i < bytes.length; i++) {
-      let b = 0;
-      for (let j = 0; j < 8; j++) b = (b << 1) | (bits[i*8+j] || 0);
-      bytes[i] = b;
+    const bytes=new Uint8Array(Math.floor(bits.length/8));
+    for (let i=0;i<bytes.length;i++){
+      let b=0; for(let j=0;j<8;j++) b=(b<<1)|(bits[i*8+j]||0);
+      bytes[i]=b;
     }
     return bytes;
   }
-
-  // --- Деинтерливинг + RS-коррекция ---
-  function deinterleaveAndDecode(raw, version, eccLevel) {
-    const table = EC_TABLE[eccLevel] || EC_TABLE.L;
-    if (!table[version]) return null;
-    const [totalCw, ecPerBlock, blocks] = table[version];
-    const blockSizes = [];
-    for (let i = 0; i < blocks[0]; i++) blockSizes.push(blocks[1]);
-    for (let i = 0; i < blocks[2]; i++) blockSizes.push(blocks[3]);
-    const totalBlocks = blockSizes.length;
-    if (totalBlocks === 0) return null;
-    const dataCw = blockSizes.reduce((a,b)=>a+b,0);
-    // Чередование: сначала data блоков, потом ecc
-    const blockData = blockSizes.map(s => new Uint8Array(s));
-    const blockEcc = blockSizes.map(() => new Uint8Array(ecPerBlock));
-    let idx = 0;
-    // Данные
-    const maxDataLen = Math.max(...blockSizes);
-    for (let i = 0; i < maxDataLen; i++) {
-      for (let b = 0; b < totalBlocks; b++) {
-        if (i < blockSizes[b]) {
-          if (idx >= raw.length) return null;
-          blockData[b][i] = raw[idx++];
-        }
-      }
-    }
-    // ECC
-    for (let i = 0; i < ecPerBlock; i++) {
-      for (let b = 0; b < totalBlocks; b++) {
-        if (idx >= raw.length) return null;
-        blockEcc[b][i] = raw[idx++];
-      }
-    }
-    // Собираем данные с ECC и корректируем
-    const finalData = new Uint8Array(dataCw);
-    let foff = 0;
-    for (let b = 0; b < totalBlocks; b++) {
-      const full = new Uint8Array(blockSizes[b] + ecPerBlock);
-      full.set(blockData[b], 0);
-      full.set(blockEcc[b], blockSizes[b]);
-      const corrected = rsCorrect(full, ecPerBlock);
-      finalData.set(corrected.slice(0, blockSizes[b]), foff);
-      foff += blockSizes[b];
-    }
-    return finalData;
-  }
-
-  // --- Декодирование полезной нагрузки ---
-  function decodePayload(data, version) {
+  function decodePayload(raw, version){
+    const blocks = QR_TABLE_L[version][2];
+    const dCw = (blocks[0]*blocks[1]) + (blocks[2]*blocks[3]);
+    const data = raw.slice(0, dCw);
     const bits = [];
-    for (const b of data) for (let i = 7; i >= 0; i--) bits.push((b >> i) & 1);
-    const readBits = (pos, len) => {
-      let v = 0;
-      for (let i = 0; i < len; i++) v = (v << 1) | (bits[pos + i] || 0);
-      return v;
-    };
+    for (const b of data) for (let i=7;i>=0;i--) bits.push((b>>i)&1);
     let pos = 0;
-    const result = [];
-    while (pos + 4 <= bits.length) {
-      const mode = readBits(pos, 4);
-      pos += 4;
-      if (mode === 0) break; // terminator
-      if (mode === 4) { // byte
-        const lenBits = version < 10 ? 8 : 16;
-        const count = readBits(pos, lenBits);
-        pos += lenBits;
-        for (let i = 0; i < count; i++) {
-          result.push(readBits(pos, 8));
-          pos += 8;
-        }
-      } else if (mode === 2) { // alphanumeric
-        const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:';
-        const lenBits = version < 10 ? 9 : 11;
-        const count = readBits(pos, lenBits);
-        pos += lenBits;
-        for (let i = 0; i + 1 < count; i += 2) {
-          const v = readBits(pos, 11);
-          pos += 11;
-          result.push(charset.charCodeAt(Math.floor(v / 45)));
-          result.push(charset.charCodeAt(v % 45));
-        }
-        if (count % 2 === 1) {
-          const v = readBits(pos, 6);
-          pos += 6;
-          result.push(charset.charCodeAt(v));
-        }
-      } else if (mode === 1) { // numeric
-        const lenBits = version < 10 ? 10 : 12;
-        const count = readBits(pos, lenBits);
-        pos += lenBits;
-        let i = 0;
-        while (i + 2 < count) {
-          const v = readBits(pos, 10); pos += 10;
-          result.push(48 + Math.floor(v / 100));
-          result.push(48 + Math.floor((v / 10) % 10));
-          result.push(48 + (v % 10));
-          i += 3;
-        }
-        if (count - i === 2) {
-          const v = readBits(pos, 7); pos += 7;
-          result.push(48 + Math.floor(v / 10));
-          result.push(48 + (v % 10));
-        } else if (count - i === 1) {
-          const v = readBits(pos, 4); pos += 4;
-          result.push(48 + v);
-        }
-      } else {
-        return null; // ECI/kanji не поддерживаем
-      }
-    }
-    try { return new TextDecoder().decode(new Uint8Array(result)); }
+    const rb = (n) => { let v=0; for(let i=0;i<n;i++) v=(v<<1)|(bits[pos+i]||0); pos+=n; return v; };
+    const mode = rb(4);
+    if (mode !== 4) return null;
+    const lenBits = version < 10 ? 8 : 16;
+    const count = rb(lenBits);
+    if (count <= 0 || count > dCw - 3) return null;
+    const bytes = [];
+    for (let i=0;i<count;i++) bytes.push(rb(8));
+    try { return new TextDecoder().decode(new Uint8Array(bytes)); }
     catch { return null; }
   }
-
-  // --- Публичный API ---
-  function decode(imageData) {
+  function decode(imageData){
     const { g, w, h } = toGray(imageData);
-    const bin = binarize(g, w, h);
-    const finders = findFinders(bin, w, h);
+    const bin = binarize(g,w,h);
+    const finders = findFinders(bin,w,h);
     if (finders.length < 3) return null;
     const trio = pickThree(finders);
     if (!trio) return null;
     const { tl, tr, bl, moduleSize } = trio;
-    // Размер QR: расстояние между TL и TR ≈ (size - 7) * moduleSize
-    const dTLTR = Math.hypot(tr.x - tl.x, tr.y - tl.y);
+    const dTLTR = Math.hypot(tr.x-tl.x, tr.y-tl.y);
     const approxSize = Math.round(dTLTR / moduleSize) + 7;
-    const trySizes = [];
-    for (let v = 1; v <= 40; v++) {
-      const sz = v * 4 + 17;
-      if (Math.abs(sz - approxSize) < 10) trySizes.push({ v, sz });
+    const tryList = [];
+    for (let v=1; v<=40; v++){
+      const sz = v*4+17;
+      tryList.push({ v, sz, diff: Math.abs(sz-approxSize) });
     }
-    if (trySizes.length === 0) {
-      // Стандартный fallback
-      for (let v = 1; v <= 40; v++) trySizes.push({ v, sz: v * 4 + 17 });
-    }
-    trySizes.sort((a,b) => Math.abs(a.sz - approxSize) - Math.abs(b.sz - approxSize));
-
-    for (const { v, sz } of trySizes.slice(0, 6)) {
-      const grid = sampleGrid(bin, w, h, tl, tr, bl, sz);
+    tryList.sort((a,b)=>a.diff-b.diff);
+    for (const { v, sz } of tryList.slice(0, 10)){
+      const grid = sampleGrid(bin,w,h,tl,tr,bl,sz);
       if (!grid) continue;
-      const fmt = readFormat(grid, sz);
-      const raw = readCodewords(grid, sz, v, fmt.mask);
-      const eccLevelName = ['L','M','Q','H'][fmt.ecc] || 'L';
-      const corrected = deinterleaveAndDecode(raw, v, eccLevelName);
-      if (!corrected) continue;
-      const text = decodePayload(corrected, v);
-      if (text && text.length > 4) return text;
+      const fmt = readFormat(grid,sz);
+      if (fmt.ecc !== 0) continue;
+      const raw = readCodewords(grid,sz,v,fmt.mask);
+      const text = decodePayload(raw, v);
+      if (text && text.length > 3) return text;
     }
     return null;
   }
-
   return { decode };
 })();
 
@@ -1340,25 +1154,24 @@ const QRDecoder = (function(){
 async function initScanner() {
   if ('BarcodeDetector' in window) {
     try {
-      const formats = await BarcodeDetector.getSupportedFormats();
-      if (formats.includes('qr_code')) {
-        S.barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
-      }
-    } catch(_) { S.barcodeDetector = null; }
+      const fmts = await BarcodeDetector.getSupportedFormats();
+      if (fmts.includes('qr_code')) S.barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+    } catch(_){}
   }
 }
-
 async function openScanner(target) {
   S.scanTarget = target;
+  S.parts = { buf: {}, total: 0, timer: null, target: null };
   $('scannerModal').classList.add('show');
   $('scanStatus').textContent = 'Запускаю камеру…';
   $('scanHint').textContent = 'Держи QR в рамке';
+  $('scanProgress').classList.remove('show');
+  $('scanProgress').textContent = '';
   try {
     let stream;
     try {
       stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { exact: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false
+        video: { facingMode: { exact: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false
       });
     } catch(_) {
       stream = await navigator.mediaDevices.getUserMedia({
@@ -1368,15 +1181,14 @@ async function openScanner(target) {
     S.scannerStream = stream;
     $('scannerVideo').srcObject = stream;
     await $('scannerVideo').play();
-    if (S.barcodeDetector) startScanLoopDetector();
-    else startScanLoopOwnDecoder();
+    if (S.barcodeDetector) scanLoopDetector();
+    else scanLoopOwn();
   } catch(e) {
     $('scanStatus').textContent = 'Ошибка камеры';
-    $('scanHint').innerHTML = 'Нет доступа: ' + e.message + '<br>Нужен HTTPS. Либо введи код вручную.';
+    $('scanHint').innerHTML = 'Нет доступа: ' + e.message + '<br>Нужен HTTPS.';
   }
 }
-
-function startScanLoopDetector() {
+function scanLoopDetector() {
   const video = $('scannerVideo');
   const tick = async () => {
     if (!$('scannerModal').classList.contains('show')) return;
@@ -1385,7 +1197,7 @@ function startScanLoopDetector() {
         const codes = await S.barcodeDetector.detect(video);
         if (codes && codes.length > 0) {
           const val = codes[0].rawValue;
-          if (val && val.length > 10) { handleScanned(val); return; }
+          if (val) { handleScanned(val); return; }
         }
       } catch(_){}
     }
@@ -1393,49 +1205,128 @@ function startScanLoopDetector() {
   };
   S.scannerRAF = requestAnimationFrame(tick);
 }
-
-function startScanLoopOwnDecoder() {
+function scanLoopOwn() {
   const video = $('scannerVideo');
   const canvas = document.createElement('canvas');
-  const ctx2d = canvas.getContext('2d', { willReadFrequently: true });
+  const c2 = canvas.getContext('2d', { willReadFrequently: true });
   let lastTry = 0;
-  const TICK = 250;
   const tick = () => {
     if (!$('scannerModal').classList.contains('show')) return;
     const now = performance.now();
-    if (now - lastTry >= TICK && video.readyState >= 2 && video.videoWidth > 0) {
+    if (now - lastTry >= 250 && video.readyState >= 2 && video.videoWidth > 0) {
       lastTry = now;
       try {
         const vw = video.videoWidth, vh = video.videoHeight;
-        const boxSize = Math.min(vw, vh) * 0.9;
-        const sx = (vw - boxSize) / 2;
-        const sy = (vh - boxSize) / 2;
-        const targetW = 480;
-        canvas.width = targetW;
-        canvas.height = targetW;
-        ctx2d.drawImage(video, sx, sy, boxSize, boxSize, 0, 0, targetW, targetW);
-        const img = ctx2d.getImageData(0, 0, targetW, targetW);
+        const box = Math.min(vw, vh) * 0.9;
+        canvas.width = 480; canvas.height = 480;
+        c2.drawImage(video, (vw-box)/2, (vh-box)/2, box, box, 0, 0, 480, 480);
+        const img = c2.getImageData(0, 0, 480, 480);
         const text = QRDecoder.decode(img);
-        if (text && text.length > 10) { handleScanned(text); return; }
-      } catch(e) {}
+        if (text) { handleScanned(text); return; }
+      } catch(_){}
     }
     S.scannerRAF = requestAnimationFrame(tick);
   };
   S.scannerRAF = requestAnimationFrame(tick);
 }
 
-function handleScanned(text) {
+/* Обработка сканирования: части (P1/N|...) → склейка, одиночный → распаковка */
+async function handleScanned(text) {
+  const raw = String(text).trim();
+
+  // Часть?
+  const m = raw.match(/^P(\d+)\/(\d+)\|([\s\S]*)$/);
+  if (m) {
+    const idx = parseInt(m[1], 10);
+    const total = parseInt(m[2], 10);
+    const data = m[3];
+
+    if (S.parts.total !== total || S.parts.target !== S.scanTarget) {
+      S.parts = { buf: {}, total, timer: null, target: S.scanTarget };
+    }
+    if (S.parts.buf[idx] != null) {
+      // уже было — просто напоминаем
+      toast('Часть ' + idx + ' уже принята', true);
+      return;
+    }
+    S.parts.buf[idx] = data;
+    S.parts.buf._total = total;
+
+    // Вибрация + звук
+    SFX.qrBeep();
+    if (navigator.vibrate) navigator.vibrate(40);
+
+    const have = Object.keys(S.parts.buf).filter(k => k !== '_total').length;
+    $('scanProgress').classList.add('show');
+    $('scanProgress').textContent = 'Принято ' + have + ' / ' + total;
+    $('scanStatus').textContent = 'Часть ' + idx + ' получена';
+
+    // сброс таймера
+    if (S.parts.timer) clearTimeout(S.parts.timer);
+    S.parts.timer = setTimeout(() => {
+      $('scanStatus').textContent = 'Тайм-аут — начни заново';
+      S.parts = { buf: {}, total: 0, timer: null, target: null };
+      $('scanProgress').classList.remove('show');
+    }, 90000);
+
+    // всё собрано?
+    let complete = true;
+    for (let i = 1; i <= total; i++) if (S.parts.buf[i] == null) { complete = false; break; }
+    if (!complete) return;
+
+    const assembled = await assembleParts(S.parts.buf);
+    S.parts = { buf: {}, total: 0, timer: null, target: null };
+    $('scanProgress').classList.remove('show');
+    if (!assembled) { toast('Не удалось собрать код', true); return; }
+    // Мгновенно принимаем результат
+    SFX.connected();
+    if (navigator.vibrate) navigator.vibrate([20,40,20]);
+    return handleScannedDecoded(assembled);
+  }
+
+  // Одиночный: распаковываем C|/R|
   SFX.qrBeep();
   if (navigator.vibrate) navigator.vibrate(60);
-  if (S.scanTarget === 'offer') {
-    $('joinOfferInput').value = text.trim();
-    $('joinOfferInputText').value = text.trim();
-    toast('QR прочитан');
-  } else if (S.scanTarget === 'answer') {
-    $('answerInput').value = text.trim();
-    toast('QR прочитан');
+  let decoded = raw;
+  if (raw.startsWith('C|')) {
+    const d = await decompressString(raw.slice(2));
+    if (d) decoded = d;
+    else { toast('Ошибка распаковки', true); return; }
+  } else if (raw.startsWith('R|')) {
+    decoded = raw.slice(2);
   }
-  closeScanner();
+  return handleScannedDecoded(decoded);
+}
+
+function handleScannedDecoded(text) {
+  const raw = String(text).trim();
+  const target = S.scanTarget;
+  const upper = raw.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const isShortCode = /^[A-Z0-9]{6}$/.test(upper) && raw.length <= 10;
+
+  if (target === 'code') {
+    if (isShortCode) {
+      $('joinCodeInput').value = upper;
+      toast('QR прочитан: ' + upper);
+      closeScanner();
+      setTimeout(() => joinLobbyByCode(), 300);
+    } else {
+      $('joinOfferInputLong').value = raw;
+      toast('Код от хоста принят, генерирую ответ…');
+      closeScanner();
+      setTimeout(() => generateAnswerLong(), 300);
+    }
+  } else if (target === 'answer') {
+    $('answerInputLong').value = raw;
+    toast('Ответ принят');
+    closeScanner();
+    setTimeout(() => acceptAnswerLong(), 300);
+  } else if (target === 'offer') {
+    $('joinOfferInputLong').value = raw;
+    toast('Код от хоста принят');
+    closeScanner();
+    setTimeout(() => generateAnswerLong(), 300);
+  }
 }
 
 function closeScanner() {
@@ -1456,51 +1347,129 @@ async function getMic() {
       video: false
     });
   } catch(e) { SFX.error(); alert('Нет доступа к микрофону.\n\n' + e.message); throw e; }
-  const wantOn = S.pttActive;
-  S.micStream.getAudioTracks().forEach(t => t.enabled = wantOn);
+  S.micStream.getAudioTracks().forEach(t => t.enabled = S.pttActive);
   return S.micStream;
 }
 
 /* ============================================================
-   MIX (для создателя)
+   MIX
    ============================================================ */
 function ensureMixDest() {
   if (!S.mixDest) {
     S.mixDest = ctx().createMediaStreamDestination();
-    if (S.micStream) {
-      try {
-        const ms = ctx().createMediaStreamSource(S.micStream);
-        ms.connect(S.mixDest);
-      } catch(_){}
-    }
+    if (S.micStream) { try { ctx().createMediaStreamSource(S.micStream).connect(S.mixDest); } catch(_){} }
   }
   return S.mixDest;
 }
-function addToMix(peerId, remoteStream) {
+function addToMix(id, stream) {
   try {
-    const src = ctx().createMediaStreamSource(remoteStream);
+    const src = ctx().createMediaStreamSource(stream);
     src.connect(S.mixDest);
-    S.mixSources[peerId] = src;
-  } catch(e) { log('mix err: ' + e.message); }
+    S.mixSources[id] = src;
+  } catch(_){}
 }
-function removeFromMix(peerId) {
-  const s = S.mixSources[peerId];
-  if (s) { try { s.disconnect(); } catch(_){} delete S.mixSources[peerId]; }
+function removeFromMix(id) {
+  const s = S.mixSources[id];
+  if (s) { try { s.disconnect(); } catch(_){} delete S.mixSources[id]; }
 }
 
 /* ============================================================
-   ICE / SDP
+   PeerJS
    ============================================================ */
-function waitIce(pc, timeout = 5000) {
-  return new Promise(res => {
-    if (pc.iceGatheringState === 'complete') return res(true);
-    let done = false;
-    const finish = (ok) => { if (done) return; done = true; pc.removeEventListener('icegatheringstatechange', check); res(ok); };
-    const check = () => { if (pc.iceGatheringState === 'complete') finish(true); };
-    pc.addEventListener('icegatheringstatechange', check);
-    setTimeout(() => finish(!!(pc.localDescription?.sdp?.includes('candidate'))), timeout);
-  });
+function genCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let out = '';
+  for (let i = 0; i < 6; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
 }
+function isValidCode(code) { return /^[A-Z0-9]{6}$/.test(code); }
+
+async function createPeerWithRetry(preferredId, timeoutMs = 5000) {
+  for (let i = 0; i < PEER_SERVERS.length; i++) {
+    const srv = PEER_SERVERS[i];
+    log('Пробую PeerServer ' + srv.host + '…');
+    const peer = new Peer(preferredId, peerOpts(i));
+    const res = await new Promise(resolve => {
+      let done = false;
+      const fin = v => { if (done) return; done = true; resolve(v); };
+      const t = setTimeout(() => fin('timeout'), timeoutMs);
+      peer.once('open', () => { clearTimeout(t); fin('ok'); });
+      peer.once('error', e => {
+        clearTimeout(t);
+        if (e && (e.type === 'unavailable-id' || e.type === 'invalid-id')) fin('busy');
+        else fin('error');
+      });
+    });
+    if (res === 'ok') return { peer, server: srv, status: 'ok' };
+    if (res === 'busy') return { peer, server: srv, status: 'busy' };
+    try { peer.destroy(); } catch(_){}
+  }
+  return { peer: null, server: null, status: 'fail' };
+}
+
+/* ============================================================
+   СОЗДАТЬ ЛОББИ
+   ============================================================ */
+async function createLobby() {
+  ctx(); SFX.powerOn();
+  try { await getMic(); } catch { return; }
+
+  const btn = $('startRoomBtn');
+  btn.disabled = true; btn.textContent = '⏳ ПРОВЕРЯЮ СЕРВЕР…';
+  $('serverStatus').textContent = '';
+
+  let success = false;
+  for (let attempt = 0; attempt < 2 && !success; attempt++) {
+    const code = genCode();
+    $('serverStatus').textContent = 'Попытка ' + (attempt+1) + ' · код ' + code;
+    const res = await createPeerWithRetry(code, 5000);
+    if (res.status === 'ok') {
+      S.peer = res.peer;
+      S.lobbyCode = code;
+      S.role = 'host';
+      S.mode = 'peerjs';
+      ensureMixDest();
+      wireHostPeer();
+      showCreatorPeerMode(code);
+      SFX.connected(); toast('Лобби создано: ' + code);
+      success = true;
+    } else if (res.status === 'busy') {
+      try { res.peer.destroy(); } catch(_){}
+      continue;
+    }
+  }
+
+  btn.disabled = false; btn.textContent = '🆕 СОЗДАТЬ ЛОББИ';
+
+  if (!success) {
+    log('PeerServer недоступен — перехожу в QR-режим');
+    toast('Сервер недоступен → QR-режим', true);
+    $('serverStatus').textContent = '⚠️ Сервер недоступен. Включаю QR-режим…';
+    startLobbyQRMode();
+  } else {
+    $('serverStatus').textContent = '';
+  }
+}
+
+function showCreatorPeerMode(code) {
+  $('menuBox').style.display = 'none';
+  $('creatorBox').style.display = '';
+  $('joinerBox').style.display = 'none';
+  $('creatorPeer').style.display = '';
+  $('creatorQR').style.display = 'none';
+  $('roomTitle').textContent = 'ЛОББИ СОЗДАНО';
+  $('myCodeDisplay').textContent = code;
+  $('codeText').value = code;
+  try {
+    const info = drawQRSingle($('offerQR'), code);
+    $('offerQRInfo').textContent = 'QR v' + info.version + ' · код ' + code;
+  } catch(e) { $('offerQRInfo').textContent = 'QR: ' + e.message; }
+  renderUsers();
+}
+
+/* ============================================================
+   QR-РЕЖИМ
+   ============================================================ */
 function encodeSDP(obj) { return btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(obj)))); }
 function decodeSDP(str) {
   try {
@@ -1509,233 +1478,49 @@ function decodeSDP(str) {
     return JSON.parse(new TextDecoder().decode(bytes));
   } catch(e) { return { sdp: str, name: '' }; }
 }
-function currentIceServers() {
-  if (S.relayMode === 'relay') return ICE_RELAY;
-  if (S.relayMode === 'p2p') return ICE_P2P;
-  return ICE_AUTO;
-}
-
-/* ============================================================
-   PEER
-   ============================================================ */
-async function createPeer(peerId, peerName, isInitiator) {
-  if (S.peers[peerId] && S.peers[peerId].pc) return S.peers[peerId];
-  const pc = new RTCPeerConnection({
-    iceServers: currentIceServers(),
-    iceTransportPolicy: S.relayMode === 'relay' ? 'relay' : 'all',
-    bundlePolicy: 'max-bundle', rtcpMuxPolicy: 'require',
-  });
-  const peer = S.peers[peerId] || {
-    pc: null, audio: null, dc: null, name: peerName || 'Участник',
-    talking: false, connected: false, lastSeen: Date.now(),
-    localCandidateType: null, remoteCandidateType: null
-  };
-  peer.pc = pc; S.peers[peerId] = peer;
-  const mic = await getMic();
-  mic.getTracks().forEach(t => pc.addTrack(t, mic));
-
-  pc.ontrack = ev => {
-    if (!peer.audio) { peer.audio = new Audio(); peer.audio.autoplay = true; peer.audio.playsInline = true; }
-    peer.audio.srcObject = ev.streams[0];
-    peer.audio.volume = S.volume;
-    peer.audio.play().catch(()=>{});
-    if (S.isCreator) {
-      ensureMixDest();
-      addToMix(peerId, ev.streams[0]);
-      try {
-        const mixTrack = S.mixDest.stream.getAudioTracks()[0];
-        Object.entries(S.peers).forEach(([id, p]) => {
-          if (id === peerId) return;
-          if (!p.pc) return;
-          const has = p.pc.getSenders().some(s => s.track === mixTrack);
-          if (!has) { try { p.pc.addTrack(mixTrack, S.mixDest.stream); } catch(_){} }
-        });
-      } catch(_){}
-    }
-  };
-
-  pc.onicecandidate = ev => {
-    if (ev.candidate) {
-      const m = ev.candidate.candidate.match(/typ (\w+)/);
-      if (m) { if (m[1] === 'relay') peer.localCandidateType = 'relay'; else if (!peer.localCandidateType) peer.localCandidateType = m[1]; }
-    }
-  };
-
-  pc.onconnectionstatechange = () => {
-    log(peerId + ' → ' + pc.connectionState);
-    if (pc.connectionState === 'connected') peer.connected = true;
-    else if (['failed','disconnected','closed'].includes(pc.connectionState)) {
-      peer.connected = false;
-      if (pc.connectionState === 'failed') setTimeout(() => attemptReconnect(peerId), 1500);
-      if (pc.connectionState === 'closed') removePeer(peerId, true);
-    }
-    renderUsers();
-  };
-
-  if (isInitiator) { peer.dc = pc.createDataChannel('sig', { ordered: true }); setupDC(peerId, peer.dc); }
-  else { pc.ondatachannel = ev => { peer.dc = ev.channel; setupDC(peerId, peer.dc); }; }
-
-  renderUsers(); return peer;
-}
-
-function setupDC(peerId, dc) {
-  dc.onopen = () => {
-    SFX.connected();
-    toast('Участник подключён: ' + (S.peers[peerId]?.name || ''));
-    try { dc.send(JSON.stringify({ t: 'hello', id: S.id, name: S.name, isCreator: S.isCreator })); } catch(_){}
-    if (S.isCreator) {
-      const list = Object.entries(S.peers)
-        .filter(([id, p]) => id !== peerId && p.connected)
-        .map(([id, p]) => ({ id, name: p.name }));
-      if (list.length) {
-        try { dc.send(JSON.stringify({ t: 'peerList', list })); } catch(_){}
-      }
-    }
-    renderUsers();
-  };
-  dc.onclose = () => log('DC close с ' + peerId);
-  dc.onerror = () => log('DC error с ' + peerId);
-  dc.onmessage = ev => { try { handleData(peerId, JSON.parse(ev.data)); } catch(e){ log('bad dc msg'); } };
-}
-
-function handleData(fromId, msg) {
-  const p = S.peers[fromId]; if (p) p.lastSeen = Date.now();
-  switch(msg.t) {
-    case 'hello': if (p) { p.name = msg.name; } renderUsers(); break;
-    case 'ptt':
-      if (p) {
-        p.talking = msg.on;
-        if (msg.on && !S.pttActive) SFX.rxBeep();
-        renderUsers();
-      }
-      break;
-    case 'peerList':
-      msg.list.forEach(item => {
-        if (item.id !== S.id && !S.peers[item.id]) {
-          autoConnect(item.id, item.name).catch(e => log('autoConnect err: ' + e.message));
-        }
-      });
-      break;
-    case 'sdp': handleRemoteSDP(fromId, msg).catch(e => log('sdp err: ' + e.message)); break;
-    case 'ping': if (p && p.dc?.readyState === 'open') { try { p.dc.send(JSON.stringify({ t: 'pong' })); } catch(_){} } break;
-    case 'pong': if (p) p.lastSeen = Date.now(); break;
-  }
-}
-
-function broadcastDC(msg, exceptId) {
-  Object.entries(S.peers).forEach(([id, p]) => {
-    if (id === exceptId) return;
-    if (p.dc && p.dc.readyState === 'open') { try { p.dc.send(JSON.stringify(msg)); } catch(_){} }
+function waitIce(pc, timeout = 5000) {
+  return new Promise(res => {
+    if (pc.iceGatheringState === 'complete') return res(true);
+    let done = false;
+    const fin = ok => { if (done) return; done = true; pc.removeEventListener('icegatheringstatechange', ch); res(ok); };
+    const ch = () => { if (pc.iceGatheringState === 'complete') fin(true); };
+    pc.addEventListener('icegatheringstatechange', ch);
+    setTimeout(() => fin(!!(pc.localDescription?.sdp?.includes('candidate'))), timeout);
   });
 }
 
-async function autoConnect(peerId, peerName) {
-  if (S.peers[peerId]) return;
-  log('Автоподключение к ' + peerId);
-  const peer = await createPeer(peerId, peerName, true);
-  const offer = await peer.pc.createOffer();
-  await peer.pc.setLocalDescription(offer);
-  await waitIce(peer.pc);
-  broadcastDC({ t: 'sdp', from: S.id, name: S.name, to: peerId, kind: 'offer', sdp: peer.pc.localDescription.sdp });
-}
-
-async function handleRemoteSDP(fromId, msg) {
-  if (msg.to !== S.id) return;
-  if (msg.kind === 'offer') {
-    const peer = await createPeer(fromId, msg.name, false);
-    await peer.pc.setRemoteDescription({ type: 'offer', sdp: msg.sdp });
-    const answer = await peer.pc.createAnswer();
-    await peer.pc.setLocalDescription(answer);
-    await waitIce(peer.pc);
-    const payload = { t: 'sdp', from: S.id, name: S.name, to: fromId, kind: 'answer', sdp: peer.pc.localDescription.sdp };
-    if (peer.dc && peer.dc.readyState === 'open') { try { peer.dc.send(JSON.stringify(payload)); return; } catch(_){} }
-    broadcastDC(payload, fromId);
-  } else if (msg.kind === 'answer') {
-    const peer = S.peers[fromId];
-    if (peer && peer.pc) { try { await peer.pc.setRemoteDescription({ type: 'answer', sdp: msg.sdp }); } catch(e){ log('SRD err'); } }
-  }
-}
-
-async function attemptReconnect(peerId) {
-  const p = S.peers[peerId]; if (!p) return;
-  const isInitiator = S.id < peerId;
-  try {
-    try { p.pc?.close(); } catch(_){}
-    removeFromMix(peerId);
-    delete S.peers[peerId];
-    const peer = await createPeer(peerId, p.name, isInitiator);
-    if (isInitiator) {
-      const offer = await peer.pc.createOffer({ iceRestart: true });
-      await peer.pc.setLocalDescription(offer);
-      await waitIce(peer.pc);
-      broadcastDC({ t: 'sdp', from: S.id, name: S.name, to: peerId, kind: 'offer', sdp: peer.pc.localDescription.sdp });
-    }
-  } catch(e) { log('reconnect fail: ' + e.message); }
-}
-
-function removePeer(peerId, quiet) {
-  const p = S.peers[peerId]; if (!p) return;
-  try { p.pc?.close(); } catch(_){}
-  try { if (p.audio) { p.audio.pause(); p.audio.srcObject = null; } } catch(_){}
-  removeFromMix(peerId);
-  delete S.peers[peerId];
-  if (!quiet) SFX.disconnected();
-  renderUsers();
-}
-
-/* ============================================================
-   СОЗДАНИЕ / ПРИСОЕДИНЕНИЕ
-   ============================================================ */
-async function startAsCreator() {
-  ctx(); SFX.powerOn();
-  S.isCreator = true;
-  await getMic();
+function startLobbyQRMode() {
+  S.mode = 'qr';
+  S.role = 'host';
   ensureMixDest();
+  $('menuBox').style.display = 'none';
   $('creatorBox').style.display = '';
   $('joinerBox').style.display = 'none';
-  $('startRoomBtn').style.display = 'none';
-  $('joinRoomBtn').style.display = 'none';
-  await newInvite();
+  $('creatorPeer').style.display = 'none';
+  $('creatorQR').style.display = '';
+  $('roomTitle').textContent = 'QR-РЕЖИМ';
+  renderUsers();
+  newInviteLong();
 }
 
-async function newInvite() {
+async function newInviteLong() {
   try {
     const pendingId = 'pending-' + Math.random().toString(36).slice(2, 8);
-    const pc = new RTCPeerConnection({
-      iceServers: currentIceServers(),
-      iceTransportPolicy: S.relayMode === 'relay' ? 'relay' : 'all',
-      bundlePolicy: 'max-bundle', rtcpMuxPolicy: 'require',
-    });
+    const pc = new RTCPeerConnection({ iceServers: PEER_ICE.iceServers,
+      bundlePolicy: 'max-bundle', rtcpMuxPolicy: 'require' });
     const mic = await getMic();
     mic.getTracks().forEach(t => pc.addTrack(t, mic));
     if (S.mixDest) {
       try {
-        const mixTrack = S.mixDest.stream.getAudioTracks()[0];
-        if (mixTrack) pc.addTrack(mixTrack, S.mixDest.stream);
+        const tr = S.mixDest.stream.getAudioTracks()[0];
+        if (tr) pc.addTrack(tr, S.mixDest.stream);
       } catch(_){}
     }
-    const peer = { pc, audio: null, dc: null, name: 'Участник', talking: false, connected: false, lastSeen: Date.now(), pending: true };
+    const peer = { pc, audio: null, dc: null, name: 'Участник', talking: false, connected: false, lastSeen: Date.now(), pending: true, mode: 'qr' };
     S.peers[pendingId] = peer;
+
     const dc = pc.createDataChannel('sig', { ordered: true });
     peer.dc = dc;
-
-    pc.ontrack = ev => {
-      if (!peer.audio) { peer.audio = new Audio(); peer.audio.autoplay = true; peer.audio.playsInline = true; }
-      peer.audio.srcObject = ev.streams[0];
-      peer.audio.volume = S.volume;
-      peer.audio.play().catch(()=>{});
-      if (S.isCreator) { ensureMixDest(); addToMix(pendingId, ev.streams[0]); }
-    };
-    pc.onconnectionstatechange = () => {
-      if (pc.connectionState === 'connected') peer.connected = true;
-      if (['failed','closed','disconnected'].includes(pc.connectionState) && S.peers[pendingId]) {
-        removeFromMix(pendingId);
-        try { pc.close(); } catch(_){}
-        delete S.peers[pendingId];
-        renderUsers();
-      }
-    };
-
     dc.onmessage = ev => {
       try {
         const m = JSON.parse(ev.data);
@@ -1748,84 +1533,142 @@ async function newInvite() {
           S.peers[realId].pending = false;
           S.peers[realId].connected = true;
           delete S.peers[pendingId];
-          setupDC(realId, S.peers[realId].dc);
+          setupDCLong(realId, S.peers[realId].dc);
           SFX.connected(); toast('Подключён: ' + m.name);
           renderUsers();
-          const list = Object.entries(S.peers)
-            .filter(([id, p]) => id !== realId && p.connected)
-            .map(([id, p]) => ({ id, name: p.name }));
-          if (list.length && S.peers[realId].dc?.readyState === 'open') {
-            try { S.peers[realId].dc.send(JSON.stringify({ t: 'peerList', list })); } catch(_){}
-          }
-        } else handleData(pendingId, m);
+        } else handleDataLong(pendingId, m);
       } catch(_){}
     };
-
+    pc.ontrack = ev => {
+      if (!peer.audio) { peer.audio = new Audio(); peer.audio.autoplay = true; peer.audio.playsInline = true; }
+      peer.audio.srcObject = ev.streams[0];
+      peer.audio.volume = S.volume;
+      peer.audio.play().catch(()=>{});
+      if (S.role === 'host') { ensureMixDest(); addToMix(pendingId, ev.streams[0]); }
+    };
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState === 'connected') peer.connected = true;
+      if (['failed','closed','disconnected'].includes(pc.connectionState) && S.peers[pendingId]) {
+        removeFromMix(pendingId);
+        try { pc.close(); } catch(_){}
+        delete S.peers[pendingId];
+        renderUsers();
+      }
+    };
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
     await waitIce(pc);
-    const code = encodeSDP({ sdp: pc.localDescription.sdp, name: S.name });
-    $('offerText').value = code;
+
+    const code = encodeSDP({ sdp: pc.localDescription.sdp, name: S.name, mode: 'qr' });
+    $('offerTextLong').value = code;
     try {
-      const info = drawQR($('offerQR'), code);
-      $('offerQRInfo').textContent = 'Версия QR ' + info.version + ' · ' + code.length + ' симв.';
-    } catch(e) { $('offerQRInfo').textContent = 'QR не поместился: ' + e.message; }
+      const res = await prepareQRPayload(code);
+      if (res.tooLong) {
+        $('offerQRLongInfo').textContent = '⚠️ Код слишком длинный для QR (' + res.parts + ' частей). Используй вкладку ТЕКСТ.';
+        $('offerQRLong').width = 0; $('offerQRLong').height = 0;
+        $('offerQRPager').textContent = '';
+        $('offerQRBtns').style.display = 'none';
+      } else {
+        renderOfferQRSeries(res);
+      }
+    } catch(e) {
+      $('offerQRLongInfo').textContent = 'QR не поместился: ' + e.message;
+    }
     S.pendingOffer = pc; S.pendingId = pendingId;
   } catch(e) { SFX.error(); alert('Ошибка: ' + e.message); }
 }
 
-async function acceptAnswer() {
+async function acceptAnswerLong() {
   const pc = S.pendingOffer, pid = S.pendingId;
   if (!pc || !pid) { toast('Нет приглашения', true); return; }
-  const ans = $('answerInput').value.trim();
+  const ans = ($('answerInputLong').value || '').trim();
   if (!ans) { toast('Вставь ответ', true); return; }
   try {
     const { sdp, name } = decodeSDP(ans);
     await pc.setRemoteDescription({ type: 'answer', sdp });
     if (name && S.peers[pid]) S.peers[pid].name = name;
     toast('Ответ принят');
-    $('offerText').value = ''; $('answerInput').value = '';
+    $('offerTextLong').value = ''; $('answerInputLong').value = '';
     S.pendingOffer = null; S.pendingId = null;
     renderUsers();
+    setTimeout(() => newInviteLong(), 800);
   } catch(e) { SFX.error(); alert('Некорректный ответ: ' + e.message); }
 }
 
-async function startAsJoiner() {
-  ctx(); SFX.powerOn();
-  await getMic();
-  $('creatorBox').style.display = 'none';
-  $('joinerBox').style.display = '';
-  $('startRoomBtn').style.display = 'none';
-  $('joinRoomBtn').style.display = 'none';
+function setupDCLong(peerId, dc) {
+  dc.onopen = () => {
+    SFX.connected();
+    toast('Участник: ' + (S.peers[peerId]?.name || ''));
+    try { dc.send(JSON.stringify({ t: 'hello', id: S.id, name: S.name })); } catch(_){}
+    const list = Object.entries(S.peers).filter(([id, p]) => id !== peerId && p.connected)
+      .map(([id, p]) => ({ id, name: p.name }));
+    if (list.length) { try { dc.send(JSON.stringify({ t: 'peerList', list })); } catch(_){} }
+    renderUsers();
+  };
+  dc.onmessage = ev => { try { handleDataLong(peerId, JSON.parse(ev.data)); } catch(_){} };
 }
 
-async function generateAnswer() {
+function handleDataLong(fromId, msg) {
+  const p = S.peers[fromId]; if (p) p.lastSeen = Date.now();
+  if (msg.t === 'hello') { if (p) p.name = msg.name; renderUsers(); }
+  else if (msg.t === 'ptt') {
+    if (p) { p.talking = !!msg.on; if (msg.on && !S.pttActive) SFX.rxBeep(); renderUsers(); }
+  }
+  else if (msg.t === 'peerList') {
+    msg.list.forEach(item => { if (item.id !== S.id && !S.peers[item.id]) meshConnectLong(item.id, item.name); });
+  }
+  else if (msg.t === 'sdp') handleRemoteSDPLong(fromId, msg);
+}
+
+async function meshConnectLong(peerId, peerName) {
+  if (S.peers[peerId]?.pc) return;
   try {
-    const a = $('joinOfferInput')?.value.trim();
-    const b = $('joinOfferInputText')?.value.trim();
-    const code = a || b;
-    if (!code) { toast('Вставь/отсканируй код', true); return; }
-    $('joinOfferInput').value = code;
-    $('joinOfferInputText').value = code;
-    const { sdp: offerSdp, name: creatorName } = decodeSDP(code);
-    const peerId = 'creator';
-    const pc = new RTCPeerConnection({
-      iceServers: currentIceServers(),
-      iceTransportPolicy: S.relayMode === 'relay' ? 'relay' : 'all',
-      bundlePolicy: 'max-bundle', rtcpMuxPolicy: 'require',
-    });
+    const pc = new RTCPeerConnection({ iceServers: PEER_ICE.iceServers,
+      bundlePolicy: 'max-bundle', rtcpMuxPolicy: 'require' });
     const mic = await getMic();
     mic.getTracks().forEach(t => pc.addTrack(t, mic));
-    const peer = { pc, audio: null, dc: null, name: creatorName || 'Создатель', talking: false, connected: false, lastSeen: Date.now() };
+    const peer = { pc, audio: null, dc: null, name: peerName || 'Участник', talking: false, connected: false, lastSeen: Date.now() };
     S.peers[peerId] = peer;
-    pc.ondatachannel = ev => { peer.dc = ev.channel; setupDC(peerId, peer.dc); };
+    const dc = pc.createDataChannel('sig', { ordered: true });
+    peer.dc = dc;
+    setupDCLong(peerId, dc);
     pc.ontrack = ev => {
       if (!peer.audio) { peer.audio = new Audio(); peer.audio.autoplay = true; peer.audio.playsInline = true; }
-      peer.audio.srcObject = ev.streams[0];
-      peer.audio.volume = S.volume;
-      peer.audio.play().catch(()=>{});
+      peer.audio.srcObject = ev.streams[0]; peer.audio.volume = S.volume; peer.audio.play().catch(()=>{});
     };
     pc.onconnectionstatechange = () => { if (pc.connectionState === 'connected') peer.connected = true; renderUsers(); };
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    await waitIce(pc);
+    broadcastDCLong({ t: 'sdp', from: S.id, to: peerId, kind: 'offer', sdp: pc.localDescription.sdp, name: S.name }, peerId);
+  } catch(_){}
+}
+function broadcastDCLong(msg, exceptId) {
+  Object.entries(S.peers).forEach(([id, p]) => {
+    if (id === exceptId) return;
+    if (p.dc && p.dc.readyState === 'open') { try { p.dc.send(JSON.stringify(msg)); } catch(_){} }
+  });
+}
+
+async function generateAnswerLong() {
+  try {
+    const code = ($('joinOfferInputLong').value || '').trim();
+    if (!code) { toast('Вставь/отсканируй код от хоста', true); return; }
+    const { sdp: offerSdp, name: hostName } = decodeSDP(code);
+    const peerId = 'host';
+    const pc = new RTCPeerConnection({ iceServers: PEER_ICE.iceServers,
+      bundlePolicy: 'max-bundle', rtcpMuxPolicy: 'require' });
+    const mic = await getMic();
+    mic.getTracks().forEach(t => pc.addTrack(t, mic));
+    const peer = { pc, audio: null, dc: null, name: hostName || 'Хост', talking: false, connected: false, lastSeen: Date.now() };
+    S.peers[peerId] = peer;
+    pc.ondatachannel = ev => { peer.dc = ev.channel; setupDCLong(peerId, peer.dc); };
+    pc.ontrack = ev => {
+      if (!peer.audio) { peer.audio = new Audio(); peer.audio.autoplay = true; peer.audio.playsInline = true; }
+      peer.audio.srcObject = ev.streams[0]; peer.audio.volume = S.volume; peer.audio.play().catch(()=>{});
+    };
+    pc.onconnectionstatechange = () => { if (pc.connectionState === 'connected') peer.connected = true; renderUsers(); };
+
     await pc.setRemoteDescription({ type: 'offer', sdp: offerSdp });
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
@@ -1833,12 +1676,246 @@ async function generateAnswer() {
     const code2 = encodeSDP({ sdp: pc.localDescription.sdp, name: S.name });
     $('joinAnswerText').value = code2;
     $('joinAnswerBox').style.display = '';
+
     try {
-      const info = drawQR($('joinAnswerQR'), code2);
-      $('joinAnswerQRInfo').textContent = 'Версия QR ' + info.version + ' · ' + code2.length + ' симв.';
-    } catch(e) { $('joinAnswerQRInfo').textContent = 'QR не поместился, отправь текстом'; }
-    toast('Покажи QR создателю');
+      const res = await prepareQRPayload(code2);
+      if (res.tooLong) {
+        $('joinAnswerQRInfo').textContent = '⚠️ Код слишком длинный (' + res.parts + ' частей). Используй ТЕКСТ.';
+        $('joinAnswerQR').width = 0; $('joinAnswerQR').height = 0;
+      } else {
+        renderJoinAnswerQRSeries(res);
+      }
+    } catch(e) {
+      $('joinAnswerQRInfo').textContent = 'QR: ' + e.message;
+    }
+    toast('Покажи QR хосту');
   } catch(e) { SFX.error(); alert('Ошибка: ' + e.message); }
+}
+
+async function handleRemoteSDPLong(fromId, msg) {
+  if (msg.to !== S.id) return;
+  if (msg.kind === 'offer') {
+    if (S.peers[fromId]?.pc) return;
+    const pc = new RTCPeerConnection({ iceServers: PEER_ICE.iceServers,
+      bundlePolicy: 'max-bundle', rtcpMuxPolicy: 'require' });
+    const mic = await getMic();
+    mic.getTracks().forEach(t => pc.addTrack(t, mic));
+    const peer = { pc, audio: null, dc: null, name: msg.name || 'Участник', talking: false, connected: false, lastSeen: Date.now() };
+    S.peers[fromId] = peer;
+    pc.ondatachannel = ev => { peer.dc = ev.channel; setupDCLong(fromId, peer.dc); };
+    pc.ontrack = ev => {
+      if (!peer.audio) { peer.audio = new Audio(); peer.audio.autoplay = true; peer.audio.playsInline = true; }
+      peer.audio.srcObject = ev.streams[0]; peer.audio.volume = S.volume; peer.audio.play().catch(()=>{});
+    };
+    pc.onconnectionstatechange = () => { if (pc.connectionState === 'connected') peer.connected = true; renderUsers(); };
+    await pc.setRemoteDescription({ type: 'offer', sdp: msg.sdp });
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    await waitIce(pc);
+    broadcastDCLong({ t: 'sdp', from: S.id, to: fromId, kind: 'answer', sdp: pc.localDescription.sdp }, fromId);
+  } else if (msg.kind === 'answer') {
+    const peer = S.peers[fromId];
+    if (peer && peer.pc) {
+      try { await peer.pc.setRemoteDescription({ type: 'answer', sdp: msg.sdp }); } catch(_){}
+    }
+  }
+}
+
+/* ============================================================
+   HOST / CLIENT PeerJS
+   ============================================================ */
+function wireHostPeer() {
+  const peer = S.peer;
+  peer.on('connection', conn => {
+    if (Object.keys(S.peers).length + 1 >= MAX_USERS) { try { conn.close(); } catch(_){}; toast('Лобби полное', true); return; }
+    const id = conn.peer;
+    const p = S.peers[id] = S.peers[id] || { conn, call: null, audio: null, name: 'Участник', talking: false, connected: false, mode: 'peerjs' };
+    p.conn = conn;
+    conn.on('open', () => {
+      p.connected = true; renderUsers();
+      const others = Object.entries(S.peers).filter(([pid, pp]) => pid !== id && pp.connected).map(([pid, pp]) => ({ id: pid, name: pp.name }));
+      if (others.length) { try { conn.send({ t: 'peerList', list: others }); } catch(_){} }
+      Object.entries(S.peers).forEach(([pid, pp]) => {
+        if (pid === id || !pp.conn || pp.conn.open !== true) return;
+        try { pp.conn.send({ t: 'peerJoined', id, name: p.name }); } catch(_){}
+      });
+    });
+    conn.on('data', data => handleConnDataPeerJS(id, data));
+    conn.on('close', () => removePeerById(id));
+  });
+  peer.on('call', call => {
+    const id = call.peer;
+    call.answer(S.micStream);
+    call.on('stream', stream => {
+      const p = S.peers[id] = S.peers[id] || { conn: null, call: null, audio: null, name: 'Участник', talking: false, connected: true, mode: 'peerjs' };
+      p.call = call;
+      if (!p.audio) { p.audio = new Audio(); p.audio.autoplay = true; p.audio.playsInline = true; }
+      p.audio.srcObject = stream; p.audio.volume = S.volume; p.audio.play().catch(()=>{});
+      ensureMixDest(); addToMix(id, stream);
+      try {
+        const mixTrack = S.mixDest.stream.getAudioTracks()[0];
+        Object.entries(S.peers).forEach(([pid, pp]) => {
+          if (pid === id) return;
+          if (pp.call && pp.call.peerConnection) {
+            const has = pp.call.peerConnection.getSenders().some(s => s.track === mixTrack);
+            if (!has) { try { pp.call.peerConnection.addTrack(mixTrack, S.mixDest.stream); } catch(_){} }
+          }
+        });
+      } catch(_){}
+      renderUsers();
+    });
+    call.on('close', () => removePeerById(id));
+  });
+  peer.on('error', err => log('peer error: ' + err.type));
+  peer.on('disconnected', () => { log('peer disconnected'); try { peer.reconnect(); } catch(_){} });
+}
+
+function wireClientPeer() {
+  const peer = S.peer;
+  peer.on('connection', conn => {
+    const id = conn.peer;
+    const p = S.peers[id] = S.peers[id] || { conn: null, call: null, audio: null, name: 'Участник', talking: false, connected: false, mode: 'peerjs' };
+    p.conn = conn;
+    conn.on('open', () => { p.connected = true; renderUsers(); });
+    conn.on('data', data => handleConnDataPeerJS(id, data));
+    conn.on('close', () => removePeerById(id));
+  });
+  peer.on('call', call => {
+    const id = call.peer;
+    call.answer(S.micStream);
+    call.on('stream', stream => {
+      const p = S.peers[id] = S.peers[id] || { conn: null, call: null, audio: null, name: 'Участник', talking: false, connected: true, mode: 'peerjs' };
+      p.call = call;
+      if (!p.audio) { p.audio = new Audio(); p.audio.autoplay = true; p.audio.playsInline = true; }
+      p.audio.srcObject = stream; p.audio.volume = S.volume; p.audio.play().catch(()=>{});
+      renderUsers();
+    });
+    call.on('close', () => removePeerById(id));
+  });
+  peer.on('error', err => log('peer error: ' + err.type));
+  peer.on('disconnected', () => { log('peer disconnected'); try { peer.reconnect(); } catch(_){} });
+}
+
+function startCallToHost(hostId) {
+  if (!S.micStream) return;
+  const call = S.peer.call(hostId, S.micStream);
+  if (!call) return;
+  const p = S.peers[hostId] = S.peers[hostId] || { conn: null, call: null, audio: null, name: 'Хост', talking: false, connected: true, mode: 'peerjs' };
+  p.call = call;
+  call.on('stream', stream => {
+    if (!p.audio) { p.audio = new Audio(); p.audio.autoplay = true; p.audio.playsInline = true; }
+    p.audio.srcObject = stream; p.audio.volume = S.volume; p.audio.play().catch(()=>{});
+  });
+  call.on('close', () => removePeerById(hostId));
+}
+
+function handleConnDataPeerJS(fromId, data) {
+  if (!data || typeof data !== 'object') return;
+  const p = S.peers[fromId];
+  switch(data.t) {
+    case 'hello': if (p) p.name = data.name || p.name; renderUsers(); break;
+    case 'peerList':
+      (data.list || []).forEach(item => {
+        if (item.id === S.peer?.id || S.peers[item.id]?.call) return;
+        meshConnectPeerJS(item.id, item.name);
+      });
+      break;
+    case 'peerJoined':
+      if (data.id && data.id !== S.peer?.id && !S.peers[data.id]?.call) meshConnectPeerJS(data.id, data.name);
+      break;
+    case 'ptt':
+      if (p) { p.talking = !!data.on; if (data.on && !S.pttActive) SFX.rxBeep(); renderUsers(); }
+      break;
+  }
+}
+
+async function meshConnectPeerJS(peerId, peerName) {
+  if (!S.peer || S.peers[peerId]?.call) return;
+  if (!S.micStream) { try { await getMic(); } catch { return; } }
+  let conn = S.peers[peerId]?.conn;
+  if (!conn) {
+    conn = S.peer.connect(peerId, { reliable: true });
+    const p = S.peers[peerId] = S.peers[peerId] || { conn: null, call: null, audio: null, name: peerName || 'Участник', talking: false, connected: false, mode: 'peerjs' };
+    p.conn = conn;
+    conn.on('open', () => { p.connected = true; try { conn.send({ t: 'hello', id: S.id, name: S.name }); } catch(_){}; renderUsers(); });
+    conn.on('data', d => handleConnDataPeerJS(peerId, d));
+    conn.on('close', () => {});
+  }
+  const call = S.peer.call(peerId, S.micStream);
+  if (!call) return;
+  const p = S.peers[peerId] = S.peers[peerId] || { conn, call: null, audio: null, name: peerName || 'Участник', talking: false, connected: true, mode: 'peerjs' };
+  p.call = call;
+  call.on('stream', stream => {
+    if (!p.audio) { p.audio = new Audio(); p.audio.autoplay = true; p.audio.playsInline = true; }
+    p.audio.srcObject = stream; p.audio.volume = S.volume; p.audio.play().catch(()=>{});
+  });
+  call.on('close', () => removePeerById(peerId));
+}
+
+function removePeerById(id) {
+  const p = S.peers[id]; if (!p) return;
+  try { p.call && p.call.close(); } catch(_){}
+  try { p.conn && p.conn.close(); } catch(_){}
+  try { p.pc && p.pc.close(); } catch(_){}
+  try { if (p.audio) { p.audio.pause(); p.audio.srcObject = null; } } catch(_){}
+  removeFromMix(id);
+  delete S.peers[id];
+  renderUsers();
+}
+
+/* ============================================================
+   JOIN короткий
+   ============================================================ */
+async function joinLobbyByCode() {
+  const code = ($('joinCodeInput').value || '').trim().toUpperCase();
+  if (!isValidCode(code)) { SFX.error(); toast('Код: 6 символов A-Z, 0-9', true); return; }
+  ctx(); SFX.powerOn();
+  try { await getMic(); } catch { return; }
+
+  const btn = $('joinConfirmBtn');
+  btn.disabled = true; btn.textContent = '⏳ ПОДКЛЮЧАЮСЬ…';
+
+  const res = await createPeerWithRetry(null, 5000);
+  if (res.status !== 'ok') {
+    btn.disabled = false; btn.textContent = '🔗 ПОДКЛЮЧИТЬСЯ';
+    SFX.error();
+    toast('Сервер недоступен', true);
+    $('serverStatusJoin').textContent = '⚠️ Сервер недоступен. Попроси хоста использовать QR.';
+    return;
+  }
+
+  S.peer = res.peer;
+  S.role = 'client';
+  S.mode = 'peerjs';
+  S.lobbyCode = code;
+  wireClientPeer();
+
+  const conn = S.peer.connect(code.toLowerCase(), { reliable: true, metadata: { name: S.name } });
+  const timeout = setTimeout(() => {
+    SFX.error(); toast('Хост не отвечает', true);
+    try { conn.close(); } catch(_){}
+    btn.disabled = false; btn.textContent = '🔗 ПОДКЛЮЧИТЬСЯ';
+  }, 12000);
+
+  conn.on('open', () => {
+    clearTimeout(timeout);
+    toast('Подключено к ' + code);
+    SFX.connected();
+    try { conn.send({ t: 'hello', id: S.id, name: S.name }); } catch(_){}
+    startCallToHost(conn.peer);
+    $('menuBox').style.display = 'none';
+    $('creatorBox').style.display = 'none';
+    $('joinerBox').style.display = 'none';
+    $('roomTitle').textContent = 'ЛОББИ ' + code;
+    btn.disabled = false; btn.textContent = '🔗 ПОДКЛЮЧИТЬСЯ';
+    $('serverStatusJoin').textContent = '';
+    renderUsers();
+  });
+  conn.on('error', () => {
+    clearTimeout(timeout);
+    SFX.error(); toast('Ошибка соединения', true);
+    btn.disabled = false; btn.textContent = '🔗 ПОДКЛЮЧИТЬСЯ';
+  });
 }
 
 /* ============================================================
@@ -1847,242 +1924,34 @@ async function generateAnswer() {
 async function startPTT() {
   if (S.pttActive) return;
   if (!S.micStream) { try { await getMic(); } catch { return; } }
-  S.pttActive = true;
-  S.myTalking = true;
+  S.pttActive = true; S.myTalking = true;
   const played = playPTTMP3();
   if (!played) SFX.mdc();
   setTimeout(() => { if (!played) SFX.click(); }, 180);
   S.micStream.getAudioTracks().forEach(t => t.enabled = true);
   $('pttBtn').classList.add('active');
   $('pttHint').textContent = 'ПЕРЕДАЧА…';
-  broadcastDC({ t: 'ptt', on: true, name: S.name });
+  broadcastPTT({ t: 'ptt', on: true });
   renderUsers();
   if (navigator.vibrate) navigator.vibrate(15);
 }
 function stopPTT() {
   if (!S.pttActive) return;
-  S.pttActive = false;
-  S.myTalking = false;
+  S.pttActive = false; S.myTalking = false;
   if (S.micStream) S.micStream.getAudioTracks().forEach(t => t.enabled = false);
   SFX.roger();
   setTimeout(() => SFX.squelchTail(), 120);
   $('pttBtn').classList.remove('active');
   $('pttHint').textContent = 'Удерживай для передачи';
-  broadcastDC({ t: 'ptt', on: false });
+  broadcastPTT({ t: 'ptt', on: false });
   renderUsers();
   if (navigator.vibrate) navigator.vibrate([10, 40, 10]);
 }
-
-/* ============================================================
-   ФАЙЛЫ
-   ============================================================ */
-function downloadTextFile(filename, text) {
-  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 3000);
-  toast('Файл сохранён: ' + filename);
-}
-async function shareFile(filename, text) {
-  const file = new File([text], filename, { type: 'text/plain' });
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try { await navigator.share({ files: [file], title: filename }); toast('Отправлено'); return; } catch(_) {}
-  }
-  downloadTextFile(filename, text);
-}
-function readTextFile(file) {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result || '').trim());
-    r.onerror = () => reject(r.error);
-    r.readAsText(file);
+function broadcastPTT(msg) {
+  Object.values(S.peers).forEach(p => {
+    if (p.conn && p.conn.open) { try { p.conn.send(msg); } catch(_){} }
+    if (p.dc && p.dc.readyState === 'open') { try { p.dc.send(JSON.stringify(msg)); } catch(_){} }
   });
-}
-
-/* ============================================================
-   ЗВУКОВАЯ ПЕРЕДАЧА КОДА (FSK)
-   ============================================================ */
-const SoundTransfer = (function() {
-  const FREQ_0 = 1200, FREQ_1 = 2200, FREQ_START = 800, FREQ_END = 600;
-  const BIT_MS = 14, GAP_MS = 30;
-
-  function textToBits(text) {
-    const full = 'RAD' + text + '#';
-    const bytes = new TextEncoder().encode(full);
-    const bits = [];
-    for (const b of bytes) {
-      bits.push(1);
-      for (let i = 7; i >= 0; i--) bits.push((b >> i) & 1);
-    }
-    return bits;
-  }
-  function bitsToText(bits) {
-    const bytes = [];
-    for (let i = 0; i + 9 <= bits.length; i += 9) {
-      if (bits[i] !== 1) break;
-      let b = 0;
-      for (let j = 1; j <= 8; j++) b = (b << 1) | bits[i + j];
-      bytes.push(b);
-    }
-    if (!bytes.length) return null;
-    try {
-      const text = new TextDecoder().decode(new Uint8Array(bytes));
-      const start = text.indexOf('RAD');
-      const end = text.indexOf('#');
-      if (start !== 0 || end < 3) return null;
-      return text.slice(3, end);
-    } catch { return null; }
-  }
-
-  let txNodes = [];
-  async function send(text, onStatus) {
-    const c = ctx();
-    if (c.state === 'suspended') await c.resume();
-    stopAllTx();
-    const bits = textToBits(text);
-    const status = onStatus || (() => {});
-    const master = c.createGain();
-    master.gain.value = 0.35;
-    master.connect(c.destination);
-    txNodes.push({ stop: () => { try { master.disconnect(); } catch(_){} } });
-    let t = c.currentTime + 0.1;
-
-    for (let k = 0; k < 3; k++) {
-      const o = c.createOscillator(), g = c.createGain();
-      o.type = 'sine'; o.frequency.value = FREQ_START;
-      g.gain.setValueAtTime(0.35, t);
-      g.gain.setValueAtTime(0.35, t + 0.05);
-      g.gain.setValueAtTime(0, t + 0.06);
-      o.connect(g).connect(master);
-      o.start(t); o.stop(t + 0.065);
-      txNodes.push({ stop: () => { try { o.stop(); } catch(_){} } });
-      t += 0.1;
-    }
-
-    for (let i = 0; i < bits.length; i++) {
-      const o = c.createOscillator(), g = c.createGain();
-      o.type = 'sine';
-      o.frequency.value = bits[i] ? FREQ_1 : FREQ_0;
-      const dur = BIT_MS / 1000;
-      g.gain.setValueAtTime(0.32, t);
-      g.gain.setValueAtTime(0.32, t + dur - 0.002);
-      g.gain.linearRampToValueAtTime(0, t + dur);
-      o.connect(g).connect(master);
-      o.start(t); o.stop(t + dur + 0.003);
-      txNodes.push({ stop: () => { try { o.stop(); } catch(_){} } });
-      t += dur;
-      if ((i + 1) % 8 === 0) t += GAP_MS / 1000;
-      if (i % 200 === 0) status('Передача: ' + Math.round((i / bits.length) * 100) + '%');
-    }
-    const oE = c.createOscillator(), gE = c.createGain();
-    oE.type = 'sine'; oE.frequency.value = FREQ_END;
-    gE.gain.setValueAtTime(0.35, t);
-    gE.gain.setValueAtTime(0, t + 0.2);
-    oE.connect(gE).connect(master);
-    oE.start(t); oE.stop(t + 0.22);
-    const totalMs = (t - c.currentTime) * 1000;
-    status('Передача: 100% (' + Math.round(totalMs / 1000) + ' сек)');
-    setTimeout(() => { stopAllTx(); status('Готово'); }, totalMs + 300);
-  }
-  function stopAllTx() {
-    txNodes.forEach(n => { try { n.stop(); } catch(_){} });
-    txNodes = [];
-  }
-
-  let rxActive = false, rxStream = null, rxAnalyser = null, rxRaf = null, rxSource = null;
-  function detectTone(analyser, sampleRate) {
-    const buf = new Float32Array(analyser.fftSize);
-    analyser.getFloatTimeDomainData(buf);
-    let crossings = 0;
-    for (let i = 1; i < buf.length; i++) {
-      if ((buf[i-1] < 0 && buf[i] >= 0) || (buf[i-1] >= 0 && buf[i] < 0)) crossings++;
-    }
-    const freq = crossings * sampleRate / (2 * buf.length);
-    let peak = 0;
-    for (let i = 0; i < buf.length; i++) peak = Math.max(peak, Math.abs(buf[i]));
-    return { freq, amp: peak };
-  }
-  async function listen(onProgress, onText) {
-    if (rxActive) return;
-    rxActive = true;
-    const c = ctx();
-    if (c.state === 'suspended') await c.resume();
-    const status = onProgress || (() => {});
-    status('Слушаю…');
-    try {
-      rxStream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 },
-        video: false
-      });
-    } catch(e) { status('Нет доступа к микрофону'); rxActive = false; return; }
-    const src = c.createMediaStreamSource(rxStream);
-    rxSource = src;
-    rxAnalyser = c.createAnalyser();
-    rxAnalyser.fftSize = 2048;
-    src.connect(rxAnalyser);
-    const sampleRate = c.sampleRate;
-    let collecting = false, bits = [], lastBitTime = 0, startDetected = 0;
-
-    const loop = () => {
-      if (!rxActive) return;
-      const { freq, amp } = detectTone(rxAnalyser, sampleRate);
-      const now = performance.now();
-      if (amp < 0.03) {
-        // тишина
-      } else if (freq > 700 && freq < 900) {
-        if (now - startDetected > 250) { startDetected = now; collecting = false; bits = []; status('Синхронизация…'); }
-      } else if (now - lastBitTime >= BIT_MS) {
-        lastBitTime = now;
-        if (freq > 1500 && freq < 2600) {
-          if (!collecting) { collecting = true; bits = []; status('Приём…'); }
-          bits.push(1);
-        } else if (freq > 900 && freq < 1400) {
-          if (!collecting) { collecting = true; bits = []; status('Приём…'); }
-          bits.push(0);
-        }
-      }
-      if (collecting && bits.length > 80 && bits.length % 40 === 0) {
-        const text = bitsToText(bits);
-        if (text && text.length > 10) {
-          status('Код принят!');
-          if (onText) onText(text);
-          stopListen();
-          return;
-        }
-      }
-      rxRaf = requestAnimationFrame(loop);
-    };
-    loop();
-  }
-  function stopListen() {
-    rxActive = false;
-    if (rxRaf) { cancelAnimationFrame(rxRaf); rxRaf = null; }
-    if (rxStream) { rxStream.getTracks().forEach(t => t.stop()); rxStream = null; }
-    try { if (rxSource) rxSource.disconnect(); } catch(_){}
-    try { if (rxAnalyser) rxAnalyser.disconnect(); } catch(_){}
-    rxSource = null; rxAnalyser = null;
-  }
-  return { send, stopAllTx, listen, stopListen };
-})();
-
-/* ============================================================
-   HEARTBEAT
-   ============================================================ */
-function startHeartbeat() {
-  if (S.heartbeatTimer) return;
-  S.heartbeatTimer = setInterval(() => {
-    const now = Date.now();
-    Object.entries(S.peers).forEach(([id, p]) => {
-      if (!p.connected) return;
-      if (p.dc && p.dc.readyState === 'open') { try { p.dc.send(JSON.stringify({ t: 'ping' })); } catch(_){} }
-      if (now - (p.lastSeen || 0) > 45000) removePeer(id, true);
-    });
-  }, 15000);
 }
 
 /* ============================================================
@@ -2104,13 +1973,39 @@ document.addEventListener('keyup', e => {
 
 $('roomBtn').addEventListener('click', () => $('roomModal').classList.add('show'));
 $('closeRoomModal').addEventListener('click', () => $('roomModal').classList.remove('show'));
-$('startRoomBtn').addEventListener('click', startAsCreator);
-$('joinRoomBtn').addEventListener('click', startAsJoiner);
-$('newInviteBtn').addEventListener('click', newInvite);
-$('acceptAnswerBtn').addEventListener('click', acceptAnswer);
-$('genAnswerBtn').addEventListener('click', generateAnswer);
+$('startRoomBtn').addEventListener('click', createLobby);
+$('joinRoomBtn').addEventListener('click', () => {
+  $('menuBox').style.display = 'none';
+  $('creatorBox').style.display = 'none';
+  $('joinerBox').style.display = '';
+  $('roomTitle').textContent = 'ПОДКЛЮЧЕНИЕ';
+  setTimeout(() => $('joinCodeInput').focus(), 100);
+});
+$('backMenuBtn').addEventListener('click', () => {
+  $('menuBox').style.display = '';
+  $('joinerBox').style.display = 'none';
+  $('roomTitle').textContent = 'СЕТЬ MESH';
+});
+$('joinConfirmBtn').addEventListener('click', joinLobbyByCode);
+$('joinCodeInput').addEventListener('input', e => {
+  e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+  if (e.target.value.length === 6) joinLobbyByCode();
+});
+$('joinCodeInput').addEventListener('keydown', e => { if (e.key === 'Enter') joinLobbyByCode(); });
+$('leaveCreatorBtn').addEventListener('click', () => {
+  SFX.powerOff();
+  try { if (S.peer) S.peer.destroy(); } catch(_){}
+  Object.keys(S.peers).forEach(removePeerById);
+  if (S.pendingOffer) try { S.pendingOffer.close(); } catch(_){}
+  S.peer = null; S.lobbyCode = null; S.role = null; S.mode = null;
+  S.pendingOffer = null; S.pendingId = null;
+  $('menuBox').style.display = '';
+  $('creatorBox').style.display = 'none';
+  $('joinerBox').style.display = 'none';
+  $('roomTitle').textContent = 'СЕТЬ MESH';
+  renderUsers(); toast('Вышел из лобби');
+});
 
-/* Табы */
 document.querySelectorAll('.tabs').forEach(tabs => {
   const wrap = tabs.parentElement;
   tabs.querySelectorAll('button').forEach(btn => {
@@ -2125,27 +2020,38 @@ document.querySelectorAll('.tabs').forEach(tabs => {
   });
 });
 
-/* Сканер */
 $('scanBtn').addEventListener('click', () => {
   if (!$('roomModal').classList.contains('show')) $('roomModal').classList.add('show');
-  if (S.isCreator) openScanner('answer'); else openScanner('offer');
+  openScanner('code');
 });
-$('scanOfferBtn').addEventListener('click', () => openScanner('offer'));
+$('scanOfferBtn').addEventListener('click', () => openScanner('code'));
 $('scanAnswerBtn').addEventListener('click', () => openScanner('answer'));
 $('scanClose').addEventListener('click', closeScanner);
 $('scanManual').addEventListener('click', () => {
   closeScanner();
-  const code = prompt('Вставь код вручную:');
-  if (code) {
-    if (S.scanTarget === 'offer') {
-      $('joinOfferInput').value = code.trim();
-      $('joinOfferInputText').value = code.trim();
-    } else $('answerInput').value = code.trim();
-    toast('Вставлено');
-  }
+  const code = prompt('Вставь код:');
+  if (code) handleScanned(code);
 });
 
-/* Копирование / share */
+$('copyOfferLongBtn').addEventListener('click', () => { copyText($('offerTextLong').value); toast('Скопировано'); });
+$('shareOfferLongBtn').addEventListener('click', async () => {
+  const t = $('offerTextLong').value;
+  if (navigator.share) { try { await navigator.share({ text: t }); } catch(_){} } else { copyText(t); toast('Скопировано'); }
+});
+$('acceptAnswerBtn').addEventListener('click', acceptAnswerLong);
+$('newInviteBtn').addEventListener('click', newInviteLong);
+$('genAnswerBtn').addEventListener('click', generateAnswerLong);
+$('copyAnswerBtn').addEventListener('click', () => { copyText($('joinAnswerText').value); toast('Скопировано'); });
+$('shareAnswerBtn').addEventListener('click', async () => {
+  const t = $('joinAnswerText').value;
+  if (navigator.share) { try { await navigator.share({ text: t }); } catch(_){} } else { copyText(t); toast('Скопировано'); }
+});
+$('copyCodeBtn').addEventListener('click', () => { copyText(S.lobbyCode || ''); toast('Код скопирован'); });
+$('shareCodeBtn').addEventListener('click', async () => {
+  const text = 'Рация — код лобби: ' + (S.lobbyCode || '');
+  if (navigator.share) { try { await navigator.share({ text }); } catch(_){} } else { copyText(text); toast('Скопировано'); }
+});
+
 function copyText(txt) {
   if (navigator.clipboard) navigator.clipboard.writeText(txt).catch(()=>{});
   const el = document.createElement('textarea');
@@ -2153,110 +2059,17 @@ function copyText(txt) {
   try { document.execCommand('copy'); } catch(_){}
   document.body.removeChild(el);
 }
-$('copyOfferBtn').addEventListener('click', () => { copyText($('offerText').value); toast('Скопировано'); });
-$('copyAnswerBtn').addEventListener('click', () => { copyText($('joinAnswerText').value); toast('Скопировано'); });
-$('shareOfferBtn').addEventListener('click', async () => {
-  const t = $('offerText').value;
-  if (navigator.share) { try { await navigator.share({ text: t }); } catch(_){} } else { copyText(t); toast('Скопировано'); }
-});
-$('shareAnswerBtn').addEventListener('click', async () => {
-  const t = $('joinAnswerText').value;
-  if (navigator.share) { try { await navigator.share({ text: t }); } catch(_){} } else { copyText(t); toast('Скопировано'); }
-});
 
-/* Файлы */
-$('saveOfferFileBtn').addEventListener('click', () => {
-  const code = $('offerText').value || '';
-  if (!code) { toast('Сначала создай сеть', true); return; }
-  downloadTextFile('radio-offer.txt', code);
-});
-$('shareOfferFileBtn').addEventListener('click', () => {
-  const code = $('offerText').value || '';
-  if (!code) { toast('Сначала создай сеть', true); return; }
-  shareFile('radio-offer.txt', code);
-});
-$('downloadOfferBtn').addEventListener('click', () => {
-  const code = $('offerText').value || '';
-  if (!code) { toast('Сначала создай сеть', true); return; }
-  downloadTextFile('radio-offer.txt', code);
-});
-$('offerFileInput').addEventListener('change', async e => {
-  const f = e.target.files[0];
-  if (!f) return;
-  try {
-    const text = await readTextFile(f);
-    $('joinOfferInput').value = text;
-    $('joinOfferInputText').value = text;
-    toast('Файл загружен');
-  } catch(err) { toast('Не удалось прочитать: ' + err.message, true); }
-});
-$('saveAnswerFileBtn').addEventListener('click', () => {
-  const code = $('joinAnswerText').value || '';
-  if (!code) { toast('Сначала сгенерируй ответ', true); return; }
-  downloadTextFile('radio-answer.txt', code);
-});
-$('shareAnswerFileBtn').addEventListener('click', () => {
-  const code = $('joinAnswerText').value || '';
-  if (!code) { toast('Сначала сгенерируй ответ', true); return; }
-  shareFile('radio-answer.txt', code);
-});
-
-/* Звук */
-$('sendOfferSoundBtn').addEventListener('click', async () => {
-  const code = $('offerText').value || '';
-  if (!code) { toast('Сначала создай сеть', true); return; }
-  const st = $('soundStatus');
-  $('sendOfferSoundBtn').classList.add('pulse-red');
-  await SoundTransfer.send(code, s => { st.textContent = s; });
-  setTimeout(() => $('sendOfferSoundBtn').classList.remove('pulse-red'), 2000);
-});
-$('listenSoundBtn').addEventListener('click', async () => {
-  const st = $('soundStatus');
-  await SoundTransfer.listen(
-    s => { st.textContent = s; },
-    text => { $('answerInput').value = text; SFX.qrBeep(); toast('Ответ принят'); }
-  );
-});
-$('listenSoundJoinBtn').addEventListener('click', async () => {
-  const st = $('soundStatusJoin');
-  await SoundTransfer.listen(
-    s => { st.textContent = s; },
-    text => {
-      $('joinOfferInput').value = text;
-      $('joinOfferInputText').value = text;
-      SFX.qrBeep();
-      toast('Код принят');
-    }
-  );
-});
-$('sendAnswerSoundBtn').addEventListener('click', async () => {
-  const code = $('joinAnswerText').value || '';
-  if (!code) { toast('Сначала сгенерируй ответ', true); return; }
-  const st = $('soundStatusAnswer');
-  await SoundTransfer.send(code, s => { st.textContent = s; });
-});
-
-/* Синхронизация полей offer */
-const _off1 = $('joinOfferInput'), _off2 = $('joinOfferInputText');
-if (_off1 && _off2) {
-  _off1.addEventListener('input', () => { _off2.value = _off1.value; });
-  _off2.addEventListener('input', () => { _off1.value = _off2.value; });
-}
-
-/* Настройки */
 $('settingsBtn').addEventListener('click', () => $('settingsModal').classList.add('show'));
 $('closeSettingsModal').addEventListener('click', () => $('settingsModal').classList.remove('show'));
 $('saveSettingsBtn').addEventListener('click', () => {
   S.name = $('nameInput').value.trim() || S.name;
-  S.relayMode = $('relayMode').value;
   S.pttSound = $('pttSound').value;
   S.squelchLevel = parseInt($('squelchSlider').value) / 100;
   localStorage.setItem('radio_name', S.name);
   localStorage.setItem('radio_vol', String(S.volume));
-  localStorage.setItem('radio_relay', S.relayMode);
   localStorage.setItem('radio_pttsnd', S.pttSound);
   localStorage.setItem('radio_sqlch', String(S.squelchLevel));
-  broadcastDC({ t: 'hello', id: S.id, name: S.name });
   renderUsers();
   $('settingsModal').classList.remove('show');
   toast('Сохранено');
@@ -2284,18 +2097,17 @@ $('powerBtn').addEventListener('click', () => {
   SFX.powerOff();
   setTimeout(() => {
     if (S.micStream) { S.micStream.getTracks().forEach(t => t.stop()); S.micStream = null; }
+    try { if (S.peer) S.peer.destroy(); } catch(_){}
+    Object.keys(S.peers).forEach(removePeerById);
     if (S.pendingOffer) try { S.pendingOffer.close(); } catch(_){}
-    Object.keys(S.peers).forEach(id => removePeer(id, true));
-    if (S.heartbeatTimer) { clearInterval(S.heartbeatTimer); S.heartbeatTimer = null; }
-    S.isCreator = false;
+    S.peer = null; S.role = null; S.mode = null; S.lobbyCode = null;
     S.pendingOffer = null; S.pendingId = null;
     if (S.mixDest) { try { S.mixDest.disconnect(); } catch(_){} S.mixDest = null; }
     S.mixSources = {};
-    $('subLabel').textContent = 'P2P · БЕЗ СЕРВЕРОВ';
-    $('startRoomBtn').style.display = '';
-    $('joinRoomBtn').style.display = '';
+    $('menuBox').style.display = '';
     $('creatorBox').style.display = 'none';
     $('joinerBox').style.display = 'none';
+    $('roomTitle').textContent = 'СЕТЬ MESH';
     renderUsers(); toast('Выключено');
   }, 400);
 });
@@ -2309,8 +2121,7 @@ document.addEventListener('pointerdown', () => ctx(), { once: true });
 /* PWA */
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
+  e.preventDefault(); deferredPrompt = e;
   $('installBanner').classList.add('show');
 });
 $('installYes').addEventListener('click', async () => {
@@ -2318,26 +2129,19 @@ $('installYes').addEventListener('click', async () => {
   if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; }
 });
 $('installNo').addEventListener('click', () => $('installBanner').classList.remove('show'));
-
 window.addEventListener('online', () => $('offlineBadge').classList.remove('show'));
 window.addEventListener('offline', () => $('offlineBadge').classList.add('show'));
 if (!navigator.onLine) $('offlineBadge').classList.add('show');
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
-}
-
 /* Init */
 S.name = localStorage.getItem('radio_name') || S.name;
 S.volume = parseFloat(localStorage.getItem('radio_vol') || '1');
-S.relayMode = localStorage.getItem('radio_relay') || 'auto';
 S.pttSound = localStorage.getItem('radio_pttsnd') || 'mp3';
 S.squelchLevel = parseFloat(localStorage.getItem('radio_sqlch') || '0.6');
 
 $('nameInput').value = S.name;
 $('volumeSlider').value = Math.round(S.volume * 100);
 $('volValue').textContent = Math.round(S.volume * 100) + '%';
-$('relayMode').value = S.relayMode;
 $('pttSound').value = S.pttSound;
 $('squelchSlider').value = Math.round(S.squelchLevel * 100);
 $('squelchValue').textContent = Math.round(S.squelchLevel * 100) + '%';
@@ -2345,12 +2149,12 @@ $('squelchValue').textContent = Math.round(S.squelchLevel * 100) + '%';
 initScanner();
 initPTTAudio();
 renderUsers();
-startHeartbeat();
 
 window.addEventListener('beforeunload', () => {
   try { SFX.powerOff(); } catch(_){}
   if (S.micStream) S.micStream.getTracks().forEach(t => t.stop());
-  Object.values(S.peers).forEach(p => { try { p.pc?.close(); } catch(_){} });
+  try { if (S.peer) S.peer.destroy(); } catch(_){}
+  Object.values(S.peers).forEach(p => { try { p.call && p.call.close(); p.pc && p.pc.close(); } catch(_){} });
   closeScanner();
 });
 </script>
