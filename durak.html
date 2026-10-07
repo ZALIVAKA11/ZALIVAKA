@@ -10,76 +10,49 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
 :root{
-  --felt-1:#2a5a9a;--felt-2:#1a3a6b;--felt-3:#0f2547;
-  --panel:rgba(0,0,0,.35);--stroke:rgba(255,255,255,.15);
-  --text:#fff;--muted:#a8b8d0;
-  --accent:#ffcf5c;--accent-2:#ffb43a;--ok:#4ade80;--danger:#ff4d5e;
-  --radius:14px;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+  --text:#fff;--muted:#a8b8d0;--stroke:rgba(255,255,255,.15);
+  --accent:#ffcf5c;--ok:#4ade80;--danger:#ff4d5e;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
-body{
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Roboto,Arial,sans-serif;
-  background:#0f2547;color:var(--text);user-select:none;
-  -webkit-font-smoothing:antialiased;overscroll-behavior:none;
-}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Roboto,Arial,sans-serif;background:#0f2547;color:var(--text);user-select:none;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
 button{font-family:inherit;cursor:pointer;border:none;color:inherit}
-
-/* ========== SCREENS ========== */
 .screen{position:fixed;inset:0;display:none;flex-direction:column}
 .screen.active{display:flex}
 
-/* ========== LOADING ========== */
 #loading{align-items:center;justify-content:center;background:radial-gradient(circle at 50% 30%,#2a5a9a,#0f2547)}
 .loader-star{font-size:80px;color:#ffcf5c;filter:drop-shadow(0 0 30px #ffcf5c);animation:spin 2s ease-in-out infinite}
 @keyframes spin{0%,100%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.2)}}
-.loader-title{margin-top:20px;font-size:22px;font-weight:900;letter-spacing:.3em;text-transform:uppercase;color:#fff}
+.loader-title{margin-top:20px;font-size:22px;font-weight:900;letter-spacing:.3em;text-transform:uppercase}
 
-/* ========== MENU ========== */
 #menu{background:radial-gradient(circle at 50% 30%,#2a5a9a,#0f2547);padding:calc(var(--safe-top) + 20px) 20px calc(var(--safe-bottom) + 20px)}
 .menu-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
 .menu-brand{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:900;letter-spacing:.15em;text-transform:uppercase}
 .menu-brand .st{color:#ffcf5c;font-size:20px}
-.coin-badge{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--stroke);border-radius:20px;padding:6px 12px;font-size:13px;font-weight:800}
-.coin-badge .coin{color:#ffcf5c}
-.profile-box{
-  display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;
-  background:linear-gradient(135deg,rgba(255,207,92,.15),rgba(255,255,255,.05));
-  border:1px solid rgba(255,207,92,.3);margin-bottom:20px;
-}
+.profile-box{display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;background:linear-gradient(135deg,rgba(255,207,92,.15),rgba(255,255,255,.05));border:1px solid rgba(255,207,92,.3);margin-bottom:20px}
 .profile-av{width:60px;height:60px;border-radius:50%;object-fit:cover;border:3px solid #ffcf5c}
 .profile-av-fb{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;font-size:24px;font-weight:900;background:linear-gradient(135deg,#ffcf5c,#ffb43a);color:#1a3a6b}
 .profile-name{font-size:17px;font-weight:800}
 .profile-un{font-size:12px;color:var(--muted);margin-top:3px}
 .profile-id{display:inline-block;font-size:10px;background:rgba(0,0,0,.3);padding:3px 8px;border-radius:10px;margin-top:6px;color:var(--muted)}
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:auto}
-.stat-card{background:var(--panel);border:1px solid var(--stroke);border-radius:12px;padding:12px 8px;text-align:center}
-.stat-num{font-size:18px;font-weight:900;color:#ffcf5c}
-.stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:3px}
-.menu-btns{display:flex;flex-direction:column;gap:12px;margin-top:30px}
+.menu-btns{display:flex;flex-direction:column;gap:12px;margin-top:auto;padding-top:30px}
 
-/* ========== BUTTONS ========== */
-.btn{
-  padding:16px 20px;border-radius:14px;font-size:15px;font-weight:900;
-  letter-spacing:.1em;text-transform:uppercase;transition:transform .12s;
-}
+.btn{padding:16px 20px;border-radius:14px;font-size:15px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;transition:transform .12s}
 .btn:active{transform:scale(.96)}
 .btn:disabled{opacity:.4;pointer-events:none}
 .btn-gold{background:linear-gradient(135deg,#ffcf5c,#ffb43a);color:#1a3a6b;box-shadow:0 6px 20px -8px #ffcf5c}
 .btn-blue{background:linear-gradient(135deg,#3a6bbf,#2a4a8a);color:#fff;box-shadow:0 6px 20px -8px #3a6bbf}
-.btn-red{background:linear-gradient(135deg,#ff4d5e,#c41e3a);color:#fff;box-shadow:0 6px 20px -8px #ff4d5e}
+.btn-red{background:linear-gradient(135deg,#ff4d5e,#c41e3a);color:#fff}
 .btn-outline{background:rgba(255,255,255,.08);border:1px solid var(--stroke);color:#fff}
 .btn-sm{padding:12px 16px;font-size:13px}
 
-/* ========== TOPBAR ========== */
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex-shrink:0;background:rgba(0,0,0,.2)}
 .tb-btn{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.1);border:1px solid var(--stroke);display:grid;place-items:center;font-size:18px;color:#fff}
 .tb-btn:active{background:rgba(255,255,255,.2)}
 .tb-title{font-size:14px;font-weight:900;letter-spacing:.15em;text-transform:uppercase}
-.tb-coins{background:rgba(0,0,0,.3);border:1px solid var(--stroke);border-radius:20px;padding:6px 12px;font-size:13px;font-weight:800;color:#ffcf5c;display:flex;gap:5px;align-items:center}
 
-/* ========== LOBBY / SETTINGS SCREENS ========== */
-.form-screen{background:radial-gradient(circle at 50% 30%,#2a5a9a,#0f2547);padding:0 0 var(--safe-bottom)}
+.form-screen{background:radial-gradient(circle at 50% 30%,#2a5a9a,#0f2547)}
 .form-body{flex:1;overflow-y:auto;padding:20px}
 .form-body::-webkit-scrollbar{display:none}
 .tabs{display:flex;gap:6px;background:rgba(0,0,0,.25);padding:5px;border-radius:12px;margin-bottom:18px}
@@ -94,7 +67,7 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 .seg{display:flex;gap:6px}
 .seg button{flex:1;padding:11px 6px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid var(--stroke);color:var(--muted);font-size:12px;font-weight:800}
 .seg button.active{background:linear-gradient(135deg,#ffcf5c,#ffb43a);color:#1a3a6b;border-color:transparent}
-.set-group{background:var(--panel);border:1px solid var(--stroke);border-radius:14px;overflow:hidden;margin-bottom:14px}
+.set-group{background:rgba(0,0,0,.35);border:1px solid var(--stroke);border-radius:14px;overflow:hidden;margin-bottom:14px}
 .set-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
 .set-row:last-child{border-bottom:none}
 .set-ic{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.08);display:grid;place-items:center;font-size:16px}
@@ -108,17 +81,17 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 .switch input:checked+.track{background:linear-gradient(135deg,#ffcf5c,#ffb43a)}
 .switch input:checked+.track::before{transform:translateX(20px)}
 
-/* ========== ROOM ========== */
 #room{background:radial-gradient(circle at 50% 30%,#2a5a9a,#0f2547)}
 .room-code-big{text-align:center;margin:16px}
 .room-code-big .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.25em;font-weight:800}
 .room-code-big .val{font-size:42px;font-weight:900;letter-spacing:.2em;text-indent:.2em;margin-top:8px;color:#ffcf5c;font-family:'SF Mono',Menlo,monospace;text-shadow:0 0 30px rgba(255,207,92,.5);cursor:pointer}
 .room-code-big .hint{font-size:11px;color:var(--muted);margin-top:6px}
 .room-players{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;padding:0 20px;margin-bottom:20px}
-.rp{position:relative;padding:12px 6px;border-radius:14px;background:var(--panel);border:1px solid var(--stroke);text-align:center}
+.rp{position:relative;padding:12px 6px;border-radius:14px;background:rgba(0,0,0,.35);border:1px solid var(--stroke);text-align:center}
 .rp.host{border-color:rgba(255,207,92,.6);box-shadow:0 0 20px -8px #ffcf5c}
 .rp.ready{border-color:rgba(74,222,128,.6)}
 .rp.me{border-color:#7c5cff}
+.rp.p2p{border-color:#4ade80}
 .rp img,.rp .fb{width:42px;height:42px;border-radius:50%;object-fit:cover;margin:0 auto 6px;display:block}
 .rp .fb{display:grid;place-items:center;font-size:16px;font-weight:900;background:linear-gradient(135deg,#3a6bbf,#2a4a8a)}
 .rp .nm{font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -126,264 +99,90 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 .b-host{background:linear-gradient(135deg,#ffcf5c,#ffb43a);color:#1a3a6b}
 .b-ready{background:linear-gradient(135deg,#4ade80,#22c55e);color:#052e16}
 .rp-slot{padding:12px 6px;border-radius:14px;border:1.5px dashed rgba(255,255,255,.15);display:grid;place-items:center;color:rgba(255,255,255,.3);font-size:22px}
-.room-params{margin:0 20px 20px;background:var(--panel);border:1px solid var(--stroke);border-radius:14px;overflow:hidden}
+.room-params{margin:0 20px 20px;background:rgba(0,0,0,.35);border:1px solid var(--stroke);border-radius:14px;overflow:hidden}
+.p2p-status{font-size:11px;text-align:center;padding:8px 16px;color:var(--muted)}
+.p2p-status.on{color:#4ade80}
+.p2p-status.off{color:#ff4d5e}
 
-/* ========== GAME SCREEN (DURAK ONLINE STYLE) ========== */
-#game{
-  background:
-    repeating-linear-gradient(135deg, rgba(0,0,0,.04) 0 2px, transparent 2px 4px),
-    radial-gradient(ellipse at 50% 40%, #3a6bbf 0%, #2a5a9a 40%, #1a3a6b 100%);
-  padding:0;
-  overflow:hidden;
-}
-.game-topbar{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:calc(var(--safe-top) + 8px) 12px 8px;flex-shrink:0;
-  gap:6px;
-}
+#game{background:repeating-linear-gradient(135deg,rgba(0,0,0,.04) 0 2px,transparent 2px 4px),radial-gradient(ellipse at 50% 40%,#3a6bbf 0%,#2a5a9a 40%,#1a3a6b 100%);padding:0;overflow:hidden}
+.game-topbar{display:flex;justify-content:space-between;align-items:center;padding:calc(var(--safe-top) + 8px) 12px 8px;flex-shrink:0;gap:6px}
 .gt-left,.gt-right{display:flex;gap:6px;align-items:center}
-.gt-btn{
-  width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.12);
-  border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;
-  font-size:16px;color:#fff;backdrop-filter:blur(6px);
-}
+.gt-btn{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;font-size:16px;color:#fff;backdrop-filter:blur(6px)}
 .gt-btn:active{background:rgba(255,255,255,.25)}
-.gt-coins{
-  background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);
-  border-radius:20px;padding:5px 11px;font-size:12px;font-weight:800;
-  color:#fff;display:flex;gap:5px;align-items:center;
-}
-.gt-coins .c{color:#4ade80;font-size:11px}
+.gt-status{font-size:11px;font-weight:800;padding:5px 11px;border-radius:20px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15)}
+.gt-status.on{color:#4ade80;border-color:rgba(74,222,128,.5)}
+.gt-status.off{color:#ff4d5e;border-color:rgba(255,77,94,.5)}
 
-/* Opponents row */
-.opps{
-  display:flex;gap:8px;padding:6px 12px;overflow-x:auto;flex-shrink:0;
-  justify-content:center;min-height:88px;
-}
+.opps{display:flex;gap:8px;padding:6px 12px;overflow-x:auto;flex-shrink:0;justify-content:center;min-height:88px}
 .opps::-webkit-scrollbar{display:none}
-.opp{
-  flex-shrink:0;position:relative;text-align:center;width:72px;
-  transition:transform .3s;
-}
+.opp{flex-shrink:0;position:relative;text-align:center;width:72px}
 .opp-av-wrap{position:relative;width:56px;height:56px;margin:0 auto}
-.opp-av{
-  width:56px;height:56px;border-radius:8px;object-fit:cover;
-  border:2px solid rgba(255,255,255,.2);display:block;
-}
-.opp-av-fb{
-  width:56px;height:56px;border-radius:8px;display:grid;place-items:center;
-  font-size:22px;font-weight:900;color:#fff;
-  background:linear-gradient(135deg,#3a6bbf,#2a4a8a);
-  border:2px solid rgba(255,255,255,.2);
-}
-.opp.active .opp-av,.opp.active .opp-av-fb{
-  border-color:#4ade80;box-shadow:0 0 16px #4ade80,0 0 0 2px #4ade80;
-  animation:pulseActive 1.5s ease-in-out infinite;
-}
+.opp-av{width:56px;height:56px;border-radius:8px;object-fit:cover;border:2px solid rgba(255,255,255,.2);display:block}
+.opp-av-fb{width:56px;height:56px;border-radius:8px;display:grid;place-items:center;font-size:22px;font-weight:900;color:#fff;background:linear-gradient(135deg,#3a6bbf,#2a4a8a);border:2px solid rgba(255,255,255,.2)}
+.opp.active .opp-av,.opp.active .opp-av-fb{border-color:#4ade80;box-shadow:0 0 16px #4ade80,0 0 0 2px #4ade80;animation:pulseActive 1.5s ease-in-out infinite}
+@keyframes pulseActive{0%,100%{box-shadow:0 0 16px #4ade80,0 0 0 2px #4ade80}50%{box-shadow:0 0 24px #4ade80,0 0 0 3px #4ade80}}
 .opp.attacker .opp-av,.opp.attacker .opp-av-fb{border-color:#ff5b6e;box-shadow:0 0 16px #ff5b6e}
 .opp.defender .opp-av,.opp.defender .opp-av-fb{border-color:#ffcf5c;box-shadow:0 0 16px #ffcf5c}
 .opp.offline{opacity:.5}
-.opp-cnt{
-  position:absolute;top:-4px;right:-4px;background:#0f2547;border:2px solid #fff;
-  border-radius:10px;padding:1px 6px;font-size:11px;font-weight:900;color:#fff;
-  min-width:22px;text-align:center;line-height:1.3;
-}
-.opp-name{
-  font-size:11px;font-weight:700;margin-top:4px;color:#fff;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  text-shadow:0 1px 3px rgba(0,0,0,.7);
-}
-.opp-badge{
-  position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);
-  font-size:8px;font-weight:900;text-transform:uppercase;padding:2px 6px;
-  border-radius:8px;letter-spacing:.05em;
-}
+.opp-cnt{position:absolute;top:-4px;right:-4px;background:#0f2547;border:2px solid #fff;border-radius:10px;padding:1px 6px;font-size:11px;font-weight:900;color:#fff;min-width:22px;text-align:center;line-height:1.3}
+.opp-name{font-size:11px;font-weight:700;margin-top:4px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.opp-badge{position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:900;text-transform:uppercase;padding:2px 6px;border-radius:8px;letter-spacing:.05em}
 .opp-badge.attacker{background:#ff4d5e;color:#fff}
 .opp-badge.defender{background:#ffcf5c;color:#1a3a6b}
 
-/* Table area */
-.table-area{
-  flex:1;position:relative;display:flex;padding:4px 12px;
-  min-height:0;
-}
-.deck-area{
-  position:absolute;top:8px;left:12px;display:flex;align-items:flex-start;gap:6px;
-}
-.deck-stack{
-  position:relative;width:44px;height:64px;
-}
-.deck-stack .card-back{position:absolute;top:0;left:0}
-.deck-cnt{
-  position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
-  background:#0f2547;border:1.5px solid #fff;border-radius:10px;
-  padding:1px 7px;font-size:11px;font-weight:900;color:#fff;min-width:26px;text-align:center;
-  z-index:10;
-}
-.trump-slot{
-  position:relative;width:44px;height:64px;
-}
+.table-area{flex:1;position:relative;display:flex;padding:4px 12px;min-height:0}
+.deck-area{position:absolute;top:8px;left:12px;display:flex;align-items:flex-start;gap:6px}
+.deck-stack{position:relative;width:44px;height:64px}
+.deck-stack .card.back{position:absolute;top:0;left:0}
+.deck-cnt{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);background:#0f2547;border:1.5px solid #fff;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:900;color:#fff;min-width:26px;text-align:center;z-index:10}
+.trump-slot{position:relative;width:44px;height:64px}
 .trump-slot .card{transform:rotate(90deg);transform-origin:center}
-.trump-slot .trump-suit-badge{
-  position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
-  background:#0f2547;border:1.5px solid #ffcf5c;border-radius:10px;
-  padding:1px 7px;font-size:14px;font-weight:900;color:#ffcf5c;
-  min-width:26px;text-align:center;z-index:10;
-}
-
-/* Table center */
-.table-center{
-  flex:1;display:flex;flex-wrap:wrap;gap:4px;
-  align-content:center;justify-content:center;
-  padding:70px 8px 8px;position:relative;
-  pointer-events:none;
-}
-.table-center .pair{
-  position:relative;width:44px;height:64px;
-  animation:dropIn .3s cubic-bezier(.34,1.56,.64,1);
-}
+.trump-suit-badge{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);background:#0f2547;border:1.5px solid #ffcf5c;border-radius:10px;padding:1px 7px;font-size:14px;font-weight:900;color:#ffcf5c;min-width:26px;text-align:center;z-index:10}
+.table-center{flex:1;display:flex;flex-wrap:wrap;gap:4px;align-content:center;justify-content:center;padding:70px 8px 8px;position:relative;pointer-events:none}
+.table-center .pair{position:relative;width:44px;height:64px;animation:dropIn .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes dropIn{from{opacity:0;transform:translateY(-20px) scale(.8)}to{opacity:1;transform:translateY(0) scale(1)}}
-.table-center .pair .card{position:absolute}
-.table-center .pair .card.atk{top:0;left:0;z-index:1}
-.table-center .pair .card.def{top:6px;left:6px;z-index:2;transform:rotate(8deg)}
-.table-center.empty::after{
-  content:"";position:absolute;inset:20% 20%;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,255,255,.08),transparent 70%);
-}
 
-/* Cards */
-.card{
-  width:44px;height:64px;border-radius:5px;background:#fff;
-  color:#1a1a1a;position:relative;flex-shrink:0;
-  box-shadow:1px 2px 5px rgba(0,0,0,.4);
-  font-family:'Times New Roman',Georgia,serif;
-  transition:transform .15s,box-shadow .15s;
-  border:1px solid rgba(0,0,0,.15);
-}
+.card{width:44px;height:64px;border-radius:5px;background:#fff;color:#1a1a1a;position:relative;flex-shrink:0;box-shadow:1px 2px 5px rgba(0,0,0,.4);font-family:'Times New Roman',Georgia,serif;transition:transform .15s,box-shadow .15s;border:1px solid rgba(0,0,0,.15)}
 .card.red{color:#c8000e}
 .card .cn{position:absolute;top:2px;left:3px;font-size:13px;font-weight:900;line-height:1;letter-spacing:-.5px}
 .card .cs{position:absolute;top:15px;left:3px;font-size:11px;line-height:1}
 .card .cn-b{position:absolute;bottom:2px;right:3px;font-size:13px;font-weight:900;line-height:1;transform:rotate(180deg);letter-spacing:-.5px}
 .card .cs-b{position:absolute;bottom:15px;right:3px;font-size:11px;line-height:1;transform:rotate(180deg)}
-.card .mid{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-size:22px;line-height:1;opacity:.9;
-}
-.card.back{
-  background:
-    repeating-linear-gradient(45deg, rgba(255,255,255,.15) 0 3px, transparent 3px 6px),
-    linear-gradient(135deg,#2a4a8a,#1a2a5a);
-  color:transparent;
-  border:1px solid rgba(255,255,255,.25);
-}
-.card.back::after{
-  content:"★";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  color:rgba(255,255,255,.4);font-size:16px;text-shadow:0 0 6px rgba(255,255,255,.4);
-}
+.card .mid{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22px;line-height:1;opacity:.9}
+.card.back{background:repeating-linear-gradient(45deg,rgba(255,255,255,.15) 0 3px,transparent 3px 6px),linear-gradient(135deg,#2a4a8a,#1a2a5a);color:transparent;border:1px solid rgba(255,255,255,.25)}
+.card.back::after{content:"★";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,.4);font-size:16px;text-shadow:0 0 6px rgba(255,255,255,.4)}
 .card.back .cn,.card.back .cs,.card.back .cn-b,.card.back .cs-b,.card.back .mid{display:none}
-.card.trump::before{
-  content:"★";position:absolute;top:1px;right:2px;font-size:8px;
-  color:#ffb43a;text-shadow:0 0 3px #ffb43a;
-}
-.card.mini{width:30px;height:44px}
-.card.mini .cn,.card.mini .cn-b{font-size:9px;top:1px;left:2px}
-.card.mini .cs,.card.mini .cs-b{font-size:7px;top:10px;left:2px}
-.card.mini .mid{font-size:15px}
-.card.mini.trump::before{font-size:6px;top:0;right:1px}
+.card.trump::before{content:"★";position:absolute;top:1px;right:2px;font-size:8px;color:#ffb43a;text-shadow:0 0 3px #ffb43a}
 
-/* Hand */
-.hand-area{
-  flex-shrink:0;padding:0 8px 8px;position:relative;
-  background:linear-gradient(to top,rgba(0,0,0,.35),transparent);
-}
-.hand-outer{
-  display:flex;justify-content:center;align-items:flex-end;
-  min-height:96px;padding:14px 8px 8px;gap:0;
-  overflow-x:auto;
-}
+.hand-area{flex-shrink:0;padding:0 8px 8px;background:linear-gradient(to top,rgba(0,0,0,.35),transparent)}
+.hand-outer{display:flex;justify-content:center;align-items:flex-end;min-height:96px;padding:14px 8px 8px;gap:0;overflow-x:auto}
 .hand-outer::-webkit-scrollbar{display:none}
-.hand-outer .card{
-  margin-left:-14px;cursor:pointer;transform-origin:bottom center;
-}
+.hand-outer .card{margin-left:-14px;cursor:pointer;transform-origin:bottom center}
 .hand-outer .card:first-child{margin-left:0}
 .hand-outer .card.playable:active{transform:translateY(-16px) scale(1.04);z-index:100}
-.hand-outer .card.selected{transform:translateY(-20px);box-shadow:0 8px 20px rgba(255,207,92,.9),0 0 0 2px #ffcf5c;z-index:99}
 .hand-outer .card.disabled{opacity:.5;filter:grayscale(.4)}
-.hand-outer .card.hint{box-shadow:0 0 0 2px #4ade80,0 4px 12px rgba(74,222,128,.6)}
 
-/* Bottom action bar */
-.action-bar{
-  flex-shrink:0;padding:8px 12px calc(var(--safe-bottom) + 8px);
-  background:linear-gradient(to top,rgba(0,0,0,.5),transparent);
-  display:flex;align-items:center;gap:10px;
-}
-.ab-me{
-  width:52px;height:52px;border-radius:12px;position:relative;flex-shrink:0;
-}
+.action-bar{flex-shrink:0;padding:8px 12px calc(var(--safe-bottom) + 8px);background:linear-gradient(to top,rgba(0,0,0,.5),transparent);display:flex;align-items:center;gap:10px}
+.ab-me{width:52px;height:52px;border-radius:12px;position:relative;flex-shrink:0}
 .ab-me .opp-av,.ab-me .opp-av-fb{width:52px;height:52px;border-radius:12px}
-.ab-me.active .opp-av,.ab-me.active .opp-av-fb{
-  border-color:#4ade80;box-shadow:0 0 14px #4ade80;
-}
+.ab-me.active .opp-av,.ab-me.active .opp-av-fb{border-color:#4ade80;box-shadow:0 0 14px #4ade80}
 .ab-me.attacker .opp-av,.ab-me.attacker .opp-av-fb{border-color:#ff5b6e;box-shadow:0 0 14px #ff5b6e}
 .ab-me.defender .opp-av,.ab-me.defender .opp-av-fb{border-color:#ffcf5c;box-shadow:0 0 14px #ffcf5c}
 .ab-me .opp-cnt{position:absolute;top:-5px;right:-5px}
-.ab-actions{
-  flex:1;display:flex;gap:8px;align-items:center;justify-content:center;
-  min-height:52px;
-}
-.act-btn{
-  padding:14px 18px;border-radius:12px;font-size:13px;font-weight:900;
-  letter-spacing:.08em;text-transform:uppercase;flex:1;max-width:130px;
-  transition:transform .12s;
-}
+.ab-actions{flex:1;display:flex;gap:8px;align-items:center;justify-content:center;min-height:52px}
+.act-btn{padding:14px 18px;border-radius:12px;font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;flex:1;max-width:130px;transition:transform .12s}
 .act-btn:active{transform:scale(.94)}
 .act-btn.gold{background:linear-gradient(135deg,#ffcf5c,#ffb43a);color:#1a3a6b;box-shadow:0 5px 16px -4px #ffcf5c}
 .act-btn.red{background:linear-gradient(135deg,#ff4d5e,#c41e3a);color:#fff;box-shadow:0 5px 16px -4px #ff4d5e}
-.act-btn.blue{background:linear-gradient(135deg,#3a6bbf,#2a4a8a);color:#fff}
 .act-btn.green{background:linear-gradient(135deg,#4ade80,#22c55e);color:#052e16}
-.ab-status{
-  flex:1;text-align:center;font-size:12px;font-weight:700;color:#fff;
-  padding:8px 12px;background:rgba(0,0,0,.35);border-radius:12px;
-  letter-spacing:.05em;
-}
+.ab-status{flex:1;text-align:center;font-size:12px;font-weight:700;color:#fff;padding:8px 12px;background:rgba(0,0,0,.35);border-radius:12px;letter-spacing:.05em}
 .ab-status.hot{background:linear-gradient(135deg,rgba(255,207,92,.4),rgba(255,180,58,.3));color:#fff;border:1px solid rgba(255,207,92,.5)}
 
-/* Timer bar */
-.timer-bar{
-  position:absolute;top:0;left:0;right:0;height:3px;background:rgba(0,0,0,.3);
-  z-index:100;overflow:hidden;
-}
-.timer-fill{
-  height:100%;background:linear-gradient(90deg,#4ade80,#ffcf5c,#ff4d5e);
-  transition:width 1s linear;width:100%;
-}
-
-/* Emote bar */
-.emotes{display:flex;gap:4px;justify-content:center;padding:4px 0;flex-shrink:0}
-.emote-btn{
-  width:38px;height:38px;border-radius:10px;background:rgba(0,0,0,.35);
-  border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;
-  font-size:19px;transition:transform .12s;
-}
-.emote-btn:active{transform:scale(.88)}
-
-/* Floating emote */
-.float-emote{
-  position:fixed;font-size:52px;pointer-events:none;z-index:999;
-  animation:floatUp 2.5s ease-out forwards;
-}
-@keyframes floatUp{
-  0%{opacity:0;transform:translateY(0) scale(.5)}
-  15%{opacity:1;transform:translateY(-20px) scale(1.2)}
-  100%{opacity:0;transform:translateY(-180px) scale(1)}
-}
-
-/* Toast */
 #toast-wrap{position:fixed;top:calc(var(--safe-top) + 60px);left:0;right:0;z-index:999;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;padding:0 16px}
 .toast{padding:11px 18px;border-radius:12px;font-size:13px;font-weight:700;background:rgba(15,37,71,.95);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(10px);animation:toastIn .3s;max-width:100%}
 @keyframes toastIn{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
 .toast.ok{border-color:#4ade80}.toast.err{border-color:#ff4d5e}
 
-/* Modal */
 #modal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
 #modal.show{display:flex}
 .modal-box{width:100%;max-width:320px;background:linear-gradient(160deg,#2a4a8a,#0f2547);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:24px;text-align:center;animation:modalIn .3s}
@@ -397,17 +196,14 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 </head>
 <body>
 
-<!-- LOADING -->
 <div class="screen active" id="loading">
   <div class="loader-star">★</div>
   <div class="loader-title">Дурак на Звёзды</div>
 </div>
 
-<!-- MENU -->
 <div class="screen" id="menu">
   <div class="menu-top">
     <div class="menu-brand"><span class="st">★</span> Дурак</div>
-    <div class="coin-badge"><span class="coin">◉</span> <span id="menuCoins">100</span></div>
   </div>
   <div class="profile-box">
     <div id="menuAvatar"></div>
@@ -417,18 +213,12 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
       <div class="profile-id" id="menuId">ID: —</div>
     </div>
   </div>
-  <div class="stats-grid">
-    <div class="stat-card"><div class="stat-num" id="sGames">0</div><div class="stat-lbl">Игр</div></div>
-    <div class="stat-card"><div class="stat-num" id="sWins">0</div><div class="stat-lbl">Побед</div></div>
-    <div class="stat-card"><div class="stat-num" id="sStars">0</div><div class="stat-lbl">Звёзд</div></div>
-  </div>
   <div class="menu-btns">
     <button class="btn btn-gold" id="toPlay">▶ Играть</button>
     <button class="btn btn-outline" id="toSettings">⚙ Настройки</button>
   </div>
 </div>
 
-<!-- LOBBY -->
 <div class="screen form-screen" id="lobby">
   <div class="topbar">
     <button class="tb-btn" data-back>‹</button>
@@ -460,7 +250,6 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   </div>
 </div>
 
-<!-- SETTINGS -->
 <div class="screen form-screen" id="settings">
   <div class="topbar">
     <button class="tb-btn" data-back>‹</button>
@@ -470,16 +259,14 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   <div class="form-body">
     <div class="set-group">
       <div class="set-row"><div class="set-ic">🔊</div><div class="set-info"><div class="set-name">Звуки</div><div class="set-desc">Ходы, победы</div></div><label class="switch"><input type="checkbox" id="setSfx" checked><span class="track"></span></label></div>
-      <div class="set-row"><div class="set-ic">📳</div><div class="set-info"><div class="set-name">Вибрация</div><div class="set-desc">Тактильный отклик</div></div><label class="switch"><input type="checkbox" id="setVibe" checked><span class="track"></span></label></div>
-      <div class="set-row"><div class="set-ic">🃏</div><div class="set-info"><div class="set-name">Сортировка карт</div><div class="set-desc">По мастям и рангу</div></div><label class="switch"><input type="checkbox" id="setSort" checked><span class="track"></span></label></div>
-      <div class="set-row"><div class="set-ic">⏱</div><div class="set-info"><div class="set-name">Таймер хода</div><div class="set-desc">30 секунд на действие</div></div><label class="switch"><input type="checkbox" id="setTimer" checked><span class="track"></span></label></div>
-      <div class="set-row"><div class="set-ic">👁</div><div class="set-info"><div class="set-name">Показывать ID</div><div class="set-desc">В главном меню</div></div><label class="switch"><input type="checkbox" id="setShowId" checked><span class="track"></span></label></div>
+      <div class="set-row"><div class="set-ic">📳</div><div class="set-info"><div class="set-name">Вибрация</div></div><label class="switch"><input type="checkbox" id="setVibe" checked><span class="track"></span></label></div>
+      <div class="set-row"><div class="set-ic">🃏</div><div class="set-info"><div class="set-name">Сортировка карт</div></div><label class="switch"><input type="checkbox" id="setSort" checked><span class="track"></span></label></div>
+      <div class="set-row"><div class="set-ic">👁</div><div class="set-info"><div class="set-name">Показывать ID</div></div><label class="switch"><input type="checkbox" id="setShowId" checked><span class="track"></span></label></div>
     </div>
     <button class="btn btn-outline btn-sm" id="btnReset">↺ Сбросить</button>
   </div>
 </div>
 
-<!-- ROOM -->
 <div class="screen" id="room">
   <div class="topbar">
     <button class="tb-btn" id="leaveRoom1">‹</button>
@@ -492,7 +279,8 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
       <div class="val" id="roomCode">——————</div>
       <div class="hint">Нажмите чтобы скопировать</div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:10px">
+    <div class="p2p-status" id="p2pStatus">Подключение...</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin:16px 0 10px">
       <span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--muted)">Игроки</span>
       <span style="font-size:13px;font-weight:900;color:#ffcf5c" id="roomCount">0/0</span>
     </div>
@@ -506,22 +294,18 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   </div>
 </div>
 
-<!-- GAME -->
 <div class="screen" id="game">
-  <div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
   <div class="game-topbar">
     <div class="gt-left">
       <button class="gt-btn" id="gtBack">‹</button>
       <button class="gt-btn" id="gtSound">🔊</button>
     </div>
     <div class="gt-right">
+      <div class="gt-status" id="gtStatus">●</div>
       <button class="gt-btn" id="gtHelp">?</button>
-      <div class="gt-coins"><span style="color:#ffcf5c">◉</span> <span id="gameCoins">100</span> <span class="c">| <span id="gameStake">0</span></span></div>
     </div>
   </div>
-
   <div class="opps" id="oppsRow"></div>
-
   <div class="table-area">
     <div class="deck-area">
       <div class="deck-stack" id="deckStack">
@@ -530,22 +314,11 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
       </div>
       <div class="trump-slot" id="trumpSlot"></div>
     </div>
-    <div class="table-center empty" id="tableCenter"></div>
+    <div class="table-center" id="tableCenter"></div>
   </div>
-
-  <div class="emotes">
-    <button class="emote-btn" data-emote="👍">👍</button>
-    <button class="emote-btn" data-emote="😂">😂</button>
-    <button class="emote-btn" data-emote="😡">😡</button>
-    <button class="emote-btn" data-emote="😭">😭</button>
-    <button class="emote-btn" data-emote="🤔">🤔</button>
-    <button class="emote-btn" data-emote="🔥">🔥</button>
-  </div>
-
   <div class="hand-area">
     <div class="hand-outer" id="myHand"></div>
   </div>
-
   <div class="action-bar">
     <div class="ab-me" id="abMe"></div>
     <div class="ab-actions" id="abActions">
@@ -554,10 +327,7 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   </div>
 </div>
 
-<!-- TOAST -->
 <div id="toast-wrap"></div>
-
-<!-- MODAL -->
 <div id="modal">
   <div class="modal-box">
     <div class="modal-icon" id="modalIcon">★</div>
@@ -573,38 +343,64 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
    ========================================================= */
 const tg = window.Telegram?.WebApp;
 if (tg){ tg.ready(); tg.expand(); try{ tg.setHeaderColor('#1a3a6b'); tg.setBackgroundColor('#1a3a6b'); tg.disableVerticalSwipes?.(); }catch(e){} }
-const tgUser = tg?.initDataUnsafe?.user || { id: 100000000 + Math.floor(Math.random()*99999), first_name:'Гость'+Math.floor(Math.random()*99), last_name:'', username:'guest', photo_url:'' };
+const tgUser = tg?.initDataUnsafe?.user || { id: 100000000 + Math.floor(Math.random()*99999), first_name:'Гость'+Math.floor(Math.random()*99), username:'guest', photo_url:'' };
 const USER = {
   id: String(tgUser.id),
   name: [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ').trim() || 'Игрок',
   username: tgUser.username ? '@'+tgUser.username : '@guest',
-  photo: tgUser.photo_url || '',
-  coins: 100
+  photo: tgUser.photo_url || ''
 };
 
 /* =========================================================
-   2. FIREBASE
+   2. FIREBASE — только сигналинг
    ========================================================= */
 const firebaseConfig = { databaseURL: "https://test-raq-default-rtdb.firebaseio.com/" };
 let db = null;
-try { firebase.initializeApp(firebaseConfig); db = firebase.database(); console.log('🔥 RTDB:', firebaseConfig.databaseURL); }
-catch(e){ console.error('Firebase init:', e); }
+try { firebase.initializeApp(firebaseConfig); db = firebase.database(); console.log('🔥 Firebase'); }
+catch(e){ console.error('FB init:', e); }
 
 /* =========================================================
-   3. STATE
+   3. ICE / WEBRTC CONFIG
+   ========================================================= */
+const ICE_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+  ],
+  iceCandidatePoolSize: 10
+};
+
+/* =========================================================
+   4. STATE
    ========================================================= */
 const State = {
   screen:'loading', history:[],
-  lobby:null, code:null, lobbyRef:null, playerRef:null,
-  isHost:false, settings:{}, 
-  heartbeat:null, timerInt:null, lastGameState:null, lastAction:{}
+  code:null, isHost:false,
+  // Firebase refs
+  lobbyRef:null, playerRef:null, signalsRef:null,
+  // WebRTC
+  peers:{},              // { [peerId]: { pc, dc } }  — host: many, guest: one
+  myPeerId:USER.id,
+  hostPeerId:null,
+  // Data
+  lobby:null,            // room info from Firebase
+  gameState:null,        // authoritative game state (host) or replica (guest)
+  settings:{},
+  heartbeat:null,
+  signalsListener:null,
+  connectedPeers:new Set(),
+  lastGameAt:0
 };
-const DEFAULTS = { sfx:true, vibe:true, sort:true, timer:true, showId:true };
+const DEFAULTS = { sfx:true, vibe:true, sort:true, showId:true };
 const LS_CODE = 'dnz_code';
 const LS_SET = 'dnz_set';
 
 /* =========================================================
-   4. HELPERS
+   5. HELPERS
    ========================================================= */
 const $ = (s,r=document)=>r.querySelector(s);
 const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
@@ -612,9 +408,11 @@ const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 
 function haptic(t='light'){
   if (!State.settings.vibe || !tg?.HapticFeedback) return;
-  try{ if (t==='success') tg.HapticFeedback.notificationOccurred('success');
-       else if (t==='error') tg.HapticFeedback.notificationOccurred('error');
-       else tg.HapticFeedback.impactOccurred(t); }catch(e){}
+  try{
+    if (t==='success') tg.HapticFeedback.notificationOccurred('success');
+    else if (t==='error') tg.HapticFeedback.notificationOccurred('error');
+    else tg.HapticFeedback.impactOccurred(t);
+  }catch(e){}
 }
 function toast(text, type='info', ms=2400){
   const el = document.createElement('div');
@@ -640,7 +438,6 @@ function modal({icon='★',title='',text='',actions=[]}){
 function closeModal(){ $('#modal').classList.remove('show'); }
 $('#modal').addEventListener('click', e=>{ if(e.target.id==='modal') closeModal(); });
 
-/* Sound */
 let audioCtx = null;
 function beep(freq=440, dur=0.08){
   if (!State.settings.sfx) return;
@@ -654,11 +451,16 @@ function beep(freq=440, dur=0.08){
     o.start(); o.stop(audioCtx.currentTime+dur);
   }catch(e){}
 }
+function rulesHint(){
+  modal({ icon:'🔐', title:'Нет доступа к базе',
+    text:'Firebase Console → Realtime Database → Rules:\n\n{ "rules": { ".read": true, ".write": true } }',
+    actions:[{label:'Понятно', style:'btn-gold'}] });
+}
 
 /* =========================================================
-   5. CARD MODEL
+   6. CARD MODEL + GAME ENGINE
    ========================================================= */
-const RANK_VAL = {'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
+const RANK_VAL = {'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14,'2':15,'3':16,'4':17,'5':18};
 const RED = new Set(['♥','♦']);
 const SUITS = ['♠','♥','♦','♣'];
 
@@ -669,8 +471,7 @@ function makeDeck(count=36){
   for (let i=d.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; }
   return d;
 }
-function cardEq(a,b){ return a && b && a.r===b.r && a.s===b.s; }
-function cardKey(c){ return c ? c.r+c.s : ''; }
+const cardEq = (a,b)=> a && b && a.r===b.r && a.s===b.s;
 function canBeat(def, atk, trump){
   if (!def || !atk) return false;
   if (def.s === atk.s) return RANK_VAL[def.r] > RANK_VAL[atk.r];
@@ -686,20 +487,15 @@ function sortHand(hand, trump){
   });
 }
 
-/* =========================================================
-   6. GAME ENGINE (pure functions - used inside Firebase transaction)
-   ========================================================= */
 function createGame(lobby){
-  const pids = Object.keys(lobby.players);
-  // shuffle order
-  for (let i=pids.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [pids[i],pids[j]]=[pids[j],pids[i]]; }
+  const pids = Object.keys(lobby.members);
+  for (let i=pids.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pids[i],pids[j]]=[pids[j],pids[i]]; }
   const deck = makeDeck(lobby.deck || 36);
   const hands = {};
-  for (const pid of pids) hands[pid] = deck.splice(deck.length - 6, 6);
+  for (const pid of pids) hands[pid] = deck.splice(deck.length-6, 6);
   const trumpCard = deck.shift();
   const trumpSuit = trumpCard.s;
 
-  // find first attacker (lowest trump)
   let firstAtt = pids[0], lowest = 99;
   for (const pid of pids) for (const c of hands[pid]){
     if (c.s === trumpSuit && RANK_VAL[c.r] < lowest){ lowest = RANK_VAL[c.r]; firstAtt = pid; }
@@ -709,27 +505,16 @@ function createGame(lobby){
 
   return {
     deck, trumpCard, trumpSuit,
-    hands, order: pids,
-    table: [], discardCount: 0,
-    attackerIdx: ai, defenderIdx: di,
-    phase: 'attack',
-    round: 1,
-    lastActionAt: Date.now(),
-    turnStartedAt: Date.now(),
-    finished: false, loserId: null, winnerId: null,
-    lastAction: { type: 'start', at: Date.now() }
+    hands, order:pids,
+    table:[], discardCount:0,
+    attackerIdx:ai, defenderIdx:di,
+    phase:'attack',
+    round:1,
+    turnStartedAt:Date.now(),
+    finished:false, loserId:null, winnerId:null,
+    lastAction:{ type:'start', at:Date.now() }
   };
 }
-
-function normGame(g){
-  if (!g) return g;
-  if (g.table && !Array.isArray(g.table)) g.table = Object.values(g.table);
-  if (g.deck && !Array.isArray(g.deck)) g.deck = Object.values(g.deck);
-  if (g.order && !Array.isArray(g.order)) g.order = Object.values(g.order);
-  if (g.hands) for (const k in g.hands) if (g.hands[k] && !Array.isArray(g.hands[k])) g.hands[k] = Object.values(g.hands[k]);
-  return g;
-}
-
 function gAttackerId(g){ return g.order[g.attackerIdx]; }
 function gDefenderId(g){ return g.order[g.defenderIdx]; }
 
@@ -742,26 +527,20 @@ function gAttack(g, pid, card){
   const idx = hand.findIndex(c => cardEq(c, card));
   if (idx < 0) return false;
   if (g.table.length >= 6) return false;
-
-  // throw check
   if (g.phase === 'throw'){
     const ranks = new Set();
     for (const p of g.table){ ranks.add(p.atk.r); if (p.def) ranks.add(p.def.r); }
     if (!ranks.has(card.r)) return false;
     const defHand = (g.hands[gDefenderId(g)] || []).length;
-    if (g.table.length >= defHand + (g.table.filter(p=>p.def).length ? 0 : 1)) {
-      // defender can't be forced to defend more cards than they have
-    }
+    if (g.table.filter(p=>p.def).length >= defHand) return false;
   }
   hand.splice(idx, 1);
   g.table.push({ atk: card, def: null });
   g.phase = 'defend';
-  g.lastActionAt = Date.now();
   g.turnStartedAt = Date.now();
-  g.lastAction = { type: 'attack', by: pid, card, at: Date.now() };
+  g.lastAction = { type:'attack', by:pid, card, at:Date.now() };
   return true;
 }
-
 function gDefend(g, pid, card){
   if (g.finished) return false;
   if (g.phase !== 'defend') return false;
@@ -775,28 +554,22 @@ function gDefend(g, pid, card){
   hand.splice(idx, 1);
   target.def = card;
   g.phase = 'throw';
-  g.lastActionAt = Date.now();
   g.turnStartedAt = Date.now();
-  g.lastAction = { type: 'defend', by: pid, card, at: Date.now() };
+  g.lastAction = { type:'defend', by:pid, card, at:Date.now() };
   return true;
 }
-
 function gTake(g, pid){
   if (g.finished) return false;
   if (g.phase !== 'defend') return false;
   if (gDefenderId(g) !== pid) return false;
   const defHand = g.hands[pid] || [];
-  for (const p of g.table){
-    defHand.push(p.atk);
-    if (p.def) defHand.push(p.def);
-  }
+  for (const p of g.table){ defHand.push(p.atk); if (p.def) defHand.push(p.def); }
   g.hands[pid] = defHand;
   g.table = [];
-  g.lastAction = { type: 'take', by: pid, at: Date.now() };
+  g.lastAction = { type:'take', by:pid, at:Date.now() };
   endRound(g, 'took');
   return true;
 }
-
 function gBito(g, pid){
   if (g.finished) return false;
   if (g.phase !== 'throw') return false;
@@ -804,47 +577,30 @@ function gBito(g, pid){
   if (g.table.some(p => !p.def)) return false;
   g.discardCount += g.table.length;
   g.table = [];
-  g.lastAction = { type: 'bito', by: pid, at: Date.now() };
+  g.lastAction = { type:'bito', by:pid, at:Date.now() };
   endRound(g, 'defended');
   return true;
 }
-
-function gTranslate(g, pid){
-  if (g.finished) return false;
-  if (g.phase !== 'defend') return false;
-  if (gDefenderId(g) !== pid) return false;
-  if (g.table.length !== 1) return false;
-  const target = g.table[0];
-  if (target.def) return false;
-  const hand = g.hands[pid] || [];
-  const matchIdx = hand.findIndex(c => c.r === target.atk.r);
+function gTranslate(g, pid, card){
+  if (g.finished || g.phase !== 'defend' || gDefenderId(g) !== pid) return false;
+  if (g.table.length !== 1 || g.table[0].def) return false;
+  if (g.order.length < 3) return false;
+  const matchIdx = (g.hands[pid]||[]).findIndex(c => c.r === g.table[0].atk.r);
   if (matchIdx < 0) return false;
-  // next defender
-  const n = g.order.length;
-  if (n < 3) return false; // no translation in 2p
-  const nextDefIdx = (g.defenderIdx + 1) % n;
+  const nextDefIdx = (g.defenderIdx + 1) % g.order.length;
   if (nextDefIdx === g.attackerIdx) return false;
-  // add card to table (becomes new attack)
-  const c = hand.splice(matchIdx, 1)[0];
-  // old attack becomes attack from previous defender, we treat translate as:
-  // swap: attacker becomes previous defender, defender becomes next player
-  const prevAtkIdx = g.attackerIdx;
+  const c = g.hands[pid].splice(matchIdx, 1)[0];
   g.attackerIdx = g.defenderIdx;
   g.defenderIdx = nextDefIdx;
-  // add card to table (as if attacker threw)
-  g.table.push({ atk: c, def: null });
+  g.table.push({ atk:c, def:null });
   g.phase = 'defend';
-  g.lastAction = { type: 'translate', by: pid, card: c, at: Date.now() };
   g.turnStartedAt = Date.now();
+  g.lastAction = { type:'translate', by:pid, card:c, at:Date.now() };
   return true;
 }
-
 function endRound(g, result){
-  const attId = gAttackerId(g);
-  const defId = gDefenderId(g);
-
-  // draw order: attacker first, then defender, then others
-  const drawOrder = [attId, defId, ...g.order.filter(p => p !== attId && p !== defId)];
+  const attId = gAttackerId(g), defId = gDefenderId(g);
+  const drawOrder = [attId, defId, ...g.order.filter(p => p!==attId && p!==defId)];
   for (const pid of drawOrder){
     const hand = g.hands[pid] || [];
     while (hand.length < 6){
@@ -854,32 +610,26 @@ function endRound(g, result){
     }
     g.hands[pid] = hand;
   }
-
-  // check finish
   const nonEmpty = g.order.filter(pid => (g.hands[pid]||[]).length > 0);
   if (nonEmpty.length <= 1 && g.deck.length === 0 && !g.trumpCard){
     g.finished = true;
     g.loserId = nonEmpty[0] || null;
     g.winnerId = g.order.find(p => p !== g.loserId) || null;
     g.phase = 'finished';
-    g.lastAction = { type: 'finished', at: Date.now() };
+    g.lastAction = { type:'finished', at:Date.now() };
     return;
   }
-
   const n = g.order.length;
   if (result === 'defended'){
-    // defender becomes attacker
-    if (n === 2){
-      [g.attackerIdx, g.defenderIdx] = [g.defenderIdx, g.attackerIdx];
-    } else {
+    if (n === 2){ [g.attackerIdx, g.defenderIdx] = [g.defenderIdx, g.attackerIdx]; }
+    else {
       g.attackerIdx = g.defenderIdx;
       g.defenderIdx = (g.defenderIdx + 1) % n;
       if (g.defenderIdx === g.attackerIdx) g.defenderIdx = (g.defenderIdx + 1) % n;
     }
-  } else { // took
-    if (n === 2){
-      [g.attackerIdx, g.defenderIdx] = [g.defenderIdx, g.attackerIdx];
-    } else {
+  } else {
+    if (n === 2){ [g.attackerIdx, g.defenderIdx] = [g.defenderIdx, g.attackerIdx]; }
+    else {
       g.attackerIdx = (g.defenderIdx + 1) % n;
       g.defenderIdx = (g.defenderIdx + 2) % n;
     }
@@ -887,11 +637,314 @@ function endRound(g, result){
   g.phase = 'attack';
   g.round++;
   g.turnStartedAt = Date.now();
-  g.lastActionAt = Date.now();
 }
 
 /* =========================================================
-   7. NAV
+   7. NET LAYER — WebRTC DataChannel + Firebase signaling
+   =========================================================
+   Host: authoritative. Holds game state. Broadcasts to all peers.
+   Guest: sends actions to host. Receives state.
+   Firebase: ONLY for signaling (offer/answer/ICE) + lobby discovery.
+   ========================================================= */
+const Net = {
+  // HOST: initialize peer connection for a new guest
+  async hostAddPeer(guestId){
+    if (State.peers[guestId]) return; // already connected
+    const pc = new RTCPeerConnection(ICE_CONFIG);
+    const entry = { pc, dc:null };
+    State.peers[guestId] = entry;
+
+    pc.onicecandidate = e => {
+      if (e.candidate && db && State.code){
+        db.ref(`lobbies/${State.code}/signals`).push({
+          from: USER.id, to: guestId, kind:'ice', cand: e.candidate.toJSON(), at: Date.now()
+        }).catch(()=>{});
+      }
+    };
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected'){
+        toast('Связь с игроком потеряна','err',2000);
+        Net.dropPeer(guestId);
+      }
+    };
+    pc.ondatachannel = e => {
+      entry.dc = e.channel;
+      Net.setupChannel(guestId, entry.dc);
+    };
+
+    // Guest creates the offer; host just waits for it.
+    // (Actually guest creates offer and host answers — that's in guestConnect.)
+  },
+
+  // HOST: handle guest's offer
+  async hostHandleOffer(guestId, offer){
+    let entry = State.peers[guestId];
+    if (!entry){
+      const pc = new RTCPeerConnection(ICE_CONFIG);
+      entry = { pc, dc:null };
+      State.peers[guestId] = entry;
+      pc.onicecandidate = e => {
+        if (e.candidate && db && State.code){
+          db.ref(`lobbies/${State.code}/signals`).push({
+            from: USER.id, to: guestId, kind:'ice', cand: e.candidate.toJSON(), at: Date.now()
+          }).catch(()=>{});
+        }
+      };
+      pc.onconnectionstatechange = () => {
+        if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') Net.dropPeer(guestId);
+      };
+      pc.ondatachannel = e => {
+        entry.dc = e.channel;
+        Net.setupChannel(guestId, entry.dc);
+      };
+    }
+    await entry.pc.setRemoteDescription({ type:'offer', sdp: offer });
+    const answer = await entry.pc.createAnswer();
+    await entry.pc.setLocalDescription(answer);
+    await db.ref(`lobbies/${State.code}/signals`).push({
+      from: USER.id, to: guestId, kind:'answer', sdp: entry.pc.localDescription.sdp, at: Date.now()
+    });
+  },
+
+  // HOST: add guest's ICE
+  async hostHandleIce(guestId, cand){
+    const entry = State.peers[guestId];
+    if (!entry || !entry.pc.remoteDescription) return;
+    try{ await entry.pc.addIceCandidate(cand); }catch(e){}
+  },
+
+  // GUEST: create offer to host
+  async guestConnectToHost(){
+    const hostId = State.hostPeerId;
+    if (!hostId) return;
+    if (State.peers[hostId]) return;
+    const pc = new RTCPeerConnection(ICE_CONFIG);
+    const entry = { pc, dc:null };
+    State.peers[hostId] = entry;
+
+    // Guest creates the data channel
+    const dc = pc.createDataChannel('game', { ordered: true });
+    entry.dc = dc;
+    Net.setupChannel(hostId, dc);
+
+    pc.onicecandidate = e => {
+      if (e.candidate && db && State.code){
+        db.ref(`lobbies/${State.code}/signals`).push({
+          from: USER.id, to: hostId, kind:'ice', cand: e.candidate.toJSON(), at: Date.now()
+        }).catch(()=>{});
+      }
+    };
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected'){
+        Net.updateP2PStatus('off');
+        setTimeout(()=>Net.guestConnectToHost(), 3000); // auto-reconnect
+      }
+    };
+
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    await db.ref(`lobbies/${State.code}/signals`).push({
+      from: USER.id, to: hostId, kind:'offer', sdp: pc.localDescription.sdp,
+      name: USER.name, photo: USER.photo, at: Date.now()
+    });
+  },
+
+  // GUEST: handle answer / ICE from host
+  async guestHandleSignal(msg){
+    const entry = State.peers[State.hostPeerId];
+    if (!entry) return;
+    if (msg.kind === 'answer' && entry.pc.signalingState === 'have-local-offer'){
+      try{ await entry.pc.setRemoteDescription({ type:'answer', sdp: msg.sdp }); }catch(e){ console.warn('answer:', e); }
+    } else if (msg.kind === 'ice' && entry.pc.remoteDescription){
+      try{ await entry.pc.addIceCandidate(msg.cand); }catch(e){}
+    }
+  },
+
+  // Common: attach handlers to a data channel
+  setupChannel(peerId, dc){
+    dc.binaryType = 'arraybuffer';
+    dc.onopen = () => {
+      State.connectedPeers.add(peerId);
+      Net.updateP2PStatus('on');
+      console.log('📡 DC open with', peerId);
+      // Host: send full state to newly connected guest
+      if (State.isHost && State.gameState){
+        Net.sendTo(peerId, { t:'state', state: State.gameState });
+      }
+      // Guest: ask for state
+      if (!State.isHost){
+        Net.sendTo(peerId, { t:'hello', id: USER.id, name: USER.name, photo: USER.photo });
+      }
+      renderRoom();
+    };
+    dc.onclose = () => {
+      State.connectedPeers.delete(peerId);
+      Net.updateP2PStatus(State.connectedPeers.size > 0 ? 'on' : 'off');
+      renderRoom();
+    };
+    dc.onerror = e => console.warn('DC error:', e);
+    dc.onmessage = e => {
+      let msg; try{ msg = JSON.parse(e.data); }catch{ return; }
+      Net.onMessage(peerId, msg);
+    };
+  },
+
+  // Message dispatcher
+  onMessage(fromId, msg){
+    // === HOST handles incoming ===
+    if (State.isHost){
+      if (msg.t === 'hello'){
+        // Guest identified — resend state
+        if (State.gameState) Net.sendTo(fromId, { t:'state', state: State.gameState });
+        return;
+      }
+      if (msg.t === 'action'){
+        // Validate + apply + broadcast
+        const ok = Net.hostApplyAction(fromId, msg);
+        return;
+      }
+      if (msg.t === 'chat'){
+        Net.broadcast({ t:'chat', from:fromId, e: msg.e }, fromId);
+        return;
+      }
+    } else {
+      // === GUEST handles incoming ===
+      if (msg.t === 'state'){
+        State.gameState = msg.state;
+        route();
+        return;
+      }
+      if (msg.t === 'chat'){
+        Net.showEmote(msg.e);
+        return;
+      }
+    }
+  },
+
+  // HOST: validate & apply action authoritatively
+  hostApplyAction(pid, msg){
+    let g = State.gameState;
+    if (!g) return false;
+    let ok = false;
+    if (msg.a === 'attack') ok = gAttack(g, pid, msg.card);
+    else if (msg.a === 'defend') ok = gDefend(g, pid, msg.card);
+    else if (msg.a === 'take') ok = gTake(g, pid);
+    else if (msg.a === 'bito') ok = gBito(g, pid);
+    else if (msg.a === 'translate') ok = gTranslate(g, pid, msg.card);
+
+    if (!ok){
+      Net.sendTo(pid, { t:'err', msg:'Ход не принят' });
+      return false;
+    }
+    Net.broadcast({ t:'state', state: g });
+    return true;
+  },
+
+  // HOST: broadcast to all peers
+  broadcast(msg, exceptId){
+    for (const pid of Object.keys(State.peers)){
+      if (pid === exceptId) continue;
+      Net.sendTo(pid, msg);
+    }
+  },
+
+  sendTo(peerId, msg){
+    const entry = State.peers[peerId];
+    if (!entry || !entry.dc || entry.dc.readyState !== 'open') return false;
+    try{ entry.dc.send(JSON.stringify(msg)); return true; }catch(e){ return false; }
+  },
+
+  // Send to host (guest only) — or handle locally if I'm host
+  sendToHost(msg){
+    if (State.isHost){
+      Net.hostApplyAction(USER.id, msg);
+      return true;
+    }
+    const hostId = State.hostPeerId;
+    return Net.sendTo(hostId, msg);
+  },
+
+  dropPeer(peerId){
+    const entry = State.peers[peerId];
+    if (entry){
+      try{ entry.pc.close(); }catch{}
+      delete State.peers[peerId];
+    }
+    State.connectedPeers.delete(peerId);
+    Net.updateP2PStatus(State.connectedPeers.size > 0 ? 'on' : 'off');
+    renderRoom();
+  },
+
+  updateP2PStatus(s){
+    const el = $('#p2pStatus'); const gt = $('#gtStatus');
+    if (el){
+      el.classList.remove('on','off');
+      if (s === 'on'){ el.classList.add('on'); el.textContent = '🟢 P2P соединение установлено'; }
+      else if (s === 'off'){ el.classList.add('off'); el.textContent = '🔴 Ожидание P2P...'; }
+      else { el.textContent = 'Подключение...'; }
+    }
+    if (gt){
+      gt.classList.remove('on','off');
+      if (s === 'on'){ gt.classList.add('on'); gt.textContent = '● P2P'; }
+      else if (s === 'off'){ gt.classList.add('off'); gt.textContent = '● офф'; }
+      else { gt.textContent = '● ...'; }
+    }
+  },
+
+  showEmote(e){
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;font-size:52px;pointer-events:none;z-index:999;left:50%;bottom:200px;transform:translateX(-50%);animation:floatUp 2.5s ease-out forwards';
+    el.textContent = e;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 2500);
+    // inject animation if missing
+    if (!$('#floatUpStyle')){
+      const st = document.createElement('style');
+      st.id = 'floatUpStyle';
+      st.textContent = '@keyframes floatUp{0%{opacity:0;transform:translate(-50%,0) scale(.5)}15%{opacity:1;transform:translate(-50%,-20px) scale(1.2)}100%{opacity:0;transform:translate(-50%,-180px) scale(1)}}';
+      document.head.appendChild(st);
+    }
+  },
+
+  // Setup Firebase signaling listener
+  setupSignaling(){
+    if (State.signalsListener){
+      try{ State.signalsListener.ref.off('child_added', State.signalsListener.cb); }catch{}
+    }
+    const ref = db.ref(`lobbies/${State.code}/signals`).orderByChild('at').startAt(Date.now() - 60000);
+    const cb = snap => {
+      const msg = snap.val();
+      if (!msg || !msg.to) return;
+      if (String(msg.to) !== USER.id) return;
+      if (String(msg.from) === USER.id) return;
+      // Cleanup handled signal
+      snap.ref.remove().catch(()=>{});
+      if (State.isHost){
+        if (msg.kind === 'offer') Net.hostHandleOffer(msg.from, msg.sdp).catch(e=>console.warn('offer err:', e));
+        else if (msg.kind === 'ice') Net.hostHandleIce(msg.from, msg.cand).catch(e=>console.warn('ice err:', e));
+      } else {
+        Net.guestHandleSignal(msg).catch(e=>console.warn('guest sig err:', e));
+      }
+    };
+    ref.on('child_added', cb);
+    State.signalsListener = { ref, cb };
+  },
+
+  cleanup(){
+    if (State.signalsListener){
+      try{ State.signalsListener.ref.off('child_added', State.signalsListener.cb); }catch{}
+      State.signalsListener = null;
+    }
+    for (const pid of Object.keys(State.peers)){
+      try{ State.peers[pid].pc.close(); }catch{}
+    }
+    State.peers = {};
+    State.connectedPeers.clear();
+  }
+};
+
+/* =========================================================
+   8. NAV
    ========================================================= */
 function showScreen(id, { push=true } = {}){
   if (State.screen === id) return;
@@ -899,39 +952,34 @@ function showScreen(id, { push=true } = {}){
   $$('.screen').forEach(s => s.classList.toggle('active', s.id === id));
   State.screen = id;
 }
-function goBack(){
-  const prev = State.history.pop() || 'menu';
-  showScreen(prev, { push:false });
-}
+function goBack(){ const prev = State.history.pop() || 'menu'; showScreen(prev, {push:false}); }
 $$('[data-back]').forEach(b => b.addEventListener('click', ()=>{ haptic('light'); goBack(); }));
 
 /* =========================================================
-   8. SETTINGS
+   9. SETTINGS
    ========================================================= */
 function loadSettings(){
   try{ const r = localStorage.getItem(LS_SET); State.settings = r ? {...DEFAULTS,...JSON.parse(r)} : {...DEFAULTS}; }
   catch{ State.settings = {...DEFAULTS}; }
 }
-function saveSettings(){
-  try{ localStorage.setItem(LS_SET, JSON.stringify(State.settings)); }catch{}
-}
+function saveSettings(){ try{ localStorage.setItem(LS_SET, JSON.stringify(State.settings)); }catch{} }
 function applySettings(){
   const s = State.settings;
   $('#setSfx').checked = s.sfx;
   $('#setVibe').checked = s.vibe;
   $('#setSort').checked = s.sort;
-  $('#setTimer').checked = s.timer;
   $('#setShowId').checked = s.showId;
   $('#menuId').style.display = s.showId ? '' : 'none';
+  $('#gtSound').textContent = s.sfx ? '🔊' : '🔇';
 }
 function bindSettings(){
-  const on = (id, key)=>{ const el = $(id); el.addEventListener('change', ()=>{ State.settings[key] = el.checked; haptic('light'); saveSettings(); applySettings(); }); };
-  on('#setSfx','sfx'); on('#setVibe','vibe'); on('#setSort','sort'); on('#setTimer','timer'); on('#setShowId','showId');
-  $('#btnReset').addEventListener('click', ()=>{ State.settings = {...DEFAULTS}; saveSettings(); applySettings(); toast('Настройки сброшены','ok'); });
+  const on = (id,key)=>{ const el = $(id); el.addEventListener('change', ()=>{ State.settings[key] = el.checked; haptic('light'); saveSettings(); applySettings(); renderRoom(); }); };
+  on('#setSfx','sfx'); on('#setVibe','vibe'); on('#setSort','sort'); on('#setShowId','showId');
+  $('#btnReset').addEventListener('click', ()=>{ State.settings = {...DEFAULTS}; saveSettings(); applySettings(); toast('Сброшено','ok'); });
 }
 
 /* =========================================================
-   9. PROFILE
+   10. PROFILE
    ========================================================= */
 function renderProfile(){
   $('#menuName').textContent = USER.name;
@@ -939,23 +987,14 @@ function renderProfile(){
   $('#menuId').textContent = 'ID: ' + USER.id;
   const av = $('#menuAvatar');
   if (USER.photo){
-    av.innerHTML = `<img class="profile-av" src="${esc(USER.photo)}" onerror="this.outerHTML='<div class=&quot;profile-av-fb&quot;>${esc(USER.name[0]||'★')}</div>'">`;
+    av.innerHTML = `<img class="profile-av" src="${esc(USER.photo)}" onerror="this.outerHTML='<div class=&quot;profile-av-fb&quot;>${esc((USER.name[0]||'★').toUpperCase())}</div>'">`;
   } else {
     av.innerHTML = `<div class="profile-av-fb">${esc((USER.name[0]||'★').toUpperCase())}</div>`;
-  }
-  if (db){
-    db.ref('users/'+USER.id+'/stats').on('value', snap=>{
-      const s = snap.val()||{};
-      $('#sGames').textContent = s.games||0;
-      $('#sWins').textContent = s.wins||0;
-      $('#sStars').textContent = s.stars||0;
-    }, ()=>{});
-    db.ref('users/'+USER.id+'/profile').update({ name:USER.name, username:USER.username, photo:USER.photo, lastSeen:Date.now() }).catch(()=>{});
   }
 }
 
 /* =========================================================
-   10. LOBBY
+   11. LOBBY
    ========================================================= */
 function genCode(){ const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let o=''; for(let i=0;i<6;i++) o+=c[Math.floor(Math.random()*c.length)]; return o; }
 function segVal(n){ const el = $(`[data-seg="${n}"] button.active`); return el ? el.dataset.val : null; }
@@ -965,7 +1004,7 @@ async function createLobby(){
   const btn = $('#btnCreate'); btn.disabled = true; btn.textContent = '⏳...';
   try{
     let code = genCode();
-    try{ for(let i=0;i<5;i++){ const s = await db.ref('lobbies/'+code).get(); if(!s.exists()) break; code = genCode(); } }catch(e){}
+    try{ for(let i=0;i<5;i++){ const s = await db.ref('lobbies/'+code+'/meta').get(); if(!s.exists()) break; code = genCode(); } }catch(e){}
     const lobby = {
       code,
       host: USER.id,
@@ -976,17 +1015,21 @@ async function createLobby(){
       maxPlayers: Number(segVal('maxp')||3),
       deck: Number(segVal('deck')||36),
       mode: segVal('mode')||'classic',
-      privacy: segVal('privacy')||'private',
-      members: {
-        [USER.id]: { id:USER.id, name:USER.name, username:USER.username, photo:USER.photo, ready:true, host:true, online:true, lastSeen:Date.now(), joinedAt:Date.now() }
-      }
+      privacy: segVal('privacy')||'private'
     };
-    await db.ref('lobbies/'+code).set(lobby);
+    // Write meta + initial member
+    await db.ref('lobbies/'+code+'/meta').set(lobby);
+    await db.ref(`lobbies/${code}/members/${USER.id}`).set({
+      id:USER.id, name:USER.name, username:USER.username, photo:USER.photo,
+      ready:true, host:true, online:true, lastSeen:Date.now(), joinedAt:Date.now()
+    });
+
     haptic('success'); toast('Лобби создано: '+code,'ok',3000);
     enterRoom(code, true);
   }catch(e){
-    console.error(e); haptic('error'); toast('Ошибка: '+(e.message||''),'err',4000);
-    if (e.code==='PERMISSION_DENIED' || /permission/i.test(e.message)) rulesHint();
+    console.error(e); haptic('error');
+    toast('Ошибка: '+(e.message||''),'err',4000);
+    if (e.code === 'PERMISSION_DENIED' || /permission/i.test(e.message)) rulesHint();
   }finally{ btn.disabled = false; btn.textContent = '★ Создать лобби'; }
 }
 
@@ -996,19 +1039,22 @@ async function joinLobby(raw){
   if (code.length !== 6){ haptic('error'); toast('Введите 6 символов','err'); return; }
   const btn = $('#btnJoin'); btn.disabled = true; btn.textContent = '⏳...';
   try{
-    const snap = await db.ref('lobbies/'+code).get();
-    if (!snap.exists()){ haptic('error'); toast('Лобби '+code+' не найдено','err'); return; }
-    const lobby = snap.val();
-    const members = lobby.members || {};
-    const cnt = Object.keys(members).length;
-    if (lobby.status === 'playing' && !members[USER.id]){ haptic('error'); toast('Игра уже идёт','err'); return; }
-    if (cnt >= lobby.maxPlayers && !members[USER.id]){ haptic('error'); toast('Лобби заполнено','err'); return; }
-    const isHost = String(lobby.host) === USER.id;
+    const metaSnap = await db.ref('lobbies/'+code+'/meta').get();
+    if (!metaSnap.exists()){ haptic('error'); toast('Лобби '+code+' не найдено','err'); return; }
+    const meta = metaSnap.val();
 
-    // === HOST-as-SIGNALER: we just write ourselves into /members ===
-    await db.ref(`lobbies/${code}/members/${USER.id}`).update({
+    const memSnap = await db.ref('lobbies/'+code+'/members').get();
+    const members = memSnap.val() || {};
+    const cnt = Object.keys(members).length;
+    if (meta.status === 'playing' && !members[USER.id]){ haptic('error'); toast('Игра уже идёт','err'); return; }
+    if (cnt >= meta.maxPlayers && !members[USER.id]){ haptic('error'); toast('Лобби заполнено','err'); return; }
+
+    const isHost = String(meta.host) === USER.id;
+
+    // Write ourselves into /members
+    await db.ref(`lobbies/${code}/members/${USER.id}`).set({
       id: USER.id, name: USER.name, username: USER.username, photo: USER.photo,
-      ready: isHost ? true : (members[USER.id]?.ready || false),
+      ready: isHost ? true : false,
       host: isHost,
       online: true, lastSeen: Date.now(),
       joinedAt: members[USER.id]?.joinedAt || Date.now()
@@ -1017,8 +1063,9 @@ async function joinLobby(raw){
     haptic('success'); toast('Добро пожаловать!','ok');
     enterRoom(code, isHost);
   }catch(e){
-    console.error(e); haptic('error'); toast('Ошибка: '+(e.message||''),'err',4000);
-    if (e.code==='PERMISSION_DENIED' || /permission/i.test(e.message)) rulesHint();
+    console.error(e); haptic('error');
+    toast('Ошибка: '+(e.message||''),'err',4000);
+    if (e.code === 'PERMISSION_DENIED' || /permission/i.test(e.message)) rulesHint();
   }finally{ btn.disabled = false; btn.textContent = '→ Войти'; }
 }
 
@@ -1032,49 +1079,47 @@ async function quickMatch(){
     snap.forEach(ch=>{
       if (found) return;
       const l = ch.val();
-      if (!l || !l.members || l.privacy !== 'public' || l.status !== 'waiting') return;
+      if (!l || !l.meta || !l.members) return;
+      if (l.meta.privacy !== 'public' || l.meta.status !== 'waiting') return;
       const n = Object.keys(l.members).length;
-      if (n < (l.maxPlayers||4) && !l.members[USER.id]) found = l;
+      if (n < (l.meta.maxPlayers||4) && !l.members[USER.id]) found = l.meta;
     });
     if (!found){ toast('Свободных лобби нет','info'); return; }
     await joinLobby(found.code);
   }catch(e){
     console.error(e);
-    if (e.code==='PERMISSION_DENIED' || /permission/i.test(e.message)) rulesHint();
+    if (e.code === 'PERMISSION_DENIED') rulesHint();
     else toast('Ошибка поиска','err');
   }finally{ btn.disabled = false; btn.textContent = '⚡ Быстрый поиск'; }
 }
 
-function rulesHint(){
-  modal({ icon:'🔐', title:'Нет доступа к БД',
-    text:'Firebase Console → Realtime Database → Rules:\n{ "rules": { ".read": true, ".write": true } }',
-    actions:[{label:'Понятно', style:'btn-gold'}] });
-}
-
 /* =========================================================
-   11. ROOM (waiting)
+   12. ROOM (waiting + P2P setup)
    ========================================================= */
 function enterRoom(code, isHost){
   // cleanup old
-  if (State.lobbyRef){ try{ State.lobbyRef.off(); }catch(e){} }
-  if (State.playerRef){ try{ State.playerRef.onDisconnect().cancel(); }catch(e){} }
+  Net.cleanup();
+  if (State.lobbyRef){ try{ State.lobbyRef.off(); }catch{} }
   if (State.heartbeat) clearInterval(State.heartbeat);
 
   State.code = code;
   State.isHost = isHost;
   State.lobbyRef = db.ref('lobbies/'+code);
   State.playerRef = db.ref(`lobbies/${code}/members/${USER.id}`);
+  State.hostPeerId = null;
+  State.gameState = null;
 
   try{ localStorage.setItem(LS_CODE, code); }catch{}
 
   $('#roomCode').textContent = code;
+  Net.updateP2PStatus('off');
 
-  // === HOST-as-SIGNALER: register onDisconnect (only flips online flag) ===
+  // Register presence — just flips online flag on disconnect, doesn't remove
   State.playerRef.child('online').onDisconnect().set(false);
   State.playerRef.child('lastSeen').onDisconnect().set(Date.now());
   State.playerRef.update({ online:true, lastSeen:Date.now() }).catch(()=>{});
 
-  // Heartbeat every 20s
+  // Heartbeat
   State.heartbeat = setInterval(()=>{
     if (State.code && db && !document.hidden){
       db.ref(`lobbies/${State.code}/members/${USER.id}/lastSeen`).set(Date.now()).catch(()=>{});
@@ -1082,38 +1127,50 @@ function enterRoom(code, isHost){
     }
   }, 20000);
 
-  State.lobbyRef.once('value').then(snap=>{
-    if (!snap.exists()){ toast('Лобби закрыто','err'); leaveRoom(false); return; }
-    State.lobby = snap.val(); route();
-  }).catch(err=>{
-    console.error('initial:', err);
-    if (err.code==='PERMISSION_DENIED') rulesHint();
-  });
-
+  // Read lobby (meta + members)
   State.lobbyRef.on('value', snap=>{
     if (!snap.exists()){ toast('Лобби закрыто','err'); leaveRoom(false); return; }
-    State.lobby = snap.val();
+    const v = snap.val();
+    State.lobby = { ...(v.meta||{}), members: v.members||{}, status: v.meta?.status||'waiting' };
+
+    // Set hostPeerId
+    State.hostPeerId = String(v.meta?.host || '');
+
+    // If host, add every guest as a peer candidate
+    if (State.isHost){
+      for (const pid of Object.keys(v.members||{})){
+        if (pid === USER.id) continue;
+        // peer connection will be created when the guest's offer arrives
+      }
+    }
     route();
   }, err=>{
-    console.error('on:', err);
-    if (err.code==='PERMISSION_DENIED') rulesHint();
+    console.error('lobby on:', err);
+    if (err.code === 'PERMISSION_DENIED') rulesHint();
   });
+
+  // Signaling listener
+  Net.setupSignaling();
+
+  // If guest — connect to host
+  if (!isHost){
+    setTimeout(()=>Net.guestConnectToHost(), 800);
+  }
 
   State.history = ['menu','lobby'];
   showScreen('room', { push:false });
+  renderRoom();
 }
 
 function route(){
   const l = State.lobby;
   if (!l) return;
-  if (l.status === 'playing' && l.game){
+  if (l.status === 'playing' && State.gameState){
     if (State.screen !== 'game'){
       showScreen('game', { push:false });
       State.history = ['menu','lobby'];
     }
-    renderGame(normGame(l.game));
-  } else if (l.status === 'finished' && l.game){
-    renderGame(normGame(l.game));
+    renderGame(State.gameState);
   } else {
     if (State.screen === 'game') showScreen('room', { push:false });
     renderRoom();
@@ -1123,13 +1180,14 @@ function route(){
 function renderRoom(){
   const l = State.lobby; if (!l) return;
   const mem = Object.values(l.members||{}).sort((a,b)=>(b.host?1:0)-(a.host?1:0)||(a.joinedAt||0)-(b.joinedAt||0));
-  $('#roomCount').textContent = mem.length + '/' + l.maxPlayers;
+  $('#roomCount').textContent = mem.length + '/' + (l.maxPlayers || '?');
   const g = $('#roomPlayers'); g.innerHTML = '';
-  mem.forEach((p,i)=>{
+  mem.forEach(p=>{
     const me = String(p.id) === USER.id;
     const off = p.online === false;
+    const p2p = State.connectedPeers.has(String(p.id)) || (State.isHost && State.connectedPeers.has(String(p.id)));
     const el = document.createElement('div');
-    el.className = 'rp' + (p.host?' host':'') + (p.ready&&!p.host?' ready':'') + (me?' me':'') + (off?' offline':'');
+    el.className = 'rp' + (p.host?' host':'') + (p.ready&&!p.host?' ready':'') + (me?' me':'') + (p2p?' p2p':'') + (off?' offline':'');
     const av = p.photo
       ? `<img src="${esc(p.photo)}" onerror="this.outerHTML='<div class=&quot;fb&quot;>${esc((p.name[0]||'★').toUpperCase())}</div>'">`
       : `<div class="fb">${esc((p.name[0]||'★').toUpperCase())}</div>`;
@@ -1139,7 +1197,7 @@ function renderRoom(){
     el.innerHTML = `${badge}${av}<div class="nm">${esc(me?'Вы':p.name)}</div>${off?'<div style="font-size:9px;color:#ff4d5e;margin-top:3px">оффлайн</div>':''}`;
     g.appendChild(el);
   });
-  for (let i=mem.length; i<l.maxPlayers; i++){
+  for (let i=mem.length; i<(l.maxPlayers||0); i++){
     const el = document.createElement('div');
     el.className = 'rp-slot'; el.textContent = '+';
     g.appendChild(el);
@@ -1148,7 +1206,7 @@ function renderRoom(){
   const modes = { classic:'Классика', podkidnoy:'Подкидной' };
   $('#roomParams').innerHTML = `
     <div class="set-row"><div class="set-ic">🏷</div><div class="set-info"><div class="set-name">${esc(l.name||'—')}</div><div class="set-desc">Название</div></div></div>
-    <div class="set-row"><div class="set-ic">👑</div><div class="set-info"><div class="set-name">${esc(l.hostName||'—')}</div><div class="set-desc">Хост (создатель)</div></div></div>
+    <div class="set-row"><div class="set-ic">👑</div><div class="set-info"><div class="set-name">${esc(l.hostName||'—')}</div><div class="set-desc">Хост = сервер (P2P)</div></div></div>
     <div class="set-row"><div class="set-ic">🎴</div><div class="set-info"><div class="set-name">${l.deck} карт • ${modes[l.mode]||'Классика'}</div><div class="set-desc">${l.privacy==='public'?'Публичное':'Приватное'}</div></div></div>
   `;
 
@@ -1157,16 +1215,18 @@ function renderRoom(){
   const me = l.members?.[USER.id];
   $('#btnStart').classList.toggle('hidden', !amHost);
   $('#btnReady').classList.toggle('hidden', amHost);
-  $('#readyHint').classList.toggle('hidden', false);
+  $('#readyHint').classList.remove('hidden');
 
   if (amHost){
     const guests = mem.filter(m => !m.host);
     const allReady = guests.length > 0 && guests.every(m => m.ready);
-    $('#btnStart').disabled = !(allReady && mem.length >= 2);
+    const allConnected = guests.every(m => State.connectedPeers.has(String(m.id)));
+    $('#btnStart').disabled = !(allReady && mem.length >= 2 && allConnected);
     const hint = $('#readyHint');
     if (mem.length < 2) hint.textContent = 'Нужно минимум 2 игрока';
     else if (!allReady) hint.textContent = 'Ожидаем готовности гостей';
-    else hint.textContent = '✓ Все готовы!';
+    else if (!allConnected) hint.textContent = 'Устанавливаем P2P соединение...';
+    else hint.textContent = '✓ Все готовы, P2P на связи';
   } else if (me){
     const rb = $('#btnReady');
     rb.textContent = me.ready ? '✅ Готов' : '⏳ Я готов';
@@ -1178,12 +1238,12 @@ function renderRoom(){
 function leaveRoom(confirm=true){
   const doLeave = ()=>{
     if (State.heartbeat){ clearInterval(State.heartbeat); State.heartbeat = null; }
-    if (State.lobbyRef){ try{ State.lobbyRef.off(); }catch(e){} State.lobbyRef = null; }
-    if (State.playerRef){ try{ State.playerRef.onDisconnect().cancel(); }catch(e){} State.playerRef.remove().catch(()=>{}); State.playerRef = null; }
+    Net.cleanup();
+    if (State.lobbyRef){ try{ State.lobbyRef.off(); }catch{} State.lobbyRef = null; }
+    if (State.playerRef){ try{ State.playerRef.onDisconnect().cancel(); }catch{} State.playerRef.remove().catch(()=>{}); State.playerRef = null; }
     if (State.code && State.isHost && db) db.ref('lobbies/'+State.code).remove().catch(()=>{});
     try{ localStorage.removeItem(LS_CODE); }catch{}
-    State.code = null; State.lobby = null; State.isHost = false;
-    if (State.timerInt){ clearInterval(State.timerInt); State.timerInt = null; }
+    State.code = null; State.lobby = null; State.isHost = false; State.gameState = null;
     haptic('light');
     showScreen('lobby', { push:false });
     State.history = ['menu'];
@@ -1197,99 +1257,66 @@ function leaveRoom(confirm=true){
 
 async function startGame(){
   if (!State.code || !State.lobby) return;
-  if (String(State.lobby.host) !== USER.id){ toast('Только хост','err'); return; }
+  if (!State.isHost){ toast('Только хост может начать','err'); return; }
   const mem = Object.keys(State.lobby.members||{});
   if (mem.length < 2){ toast('Нужно 2+ игрока','err'); return; }
   const guests = Object.values(State.lobby.members).filter(m => !m.host);
   if (!guests.every(g => g.ready)){ toast('Не все готовы','err'); return; }
+  if (!guests.every(g => State.connectedPeers.has(String(g.id)))){ toast('Ждём P2P соединения','err'); return; }
+
   const btn = $('#btnStart'); btn.disabled = true; btn.textContent = '⏳...';
   try{
-    // Build game state
-    const game = createGame(State.lobby);
-    await db.ref('lobbies/'+State.code).update({ status:'playing', game, startedAt: Date.now() });
+    // HOST creates authoritative game state
+    const g = createGame(State.lobby);
+    State.gameState = g;
+    // Update lobby status
+    await db.ref(`lobbies/${State.code}/meta/status`).set('playing');
+    // Broadcast to all peers
+    Net.broadcast({ t:'state', state: g });
     haptic('success'); toast('Игра началась!','ok');
+    route();
   }catch(e){
     console.error(e); toast('Ошибка: '+(e.message||''),'err');
-    if (e.code==='PERMISSION_DENIED') rulesHint();
   }finally{ btn.disabled = false; btn.textContent = '🚀 Начать игру'; }
 }
 
 /* =========================================================
-   12. GAME ACTIONS (transactions)
+   13. GAME ACTIONS (client sends to host)
    ========================================================= */
-async function gameAction(fn){
-  if (!State.code) return false;
-  const ref = db.ref(`lobbies/${State.code}/game`);
-  try{
-    const res = await ref.transaction(g=>{
-      if (!g) return;
-      g = normGame(g);
-      const ok = fn(g);
-      if (!ok) return;
-      return g;
-    });
-    return res.committed;
-  }catch(e){
-    console.error('tx:', e);
-    if (e.code==='PERMISSION_DENIED') rulesHint();
-    else toast('Ошибка хода','err');
-    return false;
-  }
+function sendAction(a, card){
+  const msg = { t:'action', a };
+  if (card) msg.card = card;
+  const ok = Net.sendToHost(msg);
+  if (!ok) toast('Нет связи с хостом','err',1500);
+  return ok;
 }
-
-function doAttack(card){
-  gameAction(g => gAttack(g, USER.id, card)).then(ok=>{
-    if (ok){ haptic('medium'); beep(520,0.08); }
-    else { haptic('error'); toast('Нельзя сыграть','err',1400); }
-  });
-}
-function doDefend(card){
-  gameAction(g => gDefend(g, USER.id, card)).then(ok=>{
-    if (ok){ haptic('success'); beep(660,0.1); }
-    else { haptic('error'); toast('Не бьёт','err',1400); }
-  });
-}
-function doTake(){
-  gameAction(g => gTake(g, USER.id)).then(ok=>{ if(ok){ haptic('medium'); beep(220,0.15); }});
-}
-function doBito(){
-  gameAction(g => gBito(g, USER.id)).then(ok=>{ if(ok){ haptic('success'); beep(780,0.12); }});
-}
-function doTranslate(card){
-  gameAction(g => gTranslate(g, USER.id, card)).then(ok=>{ if(ok){ haptic('success'); beep(880,0.1); }});
-}
+function doAttack(card){ if (sendAction('attack', card)) haptic('medium'); }
+function doDefend(card){ if (sendAction('defend', card)) haptic('success'); }
+function doTake(){ if (sendAction('take')) haptic('medium'); }
+function doBito(){ if (sendAction('bito')) haptic('success'); }
+function doTranslate(card){ if (sendAction('translate', card)) haptic('success'); }
 
 /* =========================================================
-   13. RENDER GAME (Durak Online style)
+   14. RENDER GAME
    ========================================================= */
-function cardHTML(card, {mini=false, trump='', click=false} = {}){
+function cardHTML(card, {trump=''} = {}){
   if (!card) return '';
   const red = RED.has(card.s);
   const isTrump = card.s === trump;
   const cls = ['card'];
   if (red) cls.push('red');
   if (isTrump) cls.push('trump');
-  if (mini) cls.push('mini');
-  return `<div class="${cls.join(' ')}" ${click?'data-click="1"':''}>
-    <span class="cn">${card.r}</span>
-    <span class="cs">${card.s}</span>
-    <span class="mid">${card.s}</span>
-    <span class="cn-b">${card.r}</span>
-    <span class="cs-b">${card.s}</span>
-  </div>`;
+  return `<div class="${cls.join(' ')}"><span class="cn">${card.r}</span><span class="cs">${card.s}</span><span class="mid">${card.s}</span><span class="cn-b">${card.r}</span><span class="cs-b">${card.s}</span></div>`;
 }
 
 function renderGame(g){
   if (!g) return;
-  State.lastGameState = g;
-
-  // === MY INFO ===
   const me = g.hands?.[USER.id] || [];
   const amAttacker = g.order[g.attackerIdx] === USER.id;
   const amDefender = g.order[g.defenderIdx] === USER.id;
   const isMyTurn = (amAttacker && (g.phase==='attack'||g.phase==='throw')) || (amDefender && g.phase==='defend');
 
-  // === OPPONENTS ===
+  // Opponents
   const opps = $('#oppsRow'); opps.innerHTML = '';
   for (const pid of g.order){
     if (pid === USER.id) continue;
@@ -1300,7 +1327,6 @@ function renderGame(g){
     const isDef = g.order[g.defenderIdx] === pid;
     const isActive = isAtk || isDef;
     const off = p.online === false;
-
     const el = document.createElement('div');
     el.className = 'opp' + (isActive?' active':'') + (isAtk?' attacker':'') + (isDef?' defender':'') + (off?' offline':'');
     const av = p.photo
@@ -1313,12 +1339,12 @@ function renderGame(g){
     opps.appendChild(el);
   }
 
-  // === DECK ===
-  const deckRemaining = (g.deck||[]).length + (g.trumpCard?1:0);
-  $('#deckCount').textContent = deckRemaining;
-  $('#deckStack').style.display = deckRemaining > 0 ? '' : 'none';
+  // Deck
+  const deckLeft = (g.deck||[]).length + (g.trumpCard?1:0);
+  $('#deckCount').textContent = deckLeft;
+  $('#deckStack').style.display = deckLeft > 0 ? '' : 'none';
 
-  // === TRUMP ===
+  // Trump
   const tSlot = $('#trumpSlot');
   if (g.trumpCard){
     tSlot.innerHTML = cardHTML(g.trumpCard, {trump:g.trumpSuit}) + `<div class="trump-suit-badge">${g.trumpSuit}</div>`;
@@ -1326,14 +1352,11 @@ function renderGame(g){
     tSlot.innerHTML = `<div style="width:44px;height:64px;display:grid;place-items:center;font-size:32px;color:${RED.has(g.trumpSuit)?'#ff4d5e':'#fff'};opacity:.6">${g.trumpSuit}</div><div class="trump-suit-badge">${g.trumpSuit}</div>`;
   }
 
-  // === TABLE ===
+  // Table
   const tc = $('#tableCenter'); tc.innerHTML = '';
-  if ((g.table||[]).length === 0) tc.classList.add('empty'); else tc.classList.remove('empty');
   for (const pair of g.table||[]){
     const p = document.createElement('div');
     p.className = 'pair';
-    let html = `<div class="card atk-wrap">${cardHTML(pair.atk,{trump:g.trumpSuit})}</div>`;
-    // simpler: two absolute cards
     p.innerHTML = `
       <div style="position:absolute;top:0;left:0">${cardHTML(pair.atk,{trump:g.trumpSuit})}</div>
       ${pair.def ? `<div style="position:absolute;top:6px;left:6px;z-index:2;transform:rotate(8deg)">${cardHTML(pair.def,{trump:g.trumpSuit})}</div>` : ''}
@@ -1341,26 +1364,23 @@ function renderGame(g){
     tc.appendChild(p);
   }
 
-  // === MY HAND ===
+  // My hand
   const hand = State.settings.sort ? sortHand(me, g.trumpSuit) : me;
   const mh = $('#myHand'); mh.innerHTML = '';
-
-  const tableRanks = new Set();
-  for (const p of g.table||[]){ tableRanks.add(p.atk.r); if (p.def) tableRanks.add(p.def.r); }
+  const ranks = new Set();
+  for (const p of g.table||[]){ ranks.add(p.atk.r); if (p.def) ranks.add(p.def.r); }
   const undefended = (g.table||[]).find(p => !p.def);
   const tableLen = (g.table||[]).length;
 
   hand.forEach(card => {
     let playable = false;
-    let hint = false;
     if (!g.finished){
       if (amAttacker && g.phase === 'attack' && tableLen === 0) playable = true;
-      else if (amAttacker && g.phase === 'throw' && tableRanks.has(card.r) && tableLen < 6) playable = true;
+      else if (amAttacker && g.phase === 'throw' && ranks.has(card.r) && tableLen < 6) playable = true;
       else if (amDefender && g.phase === 'defend' && undefended && canBeat(card, undefended.atk, g.trumpSuit)) playable = true;
     }
-    const inner = cardHTML(card, {trump:g.trumpSuit});
     const div = document.createElement('div');
-    div.innerHTML = inner;
+    div.innerHTML = cardHTML(card, {trump:g.trumpSuit});
     const cardEl = div.firstElementChild;
     if (g.finished) cardEl.classList.add('disabled');
     else if (playable){
@@ -1373,19 +1393,16 @@ function renderGame(g){
     mh.appendChild(cardEl);
   });
 
-  // === MY AVATAR ===
-  const abMe = $('#abMe');
-  const myCnt = me.length;
+  // My avatar
   const mp = State.lobby.members?.[USER.id] || {};
   const av = mp.photo
     ? `<img class="opp-av" src="${esc(mp.photo)}" onerror="this.outerHTML='<div class=&quot;opp-av-fb&quot;>${esc((mp.name[0]||'★').toUpperCase())}</div>'">`
     : `<div class="opp-av-fb">${esc((mp.name[0]||'★').toUpperCase())}</div>`;
-  abMe.className = 'ab-me' + (isMyTurn?' active':'') + (amAttacker&&g.phase!=='finished'?' attacker':'') + (amDefender&&g.phase!=='finished'?' defender':'');
-  abMe.innerHTML = `${av}<div class="opp-cnt">${myCnt}</div>`;
+  $('#abMe').className = 'ab-me' + (isMyTurn?' active':'') + (amAttacker&&!g.finished?' attacker':'') + (amDefender&&!g.finished?' defender':'');
+  $('#abMe').innerHTML = `${av}<div class="opp-cnt">${me.length}</div>`;
 
-  // === ACTION BAR ===
+  // Actions
   const ab = $('#abActions'); ab.innerHTML = '';
-
   if (g.finished){
     const iLost = g.loserId === USER.id;
     const st = document.createElement('div');
@@ -1393,7 +1410,7 @@ function renderGame(g){
     st.textContent = iLost ? '😭 Вы проиграли' : '🏆 Победа!';
     ab.appendChild(st);
     const btn = document.createElement('button');
-    btn.className = 'act-btn ' + (iLost ? 'red' : 'green');
+    btn.className = 'act-btn ' + (iLost?'red':'green');
     btn.textContent = 'Выйти';
     btn.onclick = ()=>leaveRoom(false);
     ab.appendChild(btn);
@@ -1402,21 +1419,20 @@ function renderGame(g){
     st.className = 'ab-status hot';
     st.textContent = '🛡 Ваш ход';
     ab.appendChild(st);
-    const takeBtn = document.createElement('button');
-    takeBtn.className = 'act-btn red';
-    takeBtn.textContent = '🤲 Взять';
-    takeBtn.onclick = doTake;
-    ab.appendChild(takeBtn);
-    // Translate if possible
-    if ((g.table||[]).length === 1 && !g.table[0].def && g.order.length >= 3){
+    const tb = document.createElement('button');
+    tb.className = 'act-btn red';
+    tb.textContent = '🤲 Взять';
+    tb.onclick = doTake;
+    ab.appendChild(tb);
+    if (tableLen === 1 && !g.table[0].def && g.order.length >= 3){
       const rank = g.table[0].atk.r;
-      const matchIdx = me.findIndex(c => c.r === rank);
-      if (matchIdx >= 0){
-        const trBtn = document.createElement('button');
-        trBtn.className = 'act-btn gold';
-        trBtn.textContent = '↔ Перевести';
-        trBtn.onclick = () => doTranslate(me[matchIdx]);
-        ab.appendChild(trBtn);
+      const idx = me.findIndex(c => c.r === rank);
+      if (idx >= 0){
+        const tr = document.createElement('button');
+        tr.className = 'act-btn gold';
+        tr.textContent = '↔ Перевести';
+        tr.onclick = () => doTranslate(me[idx]);
+        ab.appendChild(tr);
       }
     }
   } else if (amAttacker && g.phase === 'throw'){
@@ -1424,55 +1440,26 @@ function renderGame(g){
     st.className = 'ab-status hot';
     st.textContent = '⚔️ Ваш ход';
     ab.appendChild(st);
-    const bBtn = document.createElement('button');
-    bBtn.className = 'act-btn green';
-    bBtn.textContent = '✅ Бито';
-    bBtn.onclick = doBito;
-    ab.appendChild(bBtn);
+    const bb = document.createElement('button');
+    bb.className = 'act-btn green';
+    bb.textContent = '✅ Бито';
+    bb.onclick = doBito;
+    ab.appendChild(bb);
   } else if (amAttacker && g.phase === 'attack'){
     const st = document.createElement('div');
     st.className = 'ab-status hot';
-    st.textContent = '⚔️ Ваш ход — выберите карту';
+    st.textContent = '⚔️ Ваш ход';
     ab.appendChild(st);
   } else {
     const st = document.createElement('div');
     st.className = 'ab-status';
-    st.textContent = '⏳ Ожидайте хода';
+    st.textContent = '⏳ Ожидайте';
     ab.appendChild(st);
-  }
-
-  // === TIMER ===
-  if (State.settings.timer && !g.finished && isMyTurn){
-    const elapsed = (Date.now() - (g.turnStartedAt||Date.now())) / 1000;
-    const remaining = Math.max(0, 30 - elapsed);
-    $('#timerFill').style.width = (remaining/30*100) + '%';
-    if (!State.timerInt){
-      State.timerInt = setInterval(()=>{
-        const g2 = State.lastGameState;
-        if (!g2 || g2.finished){ $('#timerFill').style.width='100%'; return; }
-        const e = (Date.now() - (g2.turnStartedAt||Date.now()))/1000;
-        const r = Math.max(0, 30-e);
-        $('#timerFill').style.width = (r/30*100) + '%';
-        if (r <= 0 && State.timerInt){ clearInterval(State.timerInt); State.timerInt = null; }
-      }, 1000);
-    }
-  } else {
-    $('#timerFill').style.width = '100%';
-    if (State.timerInt){ clearInterval(State.timerInt); State.timerInt = null; }
-  }
-
-  // === TRACK last action for haptic ===
-  if (g.lastAction && g.lastAction.at && g.lastAction.at !== State.lastAction.at){
-    State.lastAction = g.lastAction;
-    if (g.lastAction.type === 'attack' && g.lastAction.by !== USER.id) beep(400, 0.06);
-    else if (g.lastAction.type === 'defend' && g.lastAction.by !== USER.id) beep(700, 0.06);
-    else if (g.lastAction.type === 'take' && g.lastAction.by !== USER.id) beep(200, 0.15);
-    else if (g.lastAction.type === 'bito' && g.lastAction.by !== USER.id) beep(820, 0.1);
   }
 }
 
 /* =========================================================
-   14. UI BINDINGS
+   15. UI BINDINGS
    ========================================================= */
 function bindUI(){
   $('#toPlay').addEventListener('click', ()=>{ haptic('medium'); showScreen('lobby'); });
@@ -1513,13 +1500,27 @@ function bindUI(){
 
   $('#leaveRoom1').addEventListener('click', ()=>leaveRoom(true));
   $('#btnStart').addEventListener('click', startGame);
-  $('#btnReady').addEventListener('click', ()=>{
-    if (!State.code) return;
+
+  // ===== READY BUTTON (FIXED) =====
+  $('#btnReady').addEventListener('click', async ()=>{
+    if (!State.code || !db){ toast('Нет соединения','err'); return; }
     const me = State.lobby?.members?.[USER.id];
-    const next = !me?.ready;
-    db.ref(`lobbies/${State.code}/members/${USER.id}/ready`).set(next)
-      .then(()=>{ haptic(next?'success':'light'); toast(next?'Готов!':'Отменено', next?'ok':'info',1500); })
-      .catch(()=>toast('Ошибка','err'));
+    if (!me){ toast('Вы не в лобби','err'); return; }
+
+    const next = !me.ready;
+    const btn = $('#btnReady');
+    btn.disabled = true;
+    try {
+      await db.ref(`lobbies/${State.code}/members/${USER.id}/ready`).set(next);
+      haptic(next ? 'success' : 'light');
+      toast(next ? 'Вы готовы!' : 'Отменено', next ? 'ok' : 'info', 1200);
+    } catch(e){
+      console.error('ready error:', e);
+      if (e.code === 'PERMISSION_DENIED' || /permission/i.test(e.message||'')) rulesHint();
+      else toast('Ошибка: ' + (e.message||'нет доступа к БД'),'err',3000);
+    } finally {
+      btn.disabled = false;
+    }
   });
 
   $('#gtBack').addEventListener('click', ()=>{
@@ -1534,35 +1535,13 @@ function bindUI(){
     $('#gtSound').textContent = State.settings.sfx ? '🔊' : '🔇';
     toast(State.settings.sfx?'Звук вкл':'Звук выкл','info',1200);
   });
-  $('#gtSound').textContent = State.settings.sfx ? '🔊' : '🔇';
   $('#gtHelp').addEventListener('click', ()=>{
-    modal({ icon:'❓', title:'Правила',
-      text:'• Атакующий кладёт карту\n• Защитник бьёт старшей картой той же масти или козырем\n• Атакующий может подкидывать карты того же ранга\n• Защитник может «взять» или «перевести»\n• Первый сбросивший все карты — победил\n• Последний — «дурак»',
+    modal({ icon:'❓', title:'Как играть',
+      text:'Правила классического «Дурака»:\n\n• Атакующий кладёт карту\n• Защитник бьёт старшей той же масти или козырем\n• Можно подкидывать карты того же ранга\n• «Взять» = забрать карты со стола\n• «Бито» = завершить раунд\n• «Перевести» = отдать ход следующему\n\nХост = сервер в браузере, P2P через WebRTC',
       actions:[{label:'OK',style:'btn-gold'}]
     });
   });
 
-  // Emotes
-  $$('.emote-btn').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      const emoji = b.dataset.emote;
-      haptic('light');
-      // float animation locally
-      const el = document.createElement('div');
-      el.className = 'float-emote';
-      el.textContent = emoji;
-      el.style.left = (Math.random()*60+20)+'%';
-      el.style.bottom = '120px';
-      document.body.appendChild(el);
-      setTimeout(()=>el.remove(), 2500);
-      // Send to others
-      if (State.code && db) db.ref(`lobbies/${State.code}/emotes`).push({ e:emoji, from:USER.id, at:Date.now() });
-    });
-  });
-  // Listen for others' emotes
-  if (db) db.ref('.info/connected').on('value', ()=>{});
-
-  // Swipe back
   let tx=0,ty=0;
   document.addEventListener('touchstart', e=>{ tx=e.touches[0].clientX; ty=e.touches[0].clientY; },{passive:true});
   document.addEventListener('touchend', e=>{
@@ -1582,34 +1561,20 @@ function bindUI(){
     else tg.close();
   });
 
-  // Vis: online refresh
   document.addEventListener('visibilitychange', ()=>{
     if (!document.hidden && State.code && db){
       db.ref(`lobbies/${State.code}/members/${USER.id}/online`).set(true).catch(()=>{});
       db.ref(`lobbies/${State.code}/members/${USER.id}/lastSeen`).set(Date.now()).catch(()=>{});
+      // If we lost P2P — try to reconnect
+      if (!State.isHost && State.hostPeerId && !State.connectedPeers.has(State.hostPeerId)){
+        Net.guestConnectToHost();
+      }
     }
   });
 }
 
-/* Emote listener when in room */
-function listenEmotes(){
-  if (!State.code || !db) return;
-  const ref = db.ref(`lobbies/${State.code}/emotes`).limitToLast(1);
-  ref.on('child_added', snap=>{
-    const d = snap.val();
-    if (!d || d.from === USER.id) return;
-    const el = document.createElement('div');
-    el.className = 'float-emote';
-    el.textContent = d.e;
-    el.style.left = (Math.random()*60+20)+'%';
-    el.style.bottom = '120px';
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(), 2500);
-  });
-}
-
 /* =========================================================
-   15. AUTO REJOIN
+   16. AUTO REJOIN
    ========================================================= */
 async function tryAutoRejoin(){
   if (!db) return false;
@@ -1617,20 +1582,20 @@ async function tryAutoRejoin(){
   try{ code = localStorage.getItem(LS_CODE); }catch{}
   if (!code) return false;
   try{
-    const snap = await db.ref('lobbies/'+code).get();
-    if (!snap.exists()){ try{ localStorage.removeItem(LS_CODE); }catch{} return false; }
-    const l = snap.val();
-    if (!l.members || !l.members[USER.id]){ try{ localStorage.removeItem(LS_CODE); }catch{} return false; }
-    const isHost = String(l.host) === USER.id;
-    toast('Возвращаемся...','info',1500);
+    const metaSnap = await db.ref('lobbies/'+code+'/meta').get();
+    if (!metaSnap.exists()){ try{ localStorage.removeItem(LS_CODE); }catch{} return false; }
+    const meta = metaSnap.val();
+    const memSnap = await db.ref('lobbies/'+code+'/members/'+USER.id).get();
+    if (!memSnap.exists()){ try{ localStorage.removeItem(LS_CODE); }catch{} return false; }
+    const isHost = String(meta.host) === USER.id;
+    toast('Возвращаемся...','info',1200);
     enterRoom(code, isHost);
-    listenEmotes();
     return true;
   }catch(e){ console.warn('rejoin:', e); return false; }
 }
 
 /* =========================================================
-   16. BOOT
+   17. BOOT
    ========================================================= */
 async function boot(){
   loadSettings();
@@ -1639,18 +1604,9 @@ async function boot(){
   bindUI();
   bindSettings();
 
-  if (db){
-    db.ref('.info/connected').on('value', s=>console.log('🔌 Firebase:', s.val()));
-  }
+  if (db) db.ref('.info/connected').on('value', s=>console.log('🔌', s.val()));
 
-  // Register user presence
-  if (db){
-    const userRef = db.ref('users/'+USER.id);
-    userRef.child('online').onDisconnect().set(false);
-    userRef.child('online').set(true).catch(()=>{});
-  }
-
-  await new Promise(r => setTimeout(r, 1400));
+  await new Promise(r => setTimeout(r, 1200));
 
   const rejoined = await tryAutoRejoin();
   if (!rejoined){
