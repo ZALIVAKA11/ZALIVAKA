@@ -2,353 +2,562 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#05060f">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1a3a6b">
 <title>Дурак на Звёзды</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
-:root{--bg:#05060f;--bg-2:#0b0d1f;--panel:rgba(255,255,255,.055);--panel-2:rgba(255,255,255,.09);--stroke:rgba(255,255,255,.11);--stroke-2:rgba(255,255,255,.2);--text:#ececf7;--muted:#8b8cb8;--accent:#7c5cff;--accent-2:#00e0ff;--accent-3:#ff4ecd;--gold:#ffcf5c;--ok:#37e6a0;--danger:#ff5b6e;--radius:22px;--radius-sm:14px;--card-back-1:#3a1e7a;--card-back-2:#0f2a6b;--anim-speed:1;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+:root{
+  --felt-1:#2a5a9a;--felt-2:#1a3a6b;--felt-3:#0f2547;
+  --panel:rgba(0,0,0,.35);--stroke:rgba(255,255,255,.15);
+  --text:#fff;--muted:#a8b8d0;
+  --accent:#ffcf5c;--accent-2:#ffb43a;--ok:#4ade80;--danger:#ff4d5e;
+  --radius:14px;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
-body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;user-select:none;overscroll-behavior:none}
-#stars{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
-#nebula{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 45% at 15% 8%,rgba(124,92,255,.30) 0%,transparent 65%),radial-gradient(55% 40% at 88% 18%,rgba(0,224,255,.20) 0%,transparent 65%),radial-gradient(70% 50% at 50% 105%,rgba(255,78,205,.22) 0%,transparent 70%);filter:blur(12px);animation:nebulaFloat calc(26s/var(--anim-speed)) ease-in-out infinite alternate}
-@keyframes nebulaFloat{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(0,-22px,0) scale(1.07)}}
-#app{position:relative;z-index:2;height:100%;width:100%}
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;padding:calc(var(--safe-top) + 14px) 18px calc(var(--safe-bottom) + 18px);opacity:0;visibility:hidden;transform:translateY(18px) scale(.985);transition:opacity .34s cubic-bezier(.22,1,.36,1),transform .34s cubic-bezier(.22,1,.36,1),visibility .34s;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
-.screen.active{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
-.screen::-webkit-scrollbar{display:none}
-#screen-loading{align-items:center;justify-content:center;text-align:center}
-.loader-logo{font-size:70px;line-height:1;background:linear-gradient(135deg,var(--accent-2),var(--accent),var(--accent-3));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 26px rgba(124,92,255,.85));animation:spinPulse 2.4s ease-in-out infinite}
-@keyframes spinPulse{0%,100%{transform:rotate(0deg) scale(1)}50%{transform:rotate(180deg) scale(1.18)}}
-.loader-text{margin-top:22px;font-size:20px;font-weight:900;letter-spacing:.32em;text-transform:uppercase;background:linear-gradient(90deg,var(--accent-2),#fff,var(--accent-3));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 2.6s linear infinite}
-@keyframes shimmer{to{background-position:200% center}}
-.loader-bar{margin-top:26px;width:190px;height:4px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden}
-.loader-bar>i{display:block;height:100%;width:35%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent-2));animation:loadSlide 1.15s ease-in-out infinite}
-@keyframes loadSlide{0%{transform:translateX(-120%)}100%{transform:translateX(400%)}}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-shrink:0}
-.brand{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
-.brand .star{font-size:17px;background:linear-gradient(135deg,var(--accent-2),var(--accent-3));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 8px rgba(0,224,255,.7));animation:twinkle calc(2.6s/var(--anim-speed)) ease-in-out infinite}
-@keyframes twinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.82)}}
-.icon-btn{width:44px;height:44px;flex-shrink:0;display:grid;place-items:center;border-radius:14px;border:1px solid var(--stroke);background:var(--panel);color:var(--text);font-size:19px;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform .16s,background .2s,border-color .2s}
-.icon-btn:active{transform:scale(.9);background:var(--panel-2);border-color:var(--stroke-2)}
-.title-center{font-size:14px;font-weight:900;letter-spacing:.2em;text-transform:uppercase}
-.profile-card{position:relative;display:flex;align-items:center;gap:15px;padding:18px;border-radius:var(--radius);border:1px solid var(--stroke);background:linear-gradient(135deg,rgba(124,92,255,.18),rgba(0,224,255,.08) 55%,rgba(255,78,205,.13));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 18px 44px -22px rgba(124,92,255,.9);overflow:hidden;flex-shrink:0}
-.profile-card::after{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.22) 50%,transparent 70%);background-size:250% 250%;animation:shine calc(5s/var(--anim-speed)) linear infinite;opacity:.5}
-@keyframes shine{0%{background-position:150% 0}100%{background-position:-150% 0}}
-.avatar-wrap{position:relative;flex-shrink:0}
-.avatar{width:66px;height:66px;border-radius:50%;object-fit:cover;border:2.5px solid transparent;background:linear-gradient(var(--bg-2),var(--bg-2)) padding-box,linear-gradient(135deg,var(--accent-2),var(--accent),var(--accent-3)) border-box;box-shadow:0 0 24px -4px rgba(124,92,255,.85)}
-.avatar-fallback{width:66px;height:66px;border-radius:50%;display:grid;place-items:center;font-size:26px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-3))}
-.avatar-status{position:absolute;right:1px;bottom:1px;width:15px;height:15px;border-radius:50%;background:var(--ok);border:2.5px solid var(--bg-2);box-shadow:0 0 10px var(--ok)}
-.profile-info{min-width:0;flex:1}
-.profile-name{font-size:19px;font-weight:800;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.profile-username{font-size:13px;color:var(--accent-2);font-weight:600;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.profile-id{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:4px 10px;border-radius:99px;font-size:10.5px;font-weight:700;letter-spacing:.09em;background:rgba(0,0,0,.3);border:1px solid var(--stroke);color:var(--muted)}
-.profile-id b{color:var(--gold);font-weight:800}
-.btn{position:relative;width:100%;padding:17px 20px;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:15px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;cursor:pointer;overflow:hidden;transition:transform .16s cubic-bezier(.34,1.56,.64,1),filter .2s,box-shadow .25s}
-.btn:active{transform:scale(.965)}
-.btn:disabled{opacity:.42;pointer-events:none}
-.btn-primary{color:#fff;background:linear-gradient(115deg,var(--accent) 0%,#5b46ff 38%,var(--accent-2) 100%);background-size:200% auto;box-shadow:0 16px 38px -14px rgba(124,92,255,1),inset 0 1px 0 rgba(255,255,255,.28);animation:btnFlow calc(4.5s/var(--anim-speed)) linear infinite}
-@keyframes btnFlow{to{background-position:200% center}}
-.btn-primary::after{content:"";position:absolute;top:0;left:-70%;width:45%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);transform:skewX(-22deg);animation:sweep calc(3.2s/var(--anim-speed)) ease-in-out infinite}
-@keyframes sweep{0%{left:-70%}55%,100%{left:150%}}
-.btn-ghost{color:var(--text);background:var(--panel);border:1px solid var(--stroke);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-.btn-ghost:active{background:var(--panel-2)}
-.btn-danger{color:#fff;background:linear-gradient(115deg,#ff4b62,#c81e4f);box-shadow:0 14px 32px -14px rgba(255,75,98,.95)}
-.btn-gold{color:#2a1a00;background:linear-gradient(115deg,#ffcf5c,#ff9d3c);box-shadow:0 14px 32px -14px rgba(255,207,92,.95)}
-.btn-sm{padding:13px 16px;font-size:12.5px;letter-spacing:.1em}
-.menu-actions{display:flex;flex-direction:column;gap:12px;margin-top:auto;padding-top:26px;flex-shrink:0}
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;flex-shrink:0}
-.stat{padding:13px 9px;border-radius:var(--radius-sm);text-align:center;background:var(--panel);border:1px solid var(--stroke);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-.stat-val{font-size:18px;font-weight:900;background:linear-gradient(135deg,var(--accent-2),var(--accent-3));-webkit-background-clip:text;background-clip:text;color:transparent}
-.stat-lbl{font-size:9.5px;color:var(--muted);letter-spacing:.13em;text-transform:uppercase;margin-top:4px;font-weight:700}
-.section-title{font-size:11px;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:22px 0 11px;flex-shrink:0}
-.tabs{display:flex;gap:6px;padding:5px;border-radius:16px;background:var(--panel);border:1px solid var(--stroke);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);flex-shrink:0;margin-bottom:18px}
-.tab{flex:1;padding:12px;border:none;border-radius:12px;background:transparent;color:var(--muted);font-family:inherit;font-size:12.5px;font-weight:900;letter-spacing:.11em;text-transform:uppercase;cursor:pointer;transition:all .25s cubic-bezier(.22,1,.36,1)}
-.tab.active{color:#fff;background:linear-gradient(115deg,var(--accent),var(--accent-2));box-shadow:0 8px 22px -10px rgba(124,92,255,1)}
-.tab-panel{display:none;animation:fadeUp .3s cubic-bezier(.22,1,.36,1)}
-.tab-panel.active{display:block}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Roboto,Arial,sans-serif;
+  background:#0f2547;color:var(--text);user-select:none;
+  -webkit-font-smoothing:antialiased;overscroll-behavior:none;
+}
+button{font-family:inherit;cursor:pointer;border:none;color:inherit}
+
+/* ========== SCREENS ========== */
+.screen{position:fixed;inset:0;display:none;flex-direction:column}
+.screen.active{display:flex}
+
+/* ========== LOADING ========== */
+#loading{align-items:center;justify-content:center;background:radial-gradient(circle at 50% 30%,#2a5a9a,#0f2547)}
+.loader-star{font-size:80px;color:#ffcf5c;filter:drop-shadow(0 0 30px #ffcf5c);animation:spin 2s ease-in-out infinite}
+@keyframes spin{0%,100%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.2)}}
+.loader-title{margin-top:20px;font-size:22px;font-weight:900;letter-spacing:.3em;text-transform:uppercase;color:#fff}
+
+/* ========== MENU ========== */
+#menu{background:radial-gradient(circle at 50% 30%,#2a5a9a,#0f2547);padding:calc(var(--safe-top) + 20px) 20px calc(var(--safe-bottom) + 20px)}
+.menu-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.menu-brand{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:900;letter-spacing:.15em;text-transform:uppercase}
+.menu-brand .st{color:#ffcf5c;font-size:20px}
+.coin-badge{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--stroke);border-radius:20px;padding:6px 12px;font-size:13px;font-weight:800}
+.coin-badge .coin{color:#ffcf5c}
+.profile-box{
+  display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;
+  background:linear-gradient(135deg,rgba(255,207,92,.15),rgba(255,255,255,.05));
+  border:1px solid rgba(255,207,92,.3);margin-bottom:20px;
+}
+.profile-av{width:60px;height:60px;border-radius:50%;object-fit:cover;border:3px solid #ffcf5c}
+.profile-av-fb{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;font-size:24px;font-weight:900;background:linear-gradient(135deg,#ffcf5c,#ffb43a);color:#1a3a6b}
+.profile-name{font-size:17px;font-weight:800}
+.profile-un{font-size:12px;color:var(--muted);margin-top:3px}
+.profile-id{display:inline-block;font-size:10px;background:rgba(0,0,0,.3);padding:3px 8px;border-radius:10px;margin-top:6px;color:var(--muted)}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:auto}
+.stat-card{background:var(--panel);border:1px solid var(--stroke);border-radius:12px;padding:12px 8px;text-align:center}
+.stat-num{font-size:18px;font-weight:900;color:#ffcf5c}
+.stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:3px}
+.menu-btns{display:flex;flex-direction:column;gap:12px;margin-top:30px}
+
+/* ========== BUTTONS ========== */
+.btn{
+  padding:16px 20px;border-radius:14px;font-size:15px;font-weight:900;
+  letter-spacing:.1em;text-transform:uppercase;transition:transform .12s;
+}
+.btn:active{transform:scale(.96)}
+.btn:disabled{opacity:.4;pointer-events:none}
+.btn-gold{background:linear-gradient(135deg,#ffcf5c,#ffb43a);color:#1a3a6b;box-shadow:0 6px 20px -8px #ffcf5c}
+.btn-blue{background:linear-gradient(135deg,#3a6bbf,#2a4a8a);color:#fff;box-shadow:0 6px 20px -8px #3a6bbf}
+.btn-red{background:linear-gradient(135deg,#ff4d5e,#c41e3a);color:#fff;box-shadow:0 6px 20px -8px #ff4d5e}
+.btn-outline{background:rgba(255,255,255,.08);border:1px solid var(--stroke);color:#fff}
+.btn-sm{padding:12px 16px;font-size:13px}
+
+/* ========== TOPBAR ========== */
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex-shrink:0;background:rgba(0,0,0,.2)}
+.tb-btn{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.1);border:1px solid var(--stroke);display:grid;place-items:center;font-size:18px;color:#fff}
+.tb-btn:active{background:rgba(255,255,255,.2)}
+.tb-title{font-size:14px;font-weight:900;letter-spacing:.15em;text-transform:uppercase}
+.tb-coins{background:rgba(0,0,0,.3);border:1px solid var(--stroke);border-radius:20px;padding:6px 12px;font-size:13px;font-weight:800;color:#ffcf5c;display:flex;gap:5px;align-items:center}
+
+/* ========== LOBBY / SETTINGS SCREENS ========== */
+.form-screen{background:radial-gradient(circle at 50% 30%,#2a5a9a,#0f2547);padding:0 0 var(--safe-bottom)}
+.form-body{flex:1;overflow-y:auto;padding:20px}
+.form-body::-webkit-scrollbar{display:none}
+.tabs{display:flex;gap:6px;background:rgba(0,0,0,.25);padding:5px;border-radius:12px;margin-bottom:18px}
+.tab{flex:1;padding:11px;border-radius:9px;background:transparent;color:var(--muted);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.1em}
+.tab.active{background:linear-gradient(135deg,#ffcf5c,#ffb43a);color:#1a3a6b}
+.tab-panel{display:none}.tab-panel.active{display:block}
 .field{margin-bottom:14px}
-.field-label{display:block;font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-.input{width:100%;padding:15px 16px;border-radius:var(--radius-sm);border:1px solid var(--stroke);background:rgba(0,0,0,.32);color:var(--text);font-family:inherit;font-size:15px;font-weight:700;outline:none;transition:border-color .22s,box-shadow .22s,background .22s}
-.input::placeholder{color:#4d4e75;font-weight:600}
-.input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(124,92,255,.18);background:rgba(0,0,0,.45)}
-.input-code{text-align:center;font-size:28px;font-weight:900;letter-spacing:.5em;text-indent:.5em;text-transform:uppercase;padding:19px 16px;font-family:'SF Mono',Menlo,Consolas,monospace}
-.seg{display:flex;gap:7px}
-.seg button{flex:1;padding:12px 6px;border-radius:12px;border:1px solid var(--stroke);background:rgba(0,0,0,.28);color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:800;letter-spacing:.05em;cursor:pointer;transition:all .22s}
-.seg button.active{color:#fff;border-color:transparent;background:linear-gradient(115deg,var(--accent),var(--accent-2));box-shadow:0 8px 20px -10px rgba(124,92,255,1)}
-.settings-group{border-radius:var(--radius);border:1px solid var(--stroke);background:var(--panel);overflow:hidden;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);margin-bottom:14px;flex-shrink:0}
-.set-row{display:flex;align-items:center;gap:13px;padding:15px 16px;border-bottom:1px solid rgba(255,255,255,.055)}
+.field-lbl{display:block;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}
+.input{width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--stroke);background:rgba(0,0,0,.35);color:#fff;font-size:15px;font-weight:700;outline:none;font-family:inherit}
+.input:focus{border-color:#ffcf5c;box-shadow:0 0 0 3px rgba(255,207,92,.2)}
+.input-code{text-align:center;font-size:26px;letter-spacing:.4em;text-indent:.4em;font-family:'SF Mono',Menlo,monospace;text-transform:uppercase}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;padding:11px 6px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid var(--stroke);color:var(--muted);font-size:12px;font-weight:800}
+.seg button.active{background:linear-gradient(135deg,#ffcf5c,#ffb43a);color:#1a3a6b;border-color:transparent}
+.set-group{background:var(--panel);border:1px solid var(--stroke);border-radius:14px;overflow:hidden;margin-bottom:14px}
+.set-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
 .set-row:last-child{border-bottom:none}
-.set-icon{width:38px;height:38px;flex-shrink:0;border-radius:11px;display:grid;place-items:center;font-size:17px;background:rgba(255,255,255,.06);border:1px solid var(--stroke)}
-.set-body{flex:1;min-width:0}
-.set-name{font-size:13.5px;font-weight:700}
-.set-desc{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.4}
-.switch{position:relative;width:50px;height:29px;flex-shrink:0}
-.switch input{opacity:0;width:0;height:0;position:absolute}
-.switch .track{position:absolute;inset:0;border-radius:99px;cursor:pointer;background:rgba(255,255,255,.12);border:1px solid var(--stroke);transition:background .28s,border-color .28s}
-.switch .track::before{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.45);transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
-.switch input:checked+.track{background:linear-gradient(115deg,var(--accent),var(--accent-2));border-color:transparent}
-.switch input:checked+.track::before{transform:translateX(21px)}
-.range{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:99px;outline:none;background:rgba(255,255,255,.13);margin-top:11px}
-.range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;cursor:pointer;background:linear-gradient(135deg,var(--accent-2),var(--accent));box-shadow:0 0 14px rgba(124,92,255,.95),0 2px 6px rgba(0,0,0,.5);border:2px solid #fff}
-.range::-moz-range-thumb{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid #fff;background:linear-gradient(135deg,var(--accent-2),var(--accent))}
-.card-back-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:4px 16px 16px}
-.cb{aspect-ratio:.72;border-radius:9px;cursor:pointer;border:2px solid transparent;transition:all .22s;position:relative;overflow:hidden}
-.cb::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.14) 0 4px,transparent 4px 8px);opacity:.7}
-.cb.active{border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(0,224,255,.28),0 0 22px rgba(0,224,255,.65);transform:scale(1.05)}
-.cb[data-back="space"]{background:linear-gradient(135deg,#3a1e7a,#0f2a6b)}
-.cb[data-back="neon"]{background:linear-gradient(135deg,#00e0ff,#ff4ecd)}
-.cb[data-back="gold"]{background:linear-gradient(135deg,#7a5b12,#ffcf5c)}
-.cb[data-back="crimson"]{background:linear-gradient(135deg,#7a0f24,#ff5b6e)}
-.code-box{position:relative;padding:20px 18px;border-radius:var(--radius);text-align:center;background:linear-gradient(135deg,rgba(124,92,255,.2),rgba(0,224,255,.1));border:1px solid var(--stroke-2);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);overflow:hidden}
-.code-box::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(0,224,255,.25),transparent 70%);pointer-events:none}
-.code-lbl{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);font-weight:800;position:relative}
-.code-val{margin-top:9px;font-size:34px;font-weight:900;letter-spacing:.2em;text-indent:.2em;background:linear-gradient(115deg,var(--accent-2),#fff,var(--accent-3));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 3.2s linear infinite;position:relative;font-family:'SF Mono',Menlo,Consolas,monospace}
-.code-hint{font-size:11px;color:var(--muted);margin-top:6px;position:relative;font-weight:600}
-.players-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:11px;margin-top:10px}
-.player{position:relative;padding:13px 7px;border-radius:16px;text-align:center;background:var(--panel);border:1px solid var(--stroke);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);animation:playerIn .4s cubic-bezier(.34,1.56,.64,1) backwards;transition:border-color .25s,transform .25s}
-.player.offline{opacity:.55}
-@keyframes playerIn{from{opacity:0;transform:scale(.72)}to{opacity:1;transform:scale(1)}}
-.player.is-host{border-color:rgba(255,207,92,.55);box-shadow:0 0 22px -8px rgba(255,207,92,.8)}
-.player.is-me{border-color:var(--accent-2);box-shadow:0 0 22px -8px rgba(0,224,255,.9)}
-.player img,.player .pf{width:44px;height:44px;border-radius:50%;object-fit:cover;margin:0 auto 8px;display:block}
-.player .pf{display:grid;place-items:center;font-size:17px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-3))}
-.player-name{font-size:10.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.player-badge{position:absolute;top:-6px;right:-4px;padding:3px 7px;border-radius:99px;font-size:8.5px;font-weight:900;letter-spacing:.07em;text-transform:uppercase}
-.badge-host{background:linear-gradient(115deg,#ffcf5c,#ff9d3c);color:#2a1a00}
-.badge-ready{background:linear-gradient(115deg,var(--ok),#12b57a);color:#032a1c}
-.player-slot{padding:13px 7px;border-radius:16px;text-align:center;border:1.5px dashed rgba(255,255,255,.14);background:rgba(255,255,255,.02)}
-.player-slot .ps-icon{font-size:22px;opacity:.28;margin-bottom:7px}
-.player-slot .ps-text{font-size:9.5px;color:var(--muted);letter-spacing:.1em;font-weight:700}
-#toast-wrap{position:fixed;left:0;right:0;top:calc(var(--safe-top) + 14px);z-index:999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 16px}
-.toast{max-width:100%;padding:13px 20px;border-radius:15px;font-size:13px;font-weight:700;background:rgba(14,16,34,.94);border:1px solid var(--stroke-2);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 18px 44px -14px rgba(0,0,0,1);animation:toastIn .34s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;gap:9px}
-.toast.out{animation:toastOut .28s ease forwards}
-@keyframes toastIn{from{opacity:0;transform:translateY(-24px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes toastOut{to{opacity:0;transform:translateY(-18px) scale(.94)}}
-.toast.ok{border-color:rgba(55,230,160,.5)}
-.toast.err{border-color:rgba(255,91,110,.5)}
-.toast.info{border-color:rgba(0,224,255,.5)}
-#modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:26px;background:rgba(3,4,14,.82);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}
-#modal.show{display:flex;animation:fadeIn .22s ease}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal-box{width:100%;max-width:340px;padding:26px 22px;border-radius:26px;text-align:center;background:linear-gradient(160deg,rgba(30,24,68,.97),rgba(10,12,30,.98));border:1px solid var(--stroke-2);box-shadow:0 34px 80px -26px rgba(0,0,0,1);animation:modalIn .34s cubic-bezier(.34,1.56,.64,1)}
-@keyframes modalIn{from{opacity:0;transform:scale(.85) translateY(24px)}to{opacity:1;transform:scale(1) translateY(0)}}
-.modal-icon{font-size:46px;margin-bottom:13px}
-.modal-title{font-size:18px;font-weight:900;margin-bottom:9px}
-.modal-text{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:21px}
-.modal-actions{display:flex;flex-direction:column;gap:9px}
-.spacer{flex:1;min-height:12px}
-.hidden{display:none !important}
-.center-text{text-align:center}
-body.no-anim *{animation-duration:.001s !important;animation-iteration-count:1 !important}
+.set-ic{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.08);display:grid;place-items:center;font-size:16px}
+.set-info{flex:1}
+.set-name{font-size:13px;font-weight:700}
+.set-desc{font-size:10px;color:var(--muted);margin-top:2px}
+.switch{width:46px;height:26px;position:relative;flex-shrink:0}
+.switch input{opacity:0;position:absolute;inset:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2}
+.switch .track{position:absolute;inset:0;border-radius:99px;background:rgba(255,255,255,.15);transition:.25s}
+.switch .track::before{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.25s}
+.switch input:checked+.track{background:linear-gradient(135deg,#ffcf5c,#ffb43a)}
+.switch input:checked+.track::before{transform:translateX(20px)}
 
-/* ===== GAME SCREEN ===== */
-#screen-game{padding-left:12px;padding-right:12px}
-.game-info-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;flex-shrink:0}
-.gi-item{padding:8px 6px;border-radius:12px;background:var(--panel);border:1px solid var(--stroke);text-align:center}
-.gi-lbl{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:800;margin-bottom:3px}
-.gi-val{font-size:15px;font-weight:900;color:var(--accent-2)}
-.gi-trump{display:flex;justify-content:center;align-items:center;height:34px}
+/* ========== ROOM ========== */
+#room{background:radial-gradient(circle at 50% 30%,#2a5a9a,#0f2547)}
+.room-code-big{text-align:center;margin:16px}
+.room-code-big .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.25em;font-weight:800}
+.room-code-big .val{font-size:42px;font-weight:900;letter-spacing:.2em;text-indent:.2em;margin-top:8px;color:#ffcf5c;font-family:'SF Mono',Menlo,monospace;text-shadow:0 0 30px rgba(255,207,92,.5);cursor:pointer}
+.room-code-big .hint{font-size:11px;color:var(--muted);margin-top:6px}
+.room-players{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;padding:0 20px;margin-bottom:20px}
+.rp{position:relative;padding:12px 6px;border-radius:14px;background:var(--panel);border:1px solid var(--stroke);text-align:center}
+.rp.host{border-color:rgba(255,207,92,.6);box-shadow:0 0 20px -8px #ffcf5c}
+.rp.ready{border-color:rgba(74,222,128,.6)}
+.rp.me{border-color:#7c5cff}
+.rp img,.rp .fb{width:42px;height:42px;border-radius:50%;object-fit:cover;margin:0 auto 6px;display:block}
+.rp .fb{display:grid;place-items:center;font-size:16px;font-weight:900;background:linear-gradient(135deg,#3a6bbf,#2a4a8a)}
+.rp .nm{font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp .b{position:absolute;top:-5px;right:-3px;padding:2px 6px;border-radius:10px;font-size:8px;font-weight:900;text-transform:uppercase}
+.b-host{background:linear-gradient(135deg,#ffcf5c,#ffb43a);color:#1a3a6b}
+.b-ready{background:linear-gradient(135deg,#4ade80,#22c55e);color:#052e16}
+.rp-slot{padding:12px 6px;border-radius:14px;border:1.5px dashed rgba(255,255,255,.15);display:grid;place-items:center;color:rgba(255,255,255,.3);font-size:22px}
+.room-params{margin:0 20px 20px;background:var(--panel);border:1px solid var(--stroke);border-radius:14px;overflow:hidden}
 
-.card{width:52px;height:76px;border-radius:8px;background:linear-gradient(160deg,#fefefe,#e2e2ec);color:#1a1a2e;display:flex;flex-direction:column;justify-content:space-between;padding:4px 3px;font-weight:900;position:relative;box-shadow:0 4px 10px rgba(0,0,0,.35);transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .18s;user-select:none;flex-shrink:0;font-family:Georgia,serif}
-.card.red{color:#d52b4a}
-.card .c-corner{display:flex;flex-direction:column;align-items:center;line-height:1}
-.card .c-corner.bottom{align-self:flex-end;transform:rotate(180deg)}
-.card .c-corner .c-rank{font-size:13px;line-height:1}
-.card .c-corner .c-suit{font-size:11px;line-height:1}
-.card .c-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:26px;opacity:.85}
-.card.trump::before{content:"★";position:absolute;top:2px;right:3px;font-size:9px;color:#ffb43a;filter:drop-shadow(0 0 3px #ffb43a)}
-.card-mini{width:34px;height:50px;border-radius:6px;padding:2px;font-size:9px}
-.card-mini .c-corner .c-rank{font-size:9px}
-.card-mini .c-corner .c-suit{font-size:7px}
-.card-mini .c-center{font-size:16px}
-.card-mini.trump::before{font-size:7px;top:1px;right:1px}
-.card-back{background:repeating-linear-gradient(45deg,rgba(255,255,255,.13) 0 4px,transparent 4px 8px),linear-gradient(135deg,var(--card-back-1),var(--card-back-2));color:transparent}
-.card-back .c-corner{visibility:hidden}
-.card-back::after{content:"★";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,.55);font-size:18px;filter:drop-shadow(0 0 8px rgba(255,255,255,.5))}
-.card-back .c-center{display:none}
-.card.playable{cursor:pointer}
-.card.playable:active{transform:translateY(-10px) scale(1.05)}
-.card.selected{transform:translateY(-18px);box-shadow:0 8px 20px rgba(124,92,255,.9),0 0 0 2px var(--accent-2)}
-.card.disabled{opacity:.4}
-.card.hint-ok{box-shadow:0 0 0 2px var(--ok),0 4px 12px rgba(55,230,160,.5)}
+/* ========== GAME SCREEN (DURAK ONLINE STYLE) ========== */
+#game{
+  background:
+    repeating-linear-gradient(135deg, rgba(0,0,0,.04) 0 2px, transparent 2px 4px),
+    radial-gradient(ellipse at 50% 40%, #3a6bbf 0%, #2a5a9a 40%, #1a3a6b 100%);
+  padding:0;
+  overflow:hidden;
+}
+.game-topbar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:calc(var(--safe-top) + 8px) 12px 8px;flex-shrink:0;
+  gap:6px;
+}
+.gt-left,.gt-right{display:flex;gap:6px;align-items:center}
+.gt-btn{
+  width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;
+  font-size:16px;color:#fff;backdrop-filter:blur(6px);
+}
+.gt-btn:active{background:rgba(255,255,255,.25)}
+.gt-coins{
+  background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);
+  border-radius:20px;padding:5px 11px;font-size:12px;font-weight:800;
+  color:#fff;display:flex;gap:5px;align-items:center;
+}
+.gt-coins .c{color:#4ade80;font-size:11px}
 
-.opponents-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;flex-shrink:0;min-height:72px}
-.opponents-row::-webkit-scrollbar{display:none}
-.opponent{flex-shrink:0;padding:8px 10px;border-radius:12px;background:var(--panel);border:1px solid var(--stroke);text-align:center;min-width:78px;position:relative;transition:border-color .3s,box-shadow .3s}
-.opponent.is-attacker{border-color:#ff5b6e;box-shadow:0 0 14px -4px #ff5b6e}
-.opponent.is-defender{border-color:var(--accent-2);box-shadow:0 0 14px -4px var(--accent-2)}
-.opponent.offline{opacity:.5}
-.opponent img,.opponent .op-av{width:32px;height:32px;border-radius:50%;object-fit:cover;margin:0 auto 4px;display:block}
-.opponent .op-av{display:grid;place-items:center;font-size:13px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-3))}
-.opponent .op-name{font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78px}
-.opponent .op-cards{font-size:10px;color:var(--accent-2);font-weight:800;margin-top:3px}
-.opponent .op-role{position:absolute;top:-6px;right:-4px;padding:2px 5px;border-radius:99px;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
-.op-role.attacker{background:linear-gradient(115deg,#ff4b62,#c81e4f);color:#fff}
-.op-role.defender{background:linear-gradient(115deg,var(--accent-2),var(--accent));color:#fff}
-.opponent .op-offline{position:absolute;top:4px;left:4px;width:7px;height:7px;border-radius:50%;background:#555}
+/* Opponents row */
+.opps{
+  display:flex;gap:8px;padding:6px 12px;overflow-x:auto;flex-shrink:0;
+  justify-content:center;min-height:88px;
+}
+.opps::-webkit-scrollbar{display:none}
+.opp{
+  flex-shrink:0;position:relative;text-align:center;width:72px;
+  transition:transform .3s;
+}
+.opp-av-wrap{position:relative;width:56px;height:56px;margin:0 auto}
+.opp-av{
+  width:56px;height:56px;border-radius:8px;object-fit:cover;
+  border:2px solid rgba(255,255,255,.2);display:block;
+}
+.opp-av-fb{
+  width:56px;height:56px;border-radius:8px;display:grid;place-items:center;
+  font-size:22px;font-weight:900;color:#fff;
+  background:linear-gradient(135deg,#3a6bbf,#2a4a8a);
+  border:2px solid rgba(255,255,255,.2);
+}
+.opp.active .opp-av,.opp.active .opp-av-fb{
+  border-color:#4ade80;box-shadow:0 0 16px #4ade80,0 0 0 2px #4ade80;
+  animation:pulseActive 1.5s ease-in-out infinite;
+}
+.opp.attacker .opp-av,.opp.attacker .opp-av-fb{border-color:#ff5b6e;box-shadow:0 0 16px #ff5b6e}
+.opp.defender .opp-av,.opp.defender .opp-av-fb{border-color:#ffcf5c;box-shadow:0 0 16px #ffcf5c}
+.opp.offline{opacity:.5}
+.opp-cnt{
+  position:absolute;top:-4px;right:-4px;background:#0f2547;border:2px solid #fff;
+  border-radius:10px;padding:1px 6px;font-size:11px;font-weight:900;color:#fff;
+  min-width:22px;text-align:center;line-height:1.3;
+}
+.opp-name{
+  font-size:11px;font-weight:700;margin-top:4px;color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  text-shadow:0 1px 3px rgba(0,0,0,.7);
+}
+.opp-badge{
+  position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);
+  font-size:8px;font-weight:900;text-transform:uppercase;padding:2px 6px;
+  border-radius:8px;letter-spacing:.05em;
+}
+.opp-badge.attacker{background:#ff4d5e;color:#fff}
+.opp-badge.defender{background:#ffcf5c;color:#1a3a6b}
 
-.table-center{flex:1;min-height:110px;display:flex;flex-wrap:wrap;gap:10px;align-content:center;justify-content:center;padding:14px 8px;margin:6px 0;border-radius:16px;background:rgba(0,0,0,.25);border:1px dashed rgba(255,255,255,.1);position:relative}
-.table-center.empty::after{content:"Стол пуст";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.1em}
-.table-pair{position:relative;width:52px;height:76px}
-.table-pair .card{position:absolute}
-.table-pair .card.attack{top:0;left:0}
-.table-pair .card.defend{top:5px;left:5px;z-index:2;transform:rotate(6deg)}
+/* Table area */
+.table-area{
+  flex:1;position:relative;display:flex;padding:4px 12px;
+  min-height:0;
+}
+.deck-area{
+  position:absolute;top:8px;left:12px;display:flex;align-items:flex-start;gap:6px;
+}
+.deck-stack{
+  position:relative;width:44px;height:64px;
+}
+.deck-stack .card-back{position:absolute;top:0;left:0}
+.deck-cnt{
+  position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
+  background:#0f2547;border:1.5px solid #fff;border-radius:10px;
+  padding:1px 7px;font-size:11px;font-weight:900;color:#fff;min-width:26px;text-align:center;
+  z-index:10;
+}
+.trump-slot{
+  position:relative;width:44px;height:64px;
+}
+.trump-slot .card{transform:rotate(90deg);transform-origin:center}
+.trump-slot .trump-suit-badge{
+  position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
+  background:#0f2547;border:1.5px solid #ffcf5c;border-radius:10px;
+  padding:1px 7px;font-size:14px;font-weight:900;color:#ffcf5c;
+  min-width:26px;text-align:center;z-index:10;
+}
 
-.my-hand-label{display:flex;justify-content:space-between;align-items:center;padding:0 4px;margin-bottom:4px;flex-shrink:0;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--muted)}
-.my-hand-label span:last-child{color:var(--accent-2);font-size:14px}
-.my-hand{display:flex;gap:6px;overflow-x:auto;padding:22px 4px 10px;flex-shrink:0;scrollbar-width:none;min-height:110px}
-.my-hand::-webkit-scrollbar{display:none}
-.game-actions{display:flex;gap:8px;margin-top:6px;flex-shrink:0}
-.game-actions .btn{flex:1;padding:14px 10px;font-size:12px}
-.game-status{padding:10px 14px;border-radius:14px;text-align:center;font-size:12px;font-weight:700;letter-spacing:.08em;background:var(--panel);border:1px solid var(--stroke);color:var(--muted);margin-top:6px}
-.game-status.hot{background:linear-gradient(115deg,rgba(124,92,255,.3),rgba(0,224,255,.2));color:#fff;border-color:rgba(124,92,255,.5);animation:pulseGlow 2s ease-in-out infinite}
-@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(124,92,255,.4)}50%{box-shadow:0 0 20px 4px rgba(124,92,255,.3)}}
+/* Table center */
+.table-center{
+  flex:1;display:flex;flex-wrap:wrap;gap:4px;
+  align-content:center;justify-content:center;
+  padding:70px 8px 8px;position:relative;
+  pointer-events:none;
+}
+.table-center .pair{
+  position:relative;width:44px;height:64px;
+  animation:dropIn .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes dropIn{from{opacity:0;transform:translateY(-20px) scale(.8)}to{opacity:1;transform:translateY(0) scale(1)}}
+.table-center .pair .card{position:absolute}
+.table-center .pair .card.atk{top:0;left:0;z-index:1}
+.table-center .pair .card.def{top:6px;left:6px;z-index:2;transform:rotate(8deg)}
+.table-center.empty::after{
+  content:"";position:absolute;inset:20% 20%;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.08),transparent 70%);
+}
+
+/* Cards */
+.card{
+  width:44px;height:64px;border-radius:5px;background:#fff;
+  color:#1a1a1a;position:relative;flex-shrink:0;
+  box-shadow:1px 2px 5px rgba(0,0,0,.4);
+  font-family:'Times New Roman',Georgia,serif;
+  transition:transform .15s,box-shadow .15s;
+  border:1px solid rgba(0,0,0,.15);
+}
+.card.red{color:#c8000e}
+.card .cn{position:absolute;top:2px;left:3px;font-size:13px;font-weight:900;line-height:1;letter-spacing:-.5px}
+.card .cs{position:absolute;top:15px;left:3px;font-size:11px;line-height:1}
+.card .cn-b{position:absolute;bottom:2px;right:3px;font-size:13px;font-weight:900;line-height:1;transform:rotate(180deg);letter-spacing:-.5px}
+.card .cs-b{position:absolute;bottom:15px;right:3px;font-size:11px;line-height:1;transform:rotate(180deg)}
+.card .mid{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:22px;line-height:1;opacity:.9;
+}
+.card.back{
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.15) 0 3px, transparent 3px 6px),
+    linear-gradient(135deg,#2a4a8a,#1a2a5a);
+  color:transparent;
+  border:1px solid rgba(255,255,255,.25);
+}
+.card.back::after{
+  content:"★";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  color:rgba(255,255,255,.4);font-size:16px;text-shadow:0 0 6px rgba(255,255,255,.4);
+}
+.card.back .cn,.card.back .cs,.card.back .cn-b,.card.back .cs-b,.card.back .mid{display:none}
+.card.trump::before{
+  content:"★";position:absolute;top:1px;right:2px;font-size:8px;
+  color:#ffb43a;text-shadow:0 0 3px #ffb43a;
+}
+.card.mini{width:30px;height:44px}
+.card.mini .cn,.card.mini .cn-b{font-size:9px;top:1px;left:2px}
+.card.mini .cs,.card.mini .cs-b{font-size:7px;top:10px;left:2px}
+.card.mini .mid{font-size:15px}
+.card.mini.trump::before{font-size:6px;top:0;right:1px}
+
+/* Hand */
+.hand-area{
+  flex-shrink:0;padding:0 8px 8px;position:relative;
+  background:linear-gradient(to top,rgba(0,0,0,.35),transparent);
+}
+.hand-outer{
+  display:flex;justify-content:center;align-items:flex-end;
+  min-height:96px;padding:14px 8px 8px;gap:0;
+  overflow-x:auto;
+}
+.hand-outer::-webkit-scrollbar{display:none}
+.hand-outer .card{
+  margin-left:-14px;cursor:pointer;transform-origin:bottom center;
+}
+.hand-outer .card:first-child{margin-left:0}
+.hand-outer .card.playable:active{transform:translateY(-16px) scale(1.04);z-index:100}
+.hand-outer .card.selected{transform:translateY(-20px);box-shadow:0 8px 20px rgba(255,207,92,.9),0 0 0 2px #ffcf5c;z-index:99}
+.hand-outer .card.disabled{opacity:.5;filter:grayscale(.4)}
+.hand-outer .card.hint{box-shadow:0 0 0 2px #4ade80,0 4px 12px rgba(74,222,128,.6)}
+
+/* Bottom action bar */
+.action-bar{
+  flex-shrink:0;padding:8px 12px calc(var(--safe-bottom) + 8px);
+  background:linear-gradient(to top,rgba(0,0,0,.5),transparent);
+  display:flex;align-items:center;gap:10px;
+}
+.ab-me{
+  width:52px;height:52px;border-radius:12px;position:relative;flex-shrink:0;
+}
+.ab-me .opp-av,.ab-me .opp-av-fb{width:52px;height:52px;border-radius:12px}
+.ab-me.active .opp-av,.ab-me.active .opp-av-fb{
+  border-color:#4ade80;box-shadow:0 0 14px #4ade80;
+}
+.ab-me.attacker .opp-av,.ab-me.attacker .opp-av-fb{border-color:#ff5b6e;box-shadow:0 0 14px #ff5b6e}
+.ab-me.defender .opp-av,.ab-me.defender .opp-av-fb{border-color:#ffcf5c;box-shadow:0 0 14px #ffcf5c}
+.ab-me .opp-cnt{position:absolute;top:-5px;right:-5px}
+.ab-actions{
+  flex:1;display:flex;gap:8px;align-items:center;justify-content:center;
+  min-height:52px;
+}
+.act-btn{
+  padding:14px 18px;border-radius:12px;font-size:13px;font-weight:900;
+  letter-spacing:.08em;text-transform:uppercase;flex:1;max-width:130px;
+  transition:transform .12s;
+}
+.act-btn:active{transform:scale(.94)}
+.act-btn.gold{background:linear-gradient(135deg,#ffcf5c,#ffb43a);color:#1a3a6b;box-shadow:0 5px 16px -4px #ffcf5c}
+.act-btn.red{background:linear-gradient(135deg,#ff4d5e,#c41e3a);color:#fff;box-shadow:0 5px 16px -4px #ff4d5e}
+.act-btn.blue{background:linear-gradient(135deg,#3a6bbf,#2a4a8a);color:#fff}
+.act-btn.green{background:linear-gradient(135deg,#4ade80,#22c55e);color:#052e16}
+.ab-status{
+  flex:1;text-align:center;font-size:12px;font-weight:700;color:#fff;
+  padding:8px 12px;background:rgba(0,0,0,.35);border-radius:12px;
+  letter-spacing:.05em;
+}
+.ab-status.hot{background:linear-gradient(135deg,rgba(255,207,92,.4),rgba(255,180,58,.3));color:#fff;border:1px solid rgba(255,207,92,.5)}
+
+/* Timer bar */
+.timer-bar{
+  position:absolute;top:0;left:0;right:0;height:3px;background:rgba(0,0,0,.3);
+  z-index:100;overflow:hidden;
+}
+.timer-fill{
+  height:100%;background:linear-gradient(90deg,#4ade80,#ffcf5c,#ff4d5e);
+  transition:width 1s linear;width:100%;
+}
+
+/* Emote bar */
+.emotes{display:flex;gap:4px;justify-content:center;padding:4px 0;flex-shrink:0}
+.emote-btn{
+  width:38px;height:38px;border-radius:10px;background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;
+  font-size:19px;transition:transform .12s;
+}
+.emote-btn:active{transform:scale(.88)}
+
+/* Floating emote */
+.float-emote{
+  position:fixed;font-size:52px;pointer-events:none;z-index:999;
+  animation:floatUp 2.5s ease-out forwards;
+}
+@keyframes floatUp{
+  0%{opacity:0;transform:translateY(0) scale(.5)}
+  15%{opacity:1;transform:translateY(-20px) scale(1.2)}
+  100%{opacity:0;transform:translateY(-180px) scale(1)}
+}
+
+/* Toast */
+#toast-wrap{position:fixed;top:calc(var(--safe-top) + 60px);left:0;right:0;z-index:999;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;padding:0 16px}
+.toast{padding:11px 18px;border-radius:12px;font-size:13px;font-weight:700;background:rgba(15,37,71,.95);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(10px);animation:toastIn .3s;max-width:100%}
+@keyframes toastIn{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
+.toast.ok{border-color:#4ade80}.toast.err{border-color:#ff4d5e}
+
+/* Modal */
+#modal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
+#modal.show{display:flex}
+.modal-box{width:100%;max-width:320px;background:linear-gradient(160deg,#2a4a8a,#0f2547);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:24px;text-align:center;animation:modalIn .3s}
+@keyframes modalIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+.modal-icon{font-size:44px;margin-bottom:12px}
+.modal-title{font-size:17px;font-weight:900;margin-bottom:8px}
+.modal-text{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:20px;white-space:pre-line}
+.modal-actions{display:flex;flex-direction:column;gap:8px}
+.hidden{display:none!important}
 </style>
 </head>
-<body data-table="cosmos">
-<canvas id="stars"></canvas>
-<div id="nebula"></div>
-<div id="toast-wrap"></div>
-<div id="app">
+<body>
 
-  <section class="screen active" id="screen-loading">
-    <div class="loader-logo">★</div>
-    <div class="loader-text">Дурак на Звёзды</div>
-    <div class="loader-bar"><i></i></div>
-  </section>
+<!-- LOADING -->
+<div class="screen active" id="loading">
+  <div class="loader-star">★</div>
+  <div class="loader-title">Дурак на Звёзды</div>
+</div>
 
-  <section class="screen" id="screen-menu">
-    <div class="topbar">
-      <div class="brand"><span class="star">★</span> Дурак на Звёзды</div>
-      <button class="icon-btn" id="btnSettingsTop">⚙</button>
+<!-- MENU -->
+<div class="screen" id="menu">
+  <div class="menu-top">
+    <div class="menu-brand"><span class="st">★</span> Дурак</div>
+    <div class="coin-badge"><span class="coin">◉</span> <span id="menuCoins">100</span></div>
+  </div>
+  <div class="profile-box">
+    <div id="menuAvatar"></div>
+    <div style="flex:1;min-width:0">
+      <div class="profile-name" id="menuName">—</div>
+      <div class="profile-un" id="menuUsername">@—</div>
+      <div class="profile-id" id="menuId">ID: —</div>
     </div>
-    <div class="profile-card">
-      <div class="avatar-wrap"><div id="avatarHost"></div><div class="avatar-status"></div></div>
-      <div class="profile-info">
-        <div class="profile-name" id="uiName">—</div>
-        <div class="profile-username" id="uiUsername">@—</div>
-        <div class="profile-id">ID <b id="uiId">—</b></div>
-      </div>
-    </div>
-    <div class="stats-row">
-      <div class="stat"><div class="stat-val" id="statGames">0</div><div class="stat-lbl">Игр</div></div>
-      <div class="stat"><div class="stat-val" id="statWins">0</div><div class="stat-lbl">Побед</div></div>
-      <div class="stat"><div class="stat-val" id="statStars">0</div><div class="stat-lbl">Звёзд</div></div>
-    </div>
-    <div class="spacer"></div>
-    <div class="menu-actions">
-      <button class="btn btn-primary" id="btnPlay">▶ Играть</button>
-      <button class="btn btn-ghost" id="btnSettings">⚙ Настройки</button>
-    </div>
-  </section>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="sGames">0</div><div class="stat-lbl">Игр</div></div>
+    <div class="stat-card"><div class="stat-num" id="sWins">0</div><div class="stat-lbl">Побед</div></div>
+    <div class="stat-card"><div class="stat-num" id="sStars">0</div><div class="stat-lbl">Звёзд</div></div>
+  </div>
+  <div class="menu-btns">
+    <button class="btn btn-gold" id="toPlay">▶ Играть</button>
+    <button class="btn btn-outline" id="toSettings">⚙ Настройки</button>
+  </div>
+</div>
 
-  <section class="screen" id="screen-settings">
-    <div class="topbar">
-      <button class="icon-btn" data-back="screen-menu">‹</button>
-      <div class="title-center">Настройки</div>
-      <div style="width:44px"></div>
-    </div>
-    <div class="section-title">Звук и вибрация</div>
-    <div class="settings-group">
-      <div class="set-row"><div class="set-icon">🔊</div><div class="set-body"><div class="set-name">Звуковые эффекты</div><div class="set-desc">Ходы, взятки, победы</div></div><label class="switch"><input type="checkbox" id="setSfx" checked><span class="track"></span></label></div>
-      <div class="set-row" style="flex-direction:column;align-items:stretch"><div style="display:flex;align-items:center;gap:13px"><div class="set-icon">🎚</div><div class="set-body"><div class="set-name">Громкость эффектов</div><div class="set-desc"><span id="lblSfxVol">70</span>%</div></div></div><input type="range" class="range" id="setSfxVol" min="0" max="100" value="70"></div>
-      <div class="set-row"><div class="set-icon">📳</div><div class="set-body"><div class="set-name">Вибрация</div><div class="set-desc">Тактильный отклик</div></div><label class="switch"><input type="checkbox" id="setVibe" checked><span class="track"></span></label></div>
-    </div>
-    <div class="section-title">Внешний вид</div>
-    <div class="settings-group">
-      <div class="set-row" style="flex-direction:column;align-items:stretch"><div style="display:flex;align-items:center;gap:13px"><div class="set-icon">🚀</div><div class="set-body"><div class="set-name">Уровень анимаций</div><div class="set-desc">Влияет на плавность</div></div></div><div class="seg" style="margin-top:12px" data-seg="anim"><button data-val="low">Низкий</button><button data-val="mid" class="active">Средний</button><button data-val="high">Высокий</button></div></div>
-      <div class="set-row" style="flex-direction:column;align-items:stretch"><div style="display:flex;align-items:center;gap:13px"><div class="set-icon">🎴</div><div class="set-body"><div class="set-name">Рубашка карт</div><div class="set-desc">Дизайн обратной стороны</div></div></div><div class="card-back-picker" style="padding:14px 0 0"><div class="cb active" data-back="space"></div><div class="cb" data-back="neon"></div><div class="cb" data-back="gold"></div><div class="cb" data-back="crimson"></div></div></div>
-      <div class="set-row" style="flex-direction:column;align-items:stretch"><div style="display:flex;align-items:center;gap:13px"><div class="set-icon">🪐</div><div class="set-body"><div class="set-name">Тема стола</div><div class="set-desc">Оформление поля</div></div></div><div class="seg" style="margin-top:12px" data-seg="table"><button data-val="cosmos" class="active">Космос</button><button data-val="neon">Неон</button><button data-val="royal">Пурпур</button></div></div>
-    </div>
-    <div class="section-title">Игровой процесс</div>
-    <div class="settings-group">
-      <div class="set-row"><div class="set-icon">🃏</div><div class="set-body"><div class="set-name">Автосортировка карт</div><div class="set-desc">По мастям и рангу</div></div><label class="switch"><input type="checkbox" id="setSort" checked><span class="track"></span></label></div>
-      <div class="set-row"><div class="set-icon">✅</div><div class="set-body"><div class="set-name">Подтверждать ход</div><div class="set-desc">Спрашивать перед сбросом</div></div><label class="switch"><input type="checkbox" id="setConfirm"><span class="track"></span></label></div>
-      <div class="set-row"><div class="set-icon">👁</div><div class="set-body"><div class="set-name">Показывать ID</div><div class="set-desc">Telegram ID в меню</div></div><label class="switch"><input type="checkbox" id="setShowId" checked><span class="track"></span></label></div>
-    </div>
-    <div class="spacer"></div>
-    <button class="btn btn-ghost btn-sm" id="btnResetSettings" style="margin-top:14px">↺ Сбросить настройки</button>
-  </section>
-
-  <section class="screen" id="screen-lobby">
-    <div class="topbar">
-      <button class="icon-btn" data-back="screen-menu">‹</button>
-      <div class="title-center">Лобби</div>
-      <div style="width:44px"></div>
-    </div>
+<!-- LOBBY -->
+<div class="screen form-screen" id="lobby">
+  <div class="topbar">
+    <button class="tb-btn" data-back>‹</button>
+    <div class="tb-title">Лобби</div>
+    <div style="width:40px"></div>
+  </div>
+  <div class="form-body">
     <div class="tabs">
       <button class="tab active" data-tab="create">Создать</button>
       <button class="tab" data-tab="join">Войти</button>
     </div>
-    <div class="tab-panel active" id="panel-create">
-      <div class="field"><label class="field-label">Название лобби</label><input class="input" id="lobbyName" maxlength="24" placeholder="Космический дурак"></div>
-      <div class="field"><label class="field-label">Максимум игроков</label><div class="seg" data-seg="maxp"><button data-val="2">2</button><button data-val="3" class="active">3</button><button data-val="4">4</button><button data-val="6">6</button></div></div>
-      <div class="field"><label class="field-label">Колода</label><div class="seg" data-seg="deck"><button data-val="36" class="active">36 карт</button><button data-val="52">52 карты</button></div></div>
-      <div class="field"><label class="field-label">Режим</label><div class="seg" data-seg="mode"><button data-val="classic" class="active">Классика</button><button data-val="podkidnoy">Подкидной</button><button data-val="perevod">Переводной</button></div></div>
-      <div class="field"><label class="field-label">Приватность</label><div class="seg" data-seg="privacy"><button data-val="private" class="active">По коду</button><button data-val="public">Публичное</button></div></div>
-      <div class="spacer"></div>
-      <button class="btn btn-primary" id="btnCreateLobby" style="margin-top:12px">★ Создать лобби</button>
+    <div class="tab-panel active" id="tabCreate">
+      <div class="field"><label class="field-lbl">Название</label><input class="input" id="lobbyName" maxlength="24" placeholder="Космический дурак"></div>
+      <div class="field"><label class="field-lbl">Игроков</label><div class="seg" data-seg="maxp"><button data-val="2">2</button><button data-val="3" class="active">3</button><button data-val="4">4</button></div></div>
+      <div class="field"><label class="field-lbl">Колода</label><div class="seg" data-seg="deck"><button data-val="36" class="active">36</button><button data-val="52">52</button></div></div>
+      <div class="field"><label class="field-lbl">Режим</label><div class="seg" data-seg="mode"><button data-val="classic" class="active">Классика</button><button data-val="podkidnoy">Подкидной</button></div></div>
+      <div class="field"><label class="field-lbl">Приватность</label><div class="seg" data-seg="privacy"><button data-val="private" class="active">По коду</button><button data-val="public">Публичное</button></div></div>
+      <button class="btn btn-gold" id="btnCreate" style="margin-top:20px">★ Создать лобби</button>
     </div>
-    <div class="tab-panel" id="panel-join">
-      <div class="field"><label class="field-label">Код лобби</label><input class="input input-code" id="joinCode" maxlength="6" placeholder="A1B2D3" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text"></div>
-      <p class="set-desc center-text" style="margin:4px 0 20px">Введите 6-символьный код, например <b style="color:var(--accent-2)">A1B2D3</b></p>
-      <button class="btn btn-primary" id="btnJoinLobby">→ Войти в лобби</button>
-      <button class="btn btn-ghost" id="btnQuickMatch" style="margin-top:10px">⚡ Быстрый поиск</button>
+    <div class="tab-panel" id="tabJoin">
+      <div class="field">
+        <label class="field-lbl">Код</label>
+        <input class="input input-code" id="joinCode" maxlength="6" placeholder="A1B2D3" inputmode="text" autocapitalize="characters" autocomplete="off" spellcheck="false">
+      </div>
+      <p style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:20px">Например: <b style="color:#ffcf5c">A1B2D3</b></p>
+      <button class="btn btn-gold" id="btnJoin">→ Войти</button>
+      <button class="btn btn-outline" id="btnQuick" style="margin-top:10px">⚡ Быстрый поиск</button>
     </div>
-  </section>
-
-  <section class="screen" id="screen-room">
-    <div class="topbar">
-      <button class="icon-btn" id="btnLeaveRoom">‹</button>
-      <div class="title-center">Комната</div>
-      <button class="icon-btn" id="btnCopyCode">⧉</button>
-    </div>
-    <div class="code-box">
-      <div class="code-lbl">Код лобби</div>
-      <div class="code-val" id="roomCode">——————</div>
-      <div class="code-hint">Нажмите ⧉ чтобы скопировать</div>
-    </div>
-    <div class="section-title" style="display:flex;justify-content:space-between;align-items:center"><span>Игроки</span><span style="color:var(--accent-2)" id="roomCount">0/4</span></div>
-    <div class="players-grid" id="playersGrid"></div>
-    <div class="section-title">Параметры</div>
-    <div class="settings-group" id="roomParams"></div>
-    <div class="spacer"></div>
-    <div id="hostControls" class="hidden">
-      <button class="btn btn-primary" id="btnStartGame">🚀 Начать игру</button>
-      <p class="set-desc center-text" style="margin-top:9px" id="hostHint">Все игроки должны быть готовы</p>
-    </div>
-    <div id="guestControls" class="hidden">
-      <button class="btn btn-ghost" id="btnReady">⏳ Я готов</button>
-      <p class="set-desc center-text" style="margin-top:9px">Ожидайте запуска от хоста</p>
-    </div>
-    <button class="btn btn-danger btn-sm" id="btnLeaveRoom2" style="margin-top:10px">Покинуть лобби</button>
-  </section>
-
-  <section class="screen" id="screen-game">
-    <div class="topbar">
-      <button class="icon-btn" id="btnLeaveGame">‹</button>
-      <div class="title-center" id="gameRoundLabel">Раунд 1</div>
-      <button class="icon-btn" id="btnGameRules">ℹ</button>
-    </div>
-    <div class="game-info-bar">
-      <div class="gi-item"><span class="gi-lbl">Козырь</span><div class="gi-trump" id="uiTrump"></div></div>
-      <div class="gi-item"><span class="gi-lbl">Колода</span><span class="gi-val" id="uiDeckCount">0</span></div>
-      <div class="gi-item"><span class="gi-lbl">Роль</span><span class="gi-val" id="uiMyRole">—</span></div>
-    </div>
-    <div class="opponents-row" id="opponentsRow"></div>
-    <div class="table-center empty" id="tableCenter"></div>
-    <div class="my-hand-label"><span>Ваши карты</span><span id="myHandCount">0</span></div>
-    <div class="my-hand" id="myHand"></div>
-    <div class="game-actions" id="gameActions"></div>
-    <div class="game-status" id="gameStatus"></div>
-  </section>
+  </div>
 </div>
 
+<!-- SETTINGS -->
+<div class="screen form-screen" id="settings">
+  <div class="topbar">
+    <button class="tb-btn" data-back>‹</button>
+    <div class="tb-title">Настройки</div>
+    <div style="width:40px"></div>
+  </div>
+  <div class="form-body">
+    <div class="set-group">
+      <div class="set-row"><div class="set-ic">🔊</div><div class="set-info"><div class="set-name">Звуки</div><div class="set-desc">Ходы, победы</div></div><label class="switch"><input type="checkbox" id="setSfx" checked><span class="track"></span></label></div>
+      <div class="set-row"><div class="set-ic">📳</div><div class="set-info"><div class="set-name">Вибрация</div><div class="set-desc">Тактильный отклик</div></div><label class="switch"><input type="checkbox" id="setVibe" checked><span class="track"></span></label></div>
+      <div class="set-row"><div class="set-ic">🃏</div><div class="set-info"><div class="set-name">Сортировка карт</div><div class="set-desc">По мастям и рангу</div></div><label class="switch"><input type="checkbox" id="setSort" checked><span class="track"></span></label></div>
+      <div class="set-row"><div class="set-ic">⏱</div><div class="set-info"><div class="set-name">Таймер хода</div><div class="set-desc">30 секунд на действие</div></div><label class="switch"><input type="checkbox" id="setTimer" checked><span class="track"></span></label></div>
+      <div class="set-row"><div class="set-ic">👁</div><div class="set-info"><div class="set-name">Показывать ID</div><div class="set-desc">В главном меню</div></div><label class="switch"><input type="checkbox" id="setShowId" checked><span class="track"></span></label></div>
+    </div>
+    <button class="btn btn-outline btn-sm" id="btnReset">↺ Сбросить</button>
+  </div>
+</div>
+
+<!-- ROOM -->
+<div class="screen" id="room">
+  <div class="topbar">
+    <button class="tb-btn" id="leaveRoom1">‹</button>
+    <div class="tb-title">Комната</div>
+    <button class="tb-btn" id="copyCode">⧉</button>
+  </div>
+  <div class="form-body">
+    <div class="room-code-big">
+      <div class="lbl">Код лобби</div>
+      <div class="val" id="roomCode">——————</div>
+      <div class="hint">Нажмите чтобы скопировать</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:10px">
+      <span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--muted)">Игроки</span>
+      <span style="font-size:13px;font-weight:900;color:#ffcf5c" id="roomCount">0/0</span>
+    </div>
+    <div class="room-players" id="roomPlayers"></div>
+    <div class="room-params" id="roomParams"></div>
+    <div style="padding:0 20px 20px">
+      <button class="btn btn-gold hidden" id="btnStart">🚀 Начать игру</button>
+      <button class="btn btn-blue hidden" id="btnReady">⏳ Я готов</button>
+      <p class="hidden" id="readyHint" style="text-align:center;font-size:12px;color:var(--muted);margin-top:10px"></p>
+    </div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="game">
+  <div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+  <div class="game-topbar">
+    <div class="gt-left">
+      <button class="gt-btn" id="gtBack">‹</button>
+      <button class="gt-btn" id="gtSound">🔊</button>
+    </div>
+    <div class="gt-right">
+      <button class="gt-btn" id="gtHelp">?</button>
+      <div class="gt-coins"><span style="color:#ffcf5c">◉</span> <span id="gameCoins">100</span> <span class="c">| <span id="gameStake">0</span></span></div>
+    </div>
+  </div>
+
+  <div class="opps" id="oppsRow"></div>
+
+  <div class="table-area">
+    <div class="deck-area">
+      <div class="deck-stack" id="deckStack">
+        <div class="card back"></div>
+        <div class="deck-cnt" id="deckCount">0</div>
+      </div>
+      <div class="trump-slot" id="trumpSlot"></div>
+    </div>
+    <div class="table-center empty" id="tableCenter"></div>
+  </div>
+
+  <div class="emotes">
+    <button class="emote-btn" data-emote="👍">👍</button>
+    <button class="emote-btn" data-emote="😂">😂</button>
+    <button class="emote-btn" data-emote="😡">😡</button>
+    <button class="emote-btn" data-emote="😭">😭</button>
+    <button class="emote-btn" data-emote="🤔">🤔</button>
+    <button class="emote-btn" data-emote="🔥">🔥</button>
+  </div>
+
+  <div class="hand-area">
+    <div class="hand-outer" id="myHand"></div>
+  </div>
+
+  <div class="action-bar">
+    <div class="ab-me" id="abMe"></div>
+    <div class="ab-actions" id="abActions">
+      <div class="ab-status" id="abStatus">Ожидание...</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-wrap"></div>
+
+<!-- MODAL -->
 <div id="modal">
   <div class="modal-box">
     <div class="modal-icon" id="modalIcon">★</div>
@@ -363,13 +572,14 @@ body.no-anim *{animation-duration:.001s !important;animation-iteration-count:1 !
    1. TELEGRAM
    ========================================================= */
 const tg = window.Telegram?.WebApp;
-if (tg){ tg.ready(); tg.expand(); try{ tg.setHeaderColor('#05060f'); tg.setBackgroundColor('#05060f'); tg.disableVerticalSwipes?.(); }catch(e){} }
-const tgUser = tg?.initDataUnsafe?.user || { id: 100000000 + Math.floor(Math.random()*1000), first_name:'Гость', last_name:'', username:'guest', photo_url:'' };
+if (tg){ tg.ready(); tg.expand(); try{ tg.setHeaderColor('#1a3a6b'); tg.setBackgroundColor('#1a3a6b'); tg.disableVerticalSwipes?.(); }catch(e){} }
+const tgUser = tg?.initDataUnsafe?.user || { id: 100000000 + Math.floor(Math.random()*99999), first_name:'Гость'+Math.floor(Math.random()*99), last_name:'', username:'guest', photo_url:'' };
 const USER = {
   id: String(tgUser.id),
-  name: [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || 'Игрок',
-  username: tgUser.username ? '@' + tgUser.username : '@нет_юзернейма',
-  photo: tgUser.photo_url || ''
+  name: [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ').trim() || 'Игрок',
+  username: tgUser.username ? '@'+tgUser.username : '@guest',
+  photo: tgUser.photo_url || '',
+  coins: 100
 };
 
 /* =========================================================
@@ -378,1019 +588,1049 @@ const USER = {
 const firebaseConfig = { databaseURL: "https://test-raq-default-rtdb.firebaseio.com/" };
 let db = null;
 try { firebase.initializeApp(firebaseConfig); db = firebase.database(); console.log('🔥 RTDB:', firebaseConfig.databaseURL); }
-catch (e){ console.error('Firebase init error:', e); }
+catch(e){ console.error('Firebase init:', e); }
 
 /* =========================================================
    3. STATE
    ========================================================= */
 const State = {
-  screen:'screen-loading', history:[],
-  lobby:null, lobbyId:null, lobbyRef:null, playerRef:null,
-  isHost:false, settings:{},
-  pingInterval:null
+  screen:'loading', history:[],
+  lobby:null, code:null, lobbyRef:null, playerRef:null,
+  isHost:false, settings:{}, 
+  heartbeat:null, timerInt:null, lastGameState:null, lastAction:{}
 };
-const DEFAULTS = { sfx:true,sfxVol:70,music:false,musicVol:40,vibe:true,anim:'mid',cardBack:'space',table:'cosmos',sort:true,confirm:false,showId:true };
-const LS_LAST_LOBBY = 'dnz_last_lobby';
+const DEFAULTS = { sfx:true, vibe:true, sort:true, timer:true, showId:true };
+const LS_CODE = 'dnz_code';
+const LS_SET = 'dnz_set';
 
 /* =========================================================
    4. HELPERS
    ========================================================= */
-const $  = (s,r=document) => r.querySelector(s);
-const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
 const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 function haptic(t='light'){
   if (!State.settings.vibe || !tg?.HapticFeedback) return;
-  try{
-    if (t==='success') tg.HapticFeedback.notificationOccurred('success');
-    else if (t==='error') tg.HapticFeedback.notificationOccurred('error');
-    else tg.HapticFeedback.impactOccurred(t);
-  }catch(e){}
+  try{ if (t==='success') tg.HapticFeedback.notificationOccurred('success');
+       else if (t==='error') tg.HapticFeedback.notificationOccurred('error');
+       else tg.HapticFeedback.impactOccurred(t); }catch(e){}
 }
-function toast(text, type='info', ms=2600){
+function toast(text, type='info', ms=2400){
   const el = document.createElement('div');
   el.className = 'toast ' + type;
-  const icon = { ok:'✅', err:'⚠️', info:'💫' }[type] || '💫';
-  el.innerHTML = `<span>${icon}</span><span>${esc(text)}</span>`;
+  el.textContent = text;
   $('#toast-wrap').appendChild(el);
-  setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),300); }, ms);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, ms);
 }
-function modal({ icon='★', title='', text='', actions=[] }){
+function modal({icon='★',title='',text='',actions=[]}){
   $('#modalIcon').textContent = icon;
   $('#modalTitle').textContent = title;
   $('#modalText').textContent = text;
   const w = $('#modalActions'); w.innerHTML='';
   actions.forEach(a=>{
     const b = document.createElement('button');
-    b.className = 'btn ' + (a.style||'btn-ghost');
+    b.className = 'btn ' + (a.style||'btn-outline');
     b.textContent = a.label;
-    b.onclick = () => { closeModal(); a.onClick?.(); };
+    b.onclick = ()=>{ closeModal(); a.onClick?.(); };
     w.appendChild(b);
   });
   $('#modal').classList.add('show');
 }
 function closeModal(){ $('#modal').classList.remove('show'); }
-$('#modal').addEventListener('click', e => { if (e.target.id==='modal') closeModal(); });
+$('#modal').addEventListener('click', e=>{ if(e.target.id==='modal') closeModal(); });
 
-/* =========================================================
-   5. STARFIELD
-   ========================================================= */
-(function starfield(){
-  const canvas = $('#stars'), ctx = canvas.getContext('2d');
-  let stars=[], w=0, h=0, raf=null;
-  function count(){
-    const a = State.settings.anim||'mid', ar = w*h;
-    if (a==='low') return Math.min(70, ar/22000);
-    if (a==='high') return Math.min(280, ar/7500);
-    return Math.min(150, ar/12000);
-  }
-  function build(){
-    const n = Math.floor(count());
-    stars = Array.from({length:n},()=>({
-      x:Math.random()*w, y:Math.random()*h,
-      r:Math.random()*1.5+0.35, a:Math.random()*0.65+0.25,
-      sp:Math.random()*0.16+0.03, tw:Math.random()*Math.PI*2,
-      hue: Math.random()<0.2?190:(Math.random()<0.3?285:0)
-    }));
-  }
-  function resize(){
-    const dpr = Math.min(window.devicePixelRatio||1, 2);
-    w = canvas.clientWidth = window.innerWidth;
-    h = canvas.clientHeight = window.innerHeight;
-    canvas.width = w*dpr; canvas.height = h*dpr;
-    ctx.setTransform(dpr,0,0,dpr,0,0); build();
-  }
-  let last=0;
-  function loop(t){
-    raf = requestAnimationFrame(loop);
-    const f = State.settings.anim==='low'?0.4:State.settings.anim==='high'?1.4:1;
-    if (t-last < (State.settings.anim==='low'?55:16)) return;
-    last = t;
-    ctx.clearRect(0,0,w,h);
-    for (const s of stars){
-      s.tw += 0.022*f; s.y += s.sp*f;
-      if (s.y>h+2){ s.y=-2; s.x=Math.random()*w; }
-      const a = s.a*(0.6+0.4*Math.sin(s.tw));
-      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fillStyle = s.hue===0?`rgba(255,255,255,${a})`:s.hue===190?`rgba(120,235,255,${a})`:`rgba(190,150,255,${a})`;
-      ctx.fill();
-    }
-  }
-  window.addEventListener('resize', resize);
-  resize(); raf = requestAnimationFrame(loop);
-  document.addEventListener('visibilitychange', ()=>{
-    if (document.hidden){ cancelAnimationFrame(raf); raf=null; }
-    else if (!raf){ raf = requestAnimationFrame(loop); }
-  });
-})();
-
-/* =========================================================
-   6. NAV
-   ========================================================= */
-function showScreen(id, { push=true, replace=false } = {}){
-  if (State.screen === id) return;
-  if (push && !replace && State.screen !== 'screen-loading') State.history.push(State.screen);
-  $$('.screen').forEach(s => s.classList.toggle('active', s.id === id));
-  State.screen = id;
-  const el = document.getElementById(id); if (el) el.scrollTop = 0;
-}
-function goBack(){ const prev = State.history.pop() || 'screen-menu'; showScreen(prev, {push:false}); }
-$$('[data-back]').forEach(b => b.addEventListener('click', ()=>{ haptic('light'); goBack(); }));
-
-/* =========================================================
-   7. SETTINGS
-   ========================================================= */
-function loadSettings(){
-  try{ const raw = localStorage.getItem('dnz_settings'); State.settings = raw?{...DEFAULTS,...JSON.parse(raw)}:{...DEFAULTS}; }
-  catch{ State.settings = {...DEFAULTS}; }
-}
-function saveSettings(){
-  try{ localStorage.setItem('dnz_settings', JSON.stringify(State.settings)); }catch{}
-  if (db && USER.id) db.ref('users/'+USER.id+'/settings').set(State.settings).catch(()=>{});
-}
-function applySettings(){
-  const s = State.settings;
-  document.documentElement.style.setProperty('--anim-speed', s.anim==='low'?'0.55':s.anim==='high'?'1.45':'1');
-  document.body.classList.toggle('no-anim', s.anim==='low');
-  document.body.dataset.table = s.table || 'cosmos';
-  const backs = { space:['#3a1e7a','#0f2a6b'], neon:['#00e0ff','#ff4ecd'], gold:['#7a5b12','#ffcf5c'], crimson:['#7a0f24','#ff5b6e'] };
-  const b = backs[s.cardBack] || backs.space;
-  document.documentElement.style.setProperty('--card-back-1', b[0]);
-  document.documentElement.style.setProperty('--card-back-2', b[1]);
-  $('#uiId').parentElement.style.display = s.showId ? '' : 'none';
-  $('#setSfx').checked = s.sfx;
-  $('#setSfxVol').value = s.sfxVol; $('#lblSfxVol').textContent = s.sfxVol;
-  $('#setVibe').checked = s.vibe;
-  $('#setSort').checked = s.sort;
-  $('#setConfirm').checked = s.confirm;
-  $('#setShowId').checked = s.showId;
-  $$('[data-seg="anim"] button').forEach(b => b.classList.toggle('active', b.dataset.val===s.anim));
-  $$('[data-seg="table"] button').forEach(b => b.classList.toggle('active', b.dataset.val===s.table));
-  $$('.cb').forEach(c => c.classList.toggle('active', c.dataset.back===s.cardBack));
-}
-function bindSettings(){
-  const on = (id,key)=>{ const el=$(id); if(!el) return;
-    el.addEventListener('change', ()=>{ State.settings[key]=el.type==='checkbox'?el.checked:el.value; haptic('light'); saveSettings(); applySettings(); });
-  };
-  ['#setSfx|sfx','#setVibe|vibe','#setSort|sort','#setConfirm|confirm','#setShowId|showId'].forEach(p=>{ const [id,k]=p.split('|'); on(id,k); });
-  const onRange=(id,key,label)=>{ const el=$(id);
-    el.addEventListener('input',()=>{ State.settings[key]=Number(el.value); $(label).textContent=el.value; });
-    el.addEventListener('change',()=>{ haptic('light'); saveSettings(); });
-  };
-  onRange('#setSfxVol','sfxVol','#lblSfxVol');
-  $$('[data-seg]').forEach(seg=>{
-    seg.addEventListener('click', e=>{
-      const btn = e.target.closest('button'); if(!btn) return;
-      $$('button', seg).forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      const k = seg.dataset.seg;
-      if (k==='anim') State.settings.anim = btn.dataset.val;
-      if (k==='table') State.settings.table = btn.dataset.val;
-      haptic('light'); saveSettings(); applySettings();
-    });
-  });
-  $('.card-back-picker').addEventListener('click', e=>{
-    const cb = e.target.closest('.cb'); if(!cb) return;
-    $$('.cb').forEach(c=>c.classList.remove('active')); cb.classList.add('active');
-    State.settings.cardBack = cb.dataset.back;
-    haptic('light'); saveSettings(); applySettings();
-  });
-  $('#btnResetSettings').addEventListener('click',()=>{
-    modal({icon:'↺',title:'Сбросить настройки?',text:'Все параметры вернутся к значениям по умолчанию.',
-      actions:[{label:'Отмена',style:'btn-ghost'},{label:'Сбросить',style:'btn-danger',onClick:()=>{ State.settings={...DEFAULTS}; saveSettings(); applySettings(); toast('Настройки сброшены','ok'); }}]
-    });
-  });
+/* Sound */
+let audioCtx = null;
+function beep(freq=440, dur=0.08){
+  if (!State.settings.sfx) return;
+  try{
+    if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.frequency.value = freq; o.type='sine';
+    g.gain.value = 0.08;
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime+dur);
+  }catch(e){}
 }
 
 /* =========================================================
-   8. PROFILE
+   5. CARD MODEL
    ========================================================= */
-function renderProfile(){
-  $('#uiName').textContent = USER.name;
-  $('#uiUsername').textContent = USER.username;
-  $('#uiId').textContent = USER.id;
-  const host = $('#avatarHost');
-  if (USER.photo){
-    host.innerHTML = `<img class="avatar" src="${esc(USER.photo)}" alt="" onerror="this.outerHTML='<div class=\\'avatar-fallback\\'>${esc(USER.name[0]||'★')}</div>'">`;
-  } else {
-    host.innerHTML = `<div class="avatar-fallback">${esc((USER.name[0]||'★').toUpperCase())}</div>`;
-  }
-  if (db){
-    db.ref('users/'+USER.id+'/stats').on('value', snap=>{
-      const s = snap.val() || {};
-      $('#statGames').textContent = s.games||0;
-      $('#statWins').textContent = s.wins||0;
-      $('#statStars').textContent = s.stars||0;
-    }, err=>console.warn('stats:',err.message));
-    db.ref('users/'+USER.id+'/profile').update({ name:USER.name, username:USER.username, photo:USER.photo, lastSeen:Date.now() }).catch(()=>{});
-  }
-}
+const RANK_VAL = {'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
+const RED = new Set(['♥','♦']);
+const SUITS = ['♠','♥','♦','♣'];
 
-/* =========================================================
-   9. CARD LOGIC
-   ========================================================= */
-const RANK_VAL = { '2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14 };
-const RED_SUITS = new Set(['♥','♦']);
-
-function makeDeck(count){
-  const suits = ['♠','♥','♦','♣'];
-  const ranks = count===52
-    ? ['2','3','4','5','6','7','8','9','10','J','Q','K','A']
-    : ['6','7','8','9','10','J','Q','K','A'];
-  const deck = [];
-  for (const s of suits) for (const r of ranks) deck.push({suit:s, rank:r});
-  for (let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
-  return deck;
+function makeDeck(count=36){
+  const ranks = count===52 ? ['6','7','8','9','10','J','Q','K','A','2','3','4','5'] : ['6','7','8','9','10','J','Q','K','A'];
+  const d = [];
+  for (const s of SUITS) for (const r of ranks) d.push({r, s});
+  for (let i=d.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; }
+  return d;
 }
-function canBeat(defend, attack, trumpSuit){
-  if (!defend || !attack) return false;
-  if (defend.suit === attack.suit) return RANK_VAL[defend.rank] > RANK_VAL[attack.rank];
-  return defend.suit === trumpSuit && attack.suit !== trumpSuit;
+function cardEq(a,b){ return a && b && a.r===b.r && a.s===b.s; }
+function cardKey(c){ return c ? c.r+c.s : ''; }
+function canBeat(def, atk, trump){
+  if (!def || !atk) return false;
+  if (def.s === atk.s) return RANK_VAL[def.r] > RANK_VAL[atk.r];
+  return def.s === trump && atk.s !== trump;
 }
-const cardEq = (a,b) => a && b && a.suit===b.suit && a.rank===b.rank;
-const cardKey = c => c ? c.rank + c.suit : '';
-
-function sortHand(hand, trumpSuit){
-  if (!hand) return [];
+function sortHand(hand, trump){
+  const so = {'♠':0,'♥':1,'♦':2,'♣':3};
   return [...hand].sort((a,b)=>{
-    const aT = a.suit===trumpSuit?1:0, bT = b.suit===trumpSuit?1:0;
-    if (aT !== bT) return aT - bT;
-    const suitOrder = {'♠':0,'♥':1,'♦':2,'♣':3};
-    if (a.suit !== b.suit) return suitOrder[a.suit] - suitOrder[b.suit];
-    return RANK_VAL[a.rank] - RANK_VAL[b.rank];
+    const aT = a.s===trump?1:0, bT = b.s===trump?1:0;
+    if (aT!==bT) return aT-bT;
+    if (a.s!==b.s) return so[a.s]-so[b.s];
+    return RANK_VAL[a.r]-RANK_VAL[b.r];
   });
 }
 
 /* =========================================================
-   10. GAME STATE
+   6. GAME ENGINE (pure functions - used inside Firebase transaction)
    ========================================================= */
 function createGame(lobby){
-  const order = Object.keys(lobby.players);
-  for (let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; }
+  const pids = Object.keys(lobby.players);
+  // shuffle order
+  for (let i=pids.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [pids[i],pids[j]]=[pids[j],pids[i]]; }
   const deck = makeDeck(lobby.deck || 36);
   const hands = {};
-  for (const pid of order) hands[pid] = deck.splice(deck.length-6, 6);
-  const trumpCard = deck.shift() || deck[0];
-  const trumpSuit = trumpCard.suit;
+  for (const pid of pids) hands[pid] = deck.splice(deck.length - 6, 6);
+  const trumpCard = deck.shift();
+  const trumpSuit = trumpCard.s;
 
-  let firstAttacker = order[0], lowest = 99;
-  for (const pid of order){
-    for (const c of hands[pid]){
-      if (c.suit === trumpSuit && RANK_VAL[c.rank] < lowest){ lowest = RANK_VAL[c.rank]; firstAttacker = pid; }
-    }
+  // find first attacker (lowest trump)
+  let firstAtt = pids[0], lowest = 99;
+  for (const pid of pids) for (const c of hands[pid]){
+    if (c.s === trumpSuit && RANK_VAL[c.r] < lowest){ lowest = RANK_VAL[c.r]; firstAtt = pid; }
   }
-  const attackerIdx = order.indexOf(firstAttacker);
-  const defenderIdx = (attackerIdx + 1) % order.length;
-  const roles = {};
-  order.forEach((pid, i) => {
-    roles[pid] = i===attackerIdx ? 'attacker' : i===defenderIdx ? 'defender' : 'idle';
-  });
+  const ai = pids.indexOf(firstAtt);
+  const di = (ai + 1) % pids.length;
 
   return {
     deck, trumpCard, trumpSuit,
-    table: [], hands, roles, order,
-    attackerIdx, defenderIdx,
-    phase: 'attack', round: 1, discard: 0,
-    finished: false, loser: null, winner: null,
-    startedAt: Date.now(),
-    lastAction: { by: null, type: 'start', at: Date.now() }
+    hands, order: pids,
+    table: [], discardCount: 0,
+    attackerIdx: ai, defenderIdx: di,
+    phase: 'attack',
+    round: 1,
+    lastActionAt: Date.now(),
+    turnStartedAt: Date.now(),
+    finished: false, loserId: null, winnerId: null,
+    lastAction: { type: 'start', at: Date.now() }
   };
 }
 
-function normalizeGame(g){
+function normGame(g){
   if (!g) return g;
-  if (!Array.isArray(g.table)) g.table = g.table ? Object.values(g.table) : [];
-  if (!Array.isArray(g.deck)) g.deck = g.deck ? Object.values(g.deck) : [];
-  if (!Array.isArray(g.order)) g.order = g.order ? Object.values(g.order) : [];
-  if (g.hands) for (const k in g.hands){
-    if (!Array.isArray(g.hands[k])) g.hands[k] = g.hands[k] ? Object.values(g.hands[k]) : [];
-  }
+  if (g.table && !Array.isArray(g.table)) g.table = Object.values(g.table);
+  if (g.deck && !Array.isArray(g.deck)) g.deck = Object.values(g.deck);
+  if (g.order && !Array.isArray(g.order)) g.order = Object.values(g.order);
+  if (g.hands) for (const k in g.hands) if (g.hands[k] && !Array.isArray(g.hands[k])) g.hands[k] = Object.values(g.hands[k]);
   return g;
 }
 
-/* ---- ACTIONS ---- */
-function actionAttack(g, pid, card){
+function gAttackerId(g){ return g.order[g.attackerIdx]; }
+function gDefenderId(g){ return g.order[g.defenderIdx]; }
+
+function gAttack(g, pid, card){
   if (g.finished) return false;
   if (g.phase !== 'attack' && g.phase !== 'throw') return false;
-  if (g.order[g.attackerIdx] !== pid) return false;
-  if (g.table.some(p => !p.defend)) return false;
+  if (gAttackerId(g) !== pid) return false;
+  if (g.table.some(p => !p.def)) return false;
   const hand = g.hands[pid] || [];
   const idx = hand.findIndex(c => cardEq(c, card));
   if (idx < 0) return false;
+  if (g.table.length >= 6) return false;
+
+  // throw check
   if (g.phase === 'throw'){
     const ranks = new Set();
-    for (const p of g.table){ ranks.add(p.attack.rank); if (p.defend) ranks.add(p.defend.rank); }
-    if (!ranks.has(card.rank)) return false;
+    for (const p of g.table){ ranks.add(p.atk.r); if (p.def) ranks.add(p.def.r); }
+    if (!ranks.has(card.r)) return false;
+    const defHand = (g.hands[gDefenderId(g)] || []).length;
+    if (g.table.length >= defHand + (g.table.filter(p=>p.def).length ? 0 : 1)) {
+      // defender can't be forced to defend more cards than they have
+    }
   }
-  const tableCount = g.table.length;
-  if (tableCount >= 6) return false;
-  const defId = g.order[g.defenderIdx];
-  const defHandLen = (g.hands[defId]||[]).length;
-  if (tableCount >= defHandLen && g.phase === 'throw') return false;
   hand.splice(idx, 1);
-  g.table.push({ attack: card, defend: null, id: 'p' + Date.now() + Math.floor(Math.random()*1000) });
+  g.table.push({ atk: card, def: null });
   g.phase = 'defend';
-  g.lastAction = { by: pid, type: 'attack', card, at: Date.now() };
+  g.lastActionAt = Date.now();
+  g.turnStartedAt = Date.now();
+  g.lastAction = { type: 'attack', by: pid, card, at: Date.now() };
   return true;
 }
 
-function actionDefend(g, pid, card){
+function gDefend(g, pid, card){
   if (g.finished) return false;
   if (g.phase !== 'defend') return false;
-  const defId = g.order[g.defenderIdx];
-  if (defId !== pid) return false;
+  if (gDefenderId(g) !== pid) return false;
   const hand = g.hands[pid] || [];
   const idx = hand.findIndex(c => cardEq(c, card));
   if (idx < 0) return false;
-  const target = g.table.find(p => !p.defend);
+  const target = g.table.find(p => !p.def);
   if (!target) return false;
-  if (!canBeat(card, target.attack, g.trumpSuit)) return false;
+  if (!canBeat(card, target.atk, g.trumpSuit)) return false;
   hand.splice(idx, 1);
-  target.defend = card;
+  target.def = card;
   g.phase = 'throw';
-  g.lastAction = { by: pid, type: 'defend', card, at: Date.now() };
+  g.lastActionAt = Date.now();
+  g.turnStartedAt = Date.now();
+  g.lastAction = { type: 'defend', by: pid, card, at: Date.now() };
   return true;
 }
 
-function actionTake(g, pid){
+function gTake(g, pid){
   if (g.finished) return false;
   if (g.phase !== 'defend') return false;
-  const defId = g.order[g.defenderIdx];
-  if (defId !== pid) return false;
+  if (gDefenderId(g) !== pid) return false;
   const defHand = g.hands[pid] || [];
-  let cnt = 0;
-  for (const pair of g.table){
-    defHand.push(pair.attack); cnt++;
-    if (pair.defend){ defHand.push(pair.defend); cnt++; }
+  for (const p of g.table){
+    defHand.push(p.atk);
+    if (p.def) defHand.push(p.def);
   }
   g.hands[pid] = defHand;
   g.table = [];
-  g.lastAction = { by: pid, type: 'take', at: Date.now() };
+  g.lastAction = { type: 'take', by: pid, at: Date.now() };
   endRound(g, 'took');
   return true;
 }
 
-function actionBito(g, pid){
+function gBito(g, pid){
   if (g.finished) return false;
   if (g.phase !== 'throw') return false;
-  if (g.order[g.attackerIdx] !== pid) return false;
-  if (g.table.some(p => !p.defend)) return false;
-  g.discard += g.table.length;
+  if (gAttackerId(g) !== pid) return false;
+  if (g.table.some(p => !p.def)) return false;
+  g.discardCount += g.table.length;
   g.table = [];
-  g.lastAction = { by: pid, type: 'bito', at: Date.now() };
+  g.lastAction = { type: 'bito', by: pid, at: Date.now() };
   endRound(g, 'defended');
   return true;
 }
 
-function endRound(g, result){
-  const attPid = g.order[g.attackerIdx];
-  const defPid = g.order[g.defenderIdx];
-  const drawOrder = [attPid, defPid, ...g.order.filter(p => p !== attPid && p !== defPid)];
+function gTranslate(g, pid){
+  if (g.finished) return false;
+  if (g.phase !== 'defend') return false;
+  if (gDefenderId(g) !== pid) return false;
+  if (g.table.length !== 1) return false;
+  const target = g.table[0];
+  if (target.def) return false;
+  const hand = g.hands[pid] || [];
+  const matchIdx = hand.findIndex(c => c.r === target.atk.r);
+  if (matchIdx < 0) return false;
+  // next defender
+  const n = g.order.length;
+  if (n < 3) return false; // no translation in 2p
+  const nextDefIdx = (g.defenderIdx + 1) % n;
+  if (nextDefIdx === g.attackerIdx) return false;
+  // add card to table (becomes new attack)
+  const c = hand.splice(matchIdx, 1)[0];
+  // old attack becomes attack from previous defender, we treat translate as:
+  // swap: attacker becomes previous defender, defender becomes next player
+  const prevAtkIdx = g.attackerIdx;
+  g.attackerIdx = g.defenderIdx;
+  g.defenderIdx = nextDefIdx;
+  // add card to table (as if attacker threw)
+  g.table.push({ atk: c, def: null });
+  g.phase = 'defend';
+  g.lastAction = { type: 'translate', by: pid, card: c, at: Date.now() };
+  g.turnStartedAt = Date.now();
+  return true;
+}
 
+function endRound(g, result){
+  const attId = gAttackerId(g);
+  const defId = gDefenderId(g);
+
+  // draw order: attacker first, then defender, then others
+  const drawOrder = [attId, defId, ...g.order.filter(p => p !== attId && p !== defId)];
   for (const pid of drawOrder){
     const hand = g.hands[pid] || [];
-    while (hand.length < 6 && !g.finished){
-      if (g.deck.length > 0){
-        const c = g.deck.pop();
-        hand.push(c);
-      } else if (g.trumpCard){
-        hand.push(g.trumpCard);
-        g.trumpCard = null;
-      } else break;
+    while (hand.length < 6){
+      if (g.deck.length > 0) hand.push(g.deck.pop());
+      else if (g.trumpCard){ hand.push(g.trumpCard); g.trumpCard = null; }
+      else break;
     }
     g.hands[pid] = hand;
   }
 
-  const stillIn = g.order.filter(pid => (g.hands[pid]||[]).length > 0);
-  if (stillIn.length <= 1 && g.deck.length === 0 && !g.trumpCard){
+  // check finish
+  const nonEmpty = g.order.filter(pid => (g.hands[pid]||[]).length > 0);
+  if (nonEmpty.length <= 1 && g.deck.length === 0 && !g.trumpCard){
     g.finished = true;
-    g.loser = stillIn[0] || null;
-    g.winner = g.order.find(p => p !== g.loser) || null;
+    g.loserId = nonEmpty[0] || null;
+    g.winnerId = g.order.find(p => p !== g.loserId) || null;
     g.phase = 'finished';
     g.lastAction = { type: 'finished', at: Date.now() };
     return;
   }
 
+  const n = g.order.length;
   if (result === 'defended'){
-    g.attackerIdx = g.defenderIdx;
-    g.defenderIdx = (g.defenderIdx + 1) % g.order.length;
-    if (g.defenderIdx === g.attackerIdx) g.defenderIdx = (g.defenderIdx + 1) % g.order.length;
-  } else {
-    g.defenderIdx = (g.defenderIdx + 1) % g.order.length;
-    if (g.defenderIdx === g.attackerIdx) g.defenderIdx = (g.defenderIdx + 1) % g.order.length;
+    // defender becomes attacker
+    if (n === 2){
+      [g.attackerIdx, g.defenderIdx] = [g.defenderIdx, g.attackerIdx];
+    } else {
+      g.attackerIdx = g.defenderIdx;
+      g.defenderIdx = (g.defenderIdx + 1) % n;
+      if (g.defenderIdx === g.attackerIdx) g.defenderIdx = (g.defenderIdx + 1) % n;
+    }
+  } else { // took
+    if (n === 2){
+      [g.attackerIdx, g.defenderIdx] = [g.defenderIdx, g.attackerIdx];
+    } else {
+      g.attackerIdx = (g.defenderIdx + 1) % n;
+      g.defenderIdx = (g.defenderIdx + 2) % n;
+    }
   }
-
-  for (const pid of g.order){
-    g.roles[pid] = pid === g.order[g.attackerIdx] ? 'attacker' : pid === g.order[g.defenderIdx] ? 'defender' : 'idle';
-  }
-
   g.phase = 'attack';
   g.round++;
+  g.turnStartedAt = Date.now();
+  g.lastActionAt = Date.now();
 }
 
 /* =========================================================
-   11. LOBBY / ROOM
+   7. NAV
+   ========================================================= */
+function showScreen(id, { push=true } = {}){
+  if (State.screen === id) return;
+  if (push && State.screen !== 'loading') State.history.push(State.screen);
+  $$('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+  State.screen = id;
+}
+function goBack(){
+  const prev = State.history.pop() || 'menu';
+  showScreen(prev, { push:false });
+}
+$$('[data-back]').forEach(b => b.addEventListener('click', ()=>{ haptic('light'); goBack(); }));
+
+/* =========================================================
+   8. SETTINGS
+   ========================================================= */
+function loadSettings(){
+  try{ const r = localStorage.getItem(LS_SET); State.settings = r ? {...DEFAULTS,...JSON.parse(r)} : {...DEFAULTS}; }
+  catch{ State.settings = {...DEFAULTS}; }
+}
+function saveSettings(){
+  try{ localStorage.setItem(LS_SET, JSON.stringify(State.settings)); }catch{}
+}
+function applySettings(){
+  const s = State.settings;
+  $('#setSfx').checked = s.sfx;
+  $('#setVibe').checked = s.vibe;
+  $('#setSort').checked = s.sort;
+  $('#setTimer').checked = s.timer;
+  $('#setShowId').checked = s.showId;
+  $('#menuId').style.display = s.showId ? '' : 'none';
+}
+function bindSettings(){
+  const on = (id, key)=>{ const el = $(id); el.addEventListener('change', ()=>{ State.settings[key] = el.checked; haptic('light'); saveSettings(); applySettings(); }); };
+  on('#setSfx','sfx'); on('#setVibe','vibe'); on('#setSort','sort'); on('#setTimer','timer'); on('#setShowId','showId');
+  $('#btnReset').addEventListener('click', ()=>{ State.settings = {...DEFAULTS}; saveSettings(); applySettings(); toast('Настройки сброшены','ok'); });
+}
+
+/* =========================================================
+   9. PROFILE
+   ========================================================= */
+function renderProfile(){
+  $('#menuName').textContent = USER.name;
+  $('#menuUsername').textContent = USER.username;
+  $('#menuId').textContent = 'ID: ' + USER.id;
+  const av = $('#menuAvatar');
+  if (USER.photo){
+    av.innerHTML = `<img class="profile-av" src="${esc(USER.photo)}" onerror="this.outerHTML='<div class=&quot;profile-av-fb&quot;>${esc(USER.name[0]||'★')}</div>'">`;
+  } else {
+    av.innerHTML = `<div class="profile-av-fb">${esc((USER.name[0]||'★').toUpperCase())}</div>`;
+  }
+  if (db){
+    db.ref('users/'+USER.id+'/stats').on('value', snap=>{
+      const s = snap.val()||{};
+      $('#sGames').textContent = s.games||0;
+      $('#sWins').textContent = s.wins||0;
+      $('#sStars').textContent = s.stars||0;
+    }, ()=>{});
+    db.ref('users/'+USER.id+'/profile').update({ name:USER.name, username:USER.username, photo:USER.photo, lastSeen:Date.now() }).catch(()=>{});
+  }
+}
+
+/* =========================================================
+   10. LOBBY
    ========================================================= */
 function genCode(){ const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let o=''; for(let i=0;i<6;i++) o+=c[Math.floor(Math.random()*c.length)]; return o; }
-function getSegValue(name){ const el=$(`[data-seg="${name}"] button.active`); return el?el.dataset.val:null; }
-function checkFirebase(){
-  if (!db){ modal({icon:'🔌',title:'Firebase не подключён',text:'Проверьте интернет или URL базы данных.',actions:[{label:'Понятно',style:'btn-primary'}]}); return false; }
-  return true;
-}
+function segVal(n){ const el = $(`[data-seg="${n}"] button.active`); return el ? el.dataset.val : null; }
 
 async function createLobby(){
-  if (!checkFirebase()) return;
-  const btn = $('#btnCreateLobby'); btn.disabled = true; btn.textContent = '⏳ Создание...';
-  try {
+  if (!db){ toast('Firebase не подключён','err'); return; }
+  const btn = $('#btnCreate'); btn.disabled = true; btn.textContent = '⏳...';
+  try{
     let code = genCode();
-    try { for (let i=0;i<5;i++){ const s = await db.ref('lobbies/'+code).get(); if (!s.exists()) break; code = genCode(); } } catch(e){}
+    try{ for(let i=0;i<5;i++){ const s = await db.ref('lobbies/'+code).get(); if(!s.exists()) break; code = genCode(); } }catch(e){}
     const lobby = {
-      code, hostId: USER.id, hostName: USER.name, hostPhoto: USER.photo,
-      name: $('#lobbyName').value.trim() || (USER.name + ' ★ Космос'),
-      createdAt: Date.now(), status: 'waiting',
-      maxPlayers: Number(getSegValue('maxp')||3),
-      deck: Number(getSegValue('deck')||36),
-      mode: getSegValue('mode')||'classic',
-      privacy: getSegValue('privacy')||'private',
-      players: { [USER.id]: { id:USER.id, name:USER.name, username:USER.username, photo:USER.photo, ready:true, isHost:true, online:true, lastSeen:Date.now(), joinedAt:Date.now() } }
+      code,
+      host: USER.id,
+      hostName: USER.name,
+      name: $('#lobbyName').value.trim() || (USER.name + ' ★'),
+      createdAt: Date.now(),
+      status: 'waiting',
+      maxPlayers: Number(segVal('maxp')||3),
+      deck: Number(segVal('deck')||36),
+      mode: segVal('mode')||'classic',
+      privacy: segVal('privacy')||'private',
+      members: {
+        [USER.id]: { id:USER.id, name:USER.name, username:USER.username, photo:USER.photo, ready:true, host:true, online:true, lastSeen:Date.now(), joinedAt:Date.now() }
+      }
     };
     await db.ref('lobbies/'+code).set(lobby);
-    haptic('success'); toast('Лобби создано! Код: '+code, 'ok', 3200);
+    haptic('success'); toast('Лобби создано: '+code,'ok',3000);
     enterRoom(code, true);
-  } catch (e){
-    console.error('createLobby:', e); haptic('error');
-    toast('Ошибка: '+(e.message||''), 'err', 4000); showRulesHint(e);
-  } finally { btn.disabled = false; btn.textContent = '★ Создать лобби'; }
+  }catch(e){
+    console.error(e); haptic('error'); toast('Ошибка: '+(e.message||''),'err',4000);
+    if (e.code==='PERMISSION_DENIED' || /permission/i.test(e.message)) rulesHint();
+  }finally{ btn.disabled = false; btn.textContent = '★ Создать лобби'; }
 }
 
-async function joinLobby(codeRaw){
-  if (!checkFirebase()) return;
-  const code = String(codeRaw||'').trim().toUpperCase();
-  if (code.length !== 6){ haptic('error'); toast('Введите 6-символьный код','err'); return; }
-  const btn = $('#btnJoinLobby'); btn.disabled = true; btn.textContent = '⏳ Вход...';
-  try {
+async function joinLobby(raw){
+  if (!db){ toast('Firebase не подключён','err'); return; }
+  const code = String(raw||'').trim().toUpperCase();
+  if (code.length !== 6){ haptic('error'); toast('Введите 6 символов','err'); return; }
+  const btn = $('#btnJoin'); btn.disabled = true; btn.textContent = '⏳...';
+  try{
     const snap = await db.ref('lobbies/'+code).get();
-    if (!snap.exists()){ haptic('error'); toast('Лобби с кодом '+code+' не найдено','err'); return; }
+    if (!snap.exists()){ haptic('error'); toast('Лобби '+code+' не найдено','err'); return; }
     const lobby = snap.val();
-    const players = lobby.players || {};
-    const count = Object.keys(players).length;
-    if (lobby.status !== 'waiting' && !players[USER.id]){ haptic('error'); toast('Игра уже началась','err'); return; }
-    if (count >= lobby.maxPlayers && !players[USER.id]){ haptic('error'); toast('Лобби заполнено','err'); return; }
-    const isHost = String(lobby.hostId) === USER.id;
-    await db.ref(`lobbies/${code}/players/${USER.id}`).update({
-      id:USER.id, name:USER.name, username:USER.username, photo:USER.photo,
-      ready: isHost ? true : (players[USER.id]?.ready || false),
-      isHost: isHost, online: true, lastSeen: Date.now(),
-      joinedAt: players[USER.id]?.joinedAt || Date.now()
+    const members = lobby.members || {};
+    const cnt = Object.keys(members).length;
+    if (lobby.status === 'playing' && !members[USER.id]){ haptic('error'); toast('Игра уже идёт','err'); return; }
+    if (cnt >= lobby.maxPlayers && !members[USER.id]){ haptic('error'); toast('Лобби заполнено','err'); return; }
+    const isHost = String(lobby.host) === USER.id;
+
+    // === HOST-as-SIGNALER: we just write ourselves into /members ===
+    await db.ref(`lobbies/${code}/members/${USER.id}`).update({
+      id: USER.id, name: USER.name, username: USER.username, photo: USER.photo,
+      ready: isHost ? true : (members[USER.id]?.ready || false),
+      host: isHost,
+      online: true, lastSeen: Date.now(),
+      joinedAt: members[USER.id]?.joinedAt || Date.now()
     });
-    haptic('success'); toast('Вы вошли в лобби','ok');
+
+    haptic('success'); toast('Добро пожаловать!','ok');
     enterRoom(code, isHost);
-  } catch (e){
-    console.error('joinLobby:', e); haptic('error');
-    toast('Не удалось войти: '+(e.message||''), 'err', 4000); showRulesHint(e);
-  } finally { btn.disabled = false; btn.textContent = '→ Войти в лобби'; }
+  }catch(e){
+    console.error(e); haptic('error'); toast('Ошибка: '+(e.message||''),'err',4000);
+    if (e.code==='PERMISSION_DENIED' || /permission/i.test(e.message)) rulesHint();
+  }finally{ btn.disabled = false; btn.textContent = '→ Войти'; }
 }
 
 async function quickMatch(){
-  if (!checkFirebase()) return;
-  const btn = $('#btnQuickMatch'); btn.disabled = true; btn.textContent = '⏳ Поиск...';
-  try {
+  if (!db) return;
+  const btn = $('#btnQuick'); btn.disabled = true; btn.textContent = '⏳...';
+  try{
     const snap = await db.ref('lobbies').get();
-    if (!snap.exists()){ toast('Публичных лобби нет — создайте своё!','info',3200); return; }
+    if (!snap.exists()){ toast('Нет публичных лобби','info'); return; }
     let found = null;
-    snap.forEach(child => {
+    snap.forEach(ch=>{
       if (found) return;
-      const l = child.val();
-      if (!l || !l.players || l.privacy !== 'public' || l.status !== 'waiting') return;
-      const n = Object.keys(l.players).length;
-      if (n < (l.maxPlayers||4) && !l.players[USER.id]) found = l;
+      const l = ch.val();
+      if (!l || !l.members || l.privacy !== 'public' || l.status !== 'waiting') return;
+      const n = Object.keys(l.members).length;
+      if (n < (l.maxPlayers||4) && !l.members[USER.id]) found = l;
     });
-    if (!found){ toast('Свободных публичных лобби нет','info',3200); return; }
+    if (!found){ toast('Свободных лобби нет','info'); return; }
     await joinLobby(found.code);
-  } catch (e){
-    console.error('quickMatch:', e); haptic('error');
-    if (e.code==='PERMISSION_DENIED' || /permission/i.test(e.message)){ toast('Нет доступа к БД. Откройте Rules в Firebase.','err',5000); showRulesHint(e); }
-    else toast('Ошибка поиска: '+(e.message||''),'err',4000);
-  } finally { btn.disabled = false; btn.textContent = '⚡ Быстрый поиск'; }
+  }catch(e){
+    console.error(e);
+    if (e.code==='PERMISSION_DENIED' || /permission/i.test(e.message)) rulesHint();
+    else toast('Ошибка поиска','err');
+  }finally{ btn.disabled = false; btn.textContent = '⚡ Быстрый поиск'; }
 }
 
-function showRulesHint(err){
-  if (!err) return;
-  const msg = (err.message||'').toLowerCase(), code = err.code||'';
-  if (code==='PERMISSION_DENIED' || msg.includes('permission')){
-    modal({ icon:'🔐', title:'Нет доступа к базе',
-      text:'В Firebase Console → Realtime Database → Rules установите:\n\n{ "rules": { ".read": true, ".write": true } }',
-      actions:[{ label:'Понятно', style:'btn-primary' }]
-    });
-  }
-}
-
-function enterRoom(code, isHost){
-  if (State.lobbyRef){ try{ State.lobbyRef.off(); }catch(e){} State.lobbyRef=null; }
-  if (State.playerRef){ try{ State.playerRef.onDisconnect().cancel(); }catch(e){} State.playerRef=null; }
-
-  State.lobbyId = code;
-  State.isHost = isHost;
-  State.lobbyRef = db.ref('lobbies/'+code);
-  State.playerRef = db.ref(`lobbies/${code}/players/${USER.id}`);
-
-  try{ localStorage.setItem(LS_LAST_LOBBY, code); }catch{}
-
-  $('#roomCode').textContent = code;
-
-  // МАРКИРОВКА ONLINE + автоустановка offline при разрыве (не удаляем!)
-  State.playerRef.child('online').onDisconnect().set(false);
-  State.playerRef.child('lastSeen').onDisconnect().set(Date.now());
-  State.playerRef.update({ online: true, lastSeen: Date.now() }).catch(()=>{});
-
-  // Heartbeat
-  if (State.pingInterval) clearInterval(State.pingInterval);
-  State.pingInterval = setInterval(() => {
-    if (State.lobbyId && db && document.visibilityState==='visible'){
-      db.ref(`lobbies/${State.lobbyId}/players/${USER.id}/lastSeen`).set(Date.now()).catch(()=>{});
-      db.ref(`lobbies/${State.lobbyId}/players/${USER.id}/online`).set(true).catch(()=>{});
-    }
-  }, 25000);
-
-  State.lobbyRef.once('value')
-    .then(snap => {
-      if (!snap.exists()){ toast('Лобби больше не существует','err'); leaveRoom(false); return; }
-      State.lobby = snap.val(); routeLobby(State.lobby);
-    })
-    .catch(err => { console.error('initial fetch:', err); toast('Ошибка загрузки лобби','err'); showRulesHint(err); });
-
-  State.lobbyRef.on('value',
-    snap => {
-      if (!snap.exists()){ toast('Лобби закрыто','err'); leaveRoom(false); return; }
-      State.lobby = snap.val();
-      routeLobby(State.lobby);
-    },
-    err => { console.error('lobby on:', err); toast('Синхронизация недоступна','err',4000); showRulesHint(err); }
-  );
-
-  State.history = ['screen-menu', 'screen-lobby'];
-  showScreen('screen-room', { push:false });
-}
-
-function routeLobby(lobby){
-  if (!lobby) return;
-  if (lobby.status === 'playing' && lobby.game){
-    if (State.screen !== 'screen-game'){
-      showScreen('screen-game', { push:false });
-      State.history = ['screen-menu','screen-lobby'];
-    }
-    renderGame(normalizeGame(lobby.game));
-  } else {
-    if (State.screen === 'screen-game') showScreen('screen-room', { push:false });
-    renderRoom(lobby);
-  }
-}
-
-function renderRoom(lobby){
-  try {
-    if (!lobby) return;
-    const players = Object.values(lobby.players||{}).sort((a,b)=>(b.isHost?1:0)-(a.isHost?1:0)||(a.joinedAt||0)-(b.joinedAt||0));
-    $('#roomCount').textContent = `${players.length}/${lobby.maxPlayers}`;
-    const grid = $('#playersGrid'); grid.innerHTML = '';
-    players.forEach((p,i) => {
-      const isMe = String(p.id)===USER.id;
-      const offline = p.online === false;
-      const el = document.createElement('div');
-      el.className = 'player' + (p.isHost?' is-host':'') + (isMe?' is-me':'') + (offline?' offline':'');
-      el.style.animationDelay = (i*0.05)+'s';
-      const av = p.photo ? `<img src="${esc(p.photo)}" alt="" onerror="this.outerHTML='<div class=&quot;pf&quot;>${esc((p.name[0]||'★').toUpperCase())}</div>'">` : `<div class="pf">${esc((p.name[0]||'★').toUpperCase())}</div>`;
-      let badge = '';
-      if (p.isHost) badge = '<span class="player-badge badge-host">👑 Хост</span>';
-      else if (p.ready && !offline) badge = '<span class="player-badge badge-ready">Готов</span>';
-      el.innerHTML = `${badge}${av}<div class="player-name">${esc(isMe?'Вы':p.name)}</div>${offline?'<div class="ps-text" style="color:var(--danger);font-size:9px;margin-top:3px">оффлайн</div>':''}`;
-      grid.appendChild(el);
-    });
-    for (let i=players.length; i<lobby.maxPlayers; i++){
-      const el = document.createElement('div');
-      el.className = 'player-slot';
-      el.innerHTML = `<div class="ps-icon">＋</div><div class="ps-text">Свободно</div>`;
-      grid.appendChild(el);
-    }
-    const modeNames = { classic:'Классика', podkidnoy:'Подкидной', perevod:'Переводной' };
-    $('#roomParams').innerHTML = `
-      <div class="set-row"><div class="set-icon">🏷</div><div class="set-body"><div class="set-name">${esc(lobby.name||'Лобби')}</div><div class="set-desc">Название комнаты</div></div></div>
-      <div class="set-row"><div class="set-icon">👑</div><div class="set-body"><div class="set-name">${esc(lobby.hostName||'Хост')}</div><div class="set-desc">Создатель лобби</div></div></div>
-      <div class="set-row"><div class="set-icon">🎴</div><div class="set-body"><div class="set-name">Колода ${lobby.deck} карт</div><div class="set-desc">${modeNames[lobby.mode]||'Классика'}</div></div></div>
-    `;
-    const amHost = String(lobby.hostId)===USER.id;
-    State.isHost = amHost;
-    const me = lobby.players?.[USER.id];
-    $('#hostControls').classList.toggle('hidden', !amHost);
-    $('#guestControls').classList.toggle('hidden', amHost);
-
-    if (amHost){
-      const guests = players.filter(p => !p.isHost);
-      const allReady = guests.length > 0 && guests.every(p => p.ready);
-      const btn = $('#btnStartGame');
-      btn.disabled = !(allReady && players.length >= 2);
-      const hint = $('#hostHint');
-      if (players.length < 2) hint.textContent = 'Нужно минимум 2 игрока';
-      else if (!allReady) hint.textContent = 'Ожидаем готовности игроков';
-      else hint.textContent = 'Все готовы! Можно начинать';
-    } else if (me){
-      const rbtn = $('#btnReady');
-      rbtn.textContent = me.ready ? '✅ Готов (нажмите чтобы отменить)' : '⏳ Я готов';
-      rbtn.className = me.ready ? 'btn btn-primary' : 'btn btn-ghost';
-    }
-  } catch(e){ console.error('renderRoom:', e); }
-}
-
-function leaveRoom(confirm = true){
-  const doLeave = () => {
-    if (State.pingInterval){ clearInterval(State.pingInterval); State.pingInterval = null; }
-    if (State.lobbyRef){ try{ State.lobbyRef.off(); }catch(e){} State.lobbyRef=null; }
-    if (State.playerRef){
-      try{ State.playerRef.onDisconnect().cancel(); }catch(e){}
-      State.playerRef.remove().catch(()=>{});
-      State.playerRef = null;
-    }
-    if (State.lobbyId && State.isHost && db){
-      db.ref('lobbies/'+State.lobbyId).remove().catch(()=>{});
-    }
-    try{ localStorage.removeItem(LS_LAST_LOBBY); }catch{}
-    State.lobbyId = null; State.lobby = null; State.isHost = false;
-    haptic('light');
-    showScreen('screen-lobby', { push:false });
-    State.history = ['screen-menu'];
-  };
-  if (!confirm) return doLeave();
-  modal({ icon:'🚪', title:'Покинуть лобби?',
-    text: State.isHost ? 'Вы хост — лобби будет закрыто для всех.' : 'Вы сможете вернуться по коду.',
-    actions:[{ label:'Остаться', style:'btn-ghost' },{ label:'Выйти', style:'btn-danger', onClick: doLeave }]
-  });
-}
-
-function copyCode(){
-  const code = $('#roomCode').textContent;
-  if (!code || code.includes('—')) return;
-  const done = () => { haptic('success'); toast('Код скопирован: '+code,'ok'); };
-  const fail = () => modal({icon:'📋',title:'Код лобби',text:code,actions:[{label:'Закрыть',style:'btn-primary'}]});
-  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(code).then(done).catch(fail);
-  else fail();
-}
-
-async function startGame(){
-  if (!State.lobbyId || !State.lobby){ toast('Лобби не загружено','err'); return; }
-  if (String(State.lobby.hostId) !== USER.id){ haptic('error'); toast('Только хост может начать игру','err'); return; }
-  const players = Object.keys(State.lobby.players||{});
-  if (players.length < 2){ haptic('error'); toast('Нужно минимум 2 игрока','err'); return; }
-  const guests = Object.values(State.lobby.players).filter(p => String(p.id) !== String(State.lobby.hostId));
-  if (!guests.every(g => g.ready)){ haptic('error'); toast('Не все игроки готовы','err'); return; }
-
-  const btn = $('#btnStartGame'); btn.disabled = true; btn.textContent = '⏳ Запуск...';
-  try {
-    const game = createGame(State.lobby);
-    await db.ref('lobbies/'+State.lobbyId).update({ status:'playing', game, startedAt: Date.now() });
-    haptic('success'); toast('Игра начинается! 🚀','ok');
-  } catch (e){
-    console.error('startGame:', e); haptic('error');
-    toast('Ошибка запуска: '+(e.message||''),'err',4000); showRulesHint(e);
-  } finally { btn.disabled = false; btn.textContent = '🚀 Начать игру'; }
+function rulesHint(){
+  modal({ icon:'🔐', title:'Нет доступа к БД',
+    text:'Firebase Console → Realtime Database → Rules:\n{ "rules": { ".read": true, ".write": true } }',
+    actions:[{label:'Понятно', style:'btn-gold'}] });
 }
 
 /* =========================================================
-   12. GAME ACTIONS + TRANSACTIONS
+   11. ROOM (waiting)
    ========================================================= */
-async function performGameAction(fn){
-  if (!State.lobbyId) return false;
-  const ref = db.ref(`lobbies/${State.lobbyId}/game`);
-  try {
-    const result = await ref.transaction(g => {
-      if (!g){ return; }
-      g = normalizeGame(g);
+function enterRoom(code, isHost){
+  // cleanup old
+  if (State.lobbyRef){ try{ State.lobbyRef.off(); }catch(e){} }
+  if (State.playerRef){ try{ State.playerRef.onDisconnect().cancel(); }catch(e){} }
+  if (State.heartbeat) clearInterval(State.heartbeat);
+
+  State.code = code;
+  State.isHost = isHost;
+  State.lobbyRef = db.ref('lobbies/'+code);
+  State.playerRef = db.ref(`lobbies/${code}/members/${USER.id}`);
+
+  try{ localStorage.setItem(LS_CODE, code); }catch{}
+
+  $('#roomCode').textContent = code;
+
+  // === HOST-as-SIGNALER: register onDisconnect (only flips online flag) ===
+  State.playerRef.child('online').onDisconnect().set(false);
+  State.playerRef.child('lastSeen').onDisconnect().set(Date.now());
+  State.playerRef.update({ online:true, lastSeen:Date.now() }).catch(()=>{});
+
+  // Heartbeat every 20s
+  State.heartbeat = setInterval(()=>{
+    if (State.code && db && !document.hidden){
+      db.ref(`lobbies/${State.code}/members/${USER.id}/lastSeen`).set(Date.now()).catch(()=>{});
+      db.ref(`lobbies/${State.code}/members/${USER.id}/online`).set(true).catch(()=>{});
+    }
+  }, 20000);
+
+  State.lobbyRef.once('value').then(snap=>{
+    if (!snap.exists()){ toast('Лобби закрыто','err'); leaveRoom(false); return; }
+    State.lobby = snap.val(); route();
+  }).catch(err=>{
+    console.error('initial:', err);
+    if (err.code==='PERMISSION_DENIED') rulesHint();
+  });
+
+  State.lobbyRef.on('value', snap=>{
+    if (!snap.exists()){ toast('Лобби закрыто','err'); leaveRoom(false); return; }
+    State.lobby = snap.val();
+    route();
+  }, err=>{
+    console.error('on:', err);
+    if (err.code==='PERMISSION_DENIED') rulesHint();
+  });
+
+  State.history = ['menu','lobby'];
+  showScreen('room', { push:false });
+}
+
+function route(){
+  const l = State.lobby;
+  if (!l) return;
+  if (l.status === 'playing' && l.game){
+    if (State.screen !== 'game'){
+      showScreen('game', { push:false });
+      State.history = ['menu','lobby'];
+    }
+    renderGame(normGame(l.game));
+  } else if (l.status === 'finished' && l.game){
+    renderGame(normGame(l.game));
+  } else {
+    if (State.screen === 'game') showScreen('room', { push:false });
+    renderRoom();
+  }
+}
+
+function renderRoom(){
+  const l = State.lobby; if (!l) return;
+  const mem = Object.values(l.members||{}).sort((a,b)=>(b.host?1:0)-(a.host?1:0)||(a.joinedAt||0)-(b.joinedAt||0));
+  $('#roomCount').textContent = mem.length + '/' + l.maxPlayers;
+  const g = $('#roomPlayers'); g.innerHTML = '';
+  mem.forEach((p,i)=>{
+    const me = String(p.id) === USER.id;
+    const off = p.online === false;
+    const el = document.createElement('div');
+    el.className = 'rp' + (p.host?' host':'') + (p.ready&&!p.host?' ready':'') + (me?' me':'') + (off?' offline':'');
+    const av = p.photo
+      ? `<img src="${esc(p.photo)}" onerror="this.outerHTML='<div class=&quot;fb&quot;>${esc((p.name[0]||'★').toUpperCase())}</div>'">`
+      : `<div class="fb">${esc((p.name[0]||'★').toUpperCase())}</div>`;
+    let badge = '';
+    if (p.host) badge = '<span class="b b-host">👑</span>';
+    else if (p.ready && !off) badge = '<span class="b b-ready">✓</span>';
+    el.innerHTML = `${badge}${av}<div class="nm">${esc(me?'Вы':p.name)}</div>${off?'<div style="font-size:9px;color:#ff4d5e;margin-top:3px">оффлайн</div>':''}`;
+    g.appendChild(el);
+  });
+  for (let i=mem.length; i<l.maxPlayers; i++){
+    const el = document.createElement('div');
+    el.className = 'rp-slot'; el.textContent = '+';
+    g.appendChild(el);
+  }
+
+  const modes = { classic:'Классика', podkidnoy:'Подкидной' };
+  $('#roomParams').innerHTML = `
+    <div class="set-row"><div class="set-ic">🏷</div><div class="set-info"><div class="set-name">${esc(l.name||'—')}</div><div class="set-desc">Название</div></div></div>
+    <div class="set-row"><div class="set-ic">👑</div><div class="set-info"><div class="set-name">${esc(l.hostName||'—')}</div><div class="set-desc">Хост (создатель)</div></div></div>
+    <div class="set-row"><div class="set-ic">🎴</div><div class="set-info"><div class="set-name">${l.deck} карт • ${modes[l.mode]||'Классика'}</div><div class="set-desc">${l.privacy==='public'?'Публичное':'Приватное'}</div></div></div>
+  `;
+
+  const amHost = String(l.host) === USER.id;
+  State.isHost = amHost;
+  const me = l.members?.[USER.id];
+  $('#btnStart').classList.toggle('hidden', !amHost);
+  $('#btnReady').classList.toggle('hidden', amHost);
+  $('#readyHint').classList.toggle('hidden', false);
+
+  if (amHost){
+    const guests = mem.filter(m => !m.host);
+    const allReady = guests.length > 0 && guests.every(m => m.ready);
+    $('#btnStart').disabled = !(allReady && mem.length >= 2);
+    const hint = $('#readyHint');
+    if (mem.length < 2) hint.textContent = 'Нужно минимум 2 игрока';
+    else if (!allReady) hint.textContent = 'Ожидаем готовности гостей';
+    else hint.textContent = '✓ Все готовы!';
+  } else if (me){
+    const rb = $('#btnReady');
+    rb.textContent = me.ready ? '✅ Готов' : '⏳ Я готов';
+    rb.className = 'btn ' + (me.ready ? 'btn-gold' : 'btn-blue');
+    $('#readyHint').textContent = me.ready ? 'Ожидайте запуска от хоста' : 'Нажмите «Я готов»';
+  }
+}
+
+function leaveRoom(confirm=true){
+  const doLeave = ()=>{
+    if (State.heartbeat){ clearInterval(State.heartbeat); State.heartbeat = null; }
+    if (State.lobbyRef){ try{ State.lobbyRef.off(); }catch(e){} State.lobbyRef = null; }
+    if (State.playerRef){ try{ State.playerRef.onDisconnect().cancel(); }catch(e){} State.playerRef.remove().catch(()=>{}); State.playerRef = null; }
+    if (State.code && State.isHost && db) db.ref('lobbies/'+State.code).remove().catch(()=>{});
+    try{ localStorage.removeItem(LS_CODE); }catch{}
+    State.code = null; State.lobby = null; State.isHost = false;
+    if (State.timerInt){ clearInterval(State.timerInt); State.timerInt = null; }
+    haptic('light');
+    showScreen('lobby', { push:false });
+    State.history = ['menu'];
+  };
+  if (!confirm) return doLeave();
+  modal({ icon:'🚪', title:'Покинуть лобби?',
+    text: State.isHost ? 'Вы хост — лобби закроется для всех.' : 'Вы сможете вернуться по коду.',
+    actions:[{label:'Остаться',style:'btn-outline'},{label:'Выйти',style:'btn-red',onClick: doLeave}]
+  });
+}
+
+async function startGame(){
+  if (!State.code || !State.lobby) return;
+  if (String(State.lobby.host) !== USER.id){ toast('Только хост','err'); return; }
+  const mem = Object.keys(State.lobby.members||{});
+  if (mem.length < 2){ toast('Нужно 2+ игрока','err'); return; }
+  const guests = Object.values(State.lobby.members).filter(m => !m.host);
+  if (!guests.every(g => g.ready)){ toast('Не все готовы','err'); return; }
+  const btn = $('#btnStart'); btn.disabled = true; btn.textContent = '⏳...';
+  try{
+    // Build game state
+    const game = createGame(State.lobby);
+    await db.ref('lobbies/'+State.code).update({ status:'playing', game, startedAt: Date.now() });
+    haptic('success'); toast('Игра началась!','ok');
+  }catch(e){
+    console.error(e); toast('Ошибка: '+(e.message||''),'err');
+    if (e.code==='PERMISSION_DENIED') rulesHint();
+  }finally{ btn.disabled = false; btn.textContent = '🚀 Начать игру'; }
+}
+
+/* =========================================================
+   12. GAME ACTIONS (transactions)
+   ========================================================= */
+async function gameAction(fn){
+  if (!State.code) return false;
+  const ref = db.ref(`lobbies/${State.code}/game`);
+  try{
+    const res = await ref.transaction(g=>{
+      if (!g) return;
+      g = normGame(g);
       const ok = fn(g);
       if (!ok) return;
       return g;
     });
-    return result.committed;
-  } catch (e){
-    console.error('transaction:', e);
-    toast('Не удалось: '+(e.message||''), 'err', 3000);
+    return res.committed;
+  }catch(e){
+    console.error('tx:', e);
+    if (e.code==='PERMISSION_DENIED') rulesHint();
+    else toast('Ошибка хода','err');
     return false;
   }
 }
 
-function playCard(card){
-  const g = State.lobby?.game;
-  if (!g) return;
-  const role = g.roles?.[USER.id];
-  const phase = g.phase;
-  if (role === 'attacker' && (phase === 'attack' || phase === 'throw')){
-    performGameAction(gg => actionAttack(gg, USER.id, card)).then(ok => {
-      if (ok){ haptic('medium'); beep(); } else haptic('error');
-    });
-  } else if (role === 'defender' && phase === 'defend'){
-    performGameAction(gg => actionDefend(gg, USER.id, card)).then(ok => {
-      if (ok){ haptic('success'); beep(); } else { haptic('error'); toast('Эта карта не бьёт','err',1500); }
-    });
-  }
-}
-
-function takeCards(){
-  performGameAction(g => actionTake(g, USER.id)).then(ok => {
-    if (ok){ haptic('medium'); beep(220); }
+function doAttack(card){
+  gameAction(g => gAttack(g, USER.id, card)).then(ok=>{
+    if (ok){ haptic('medium'); beep(520,0.08); }
+    else { haptic('error'); toast('Нельзя сыграть','err',1400); }
   });
 }
-
-function bito(){
-  performGameAction(g => actionBito(g, USER.id)).then(ok => {
-    if (ok){ haptic('success'); beep(660); }
+function doDefend(card){
+  gameAction(g => gDefend(g, USER.id, card)).then(ok=>{
+    if (ok){ haptic('success'); beep(660,0.1); }
+    else { haptic('error'); toast('Не бьёт','err',1400); }
   });
+}
+function doTake(){
+  gameAction(g => gTake(g, USER.id)).then(ok=>{ if(ok){ haptic('medium'); beep(220,0.15); }});
+}
+function doBito(){
+  gameAction(g => gBito(g, USER.id)).then(ok=>{ if(ok){ haptic('success'); beep(780,0.12); }});
+}
+function doTranslate(card){
+  gameAction(g => gTranslate(g, USER.id, card)).then(ok=>{ if(ok){ haptic('success'); beep(880,0.1); }});
 }
 
 /* =========================================================
-   13. RENDER GAME
+   13. RENDER GAME (Durak Online style)
    ========================================================= */
-function cardEl(card, trumpSuit, opts={}){
-  const el = document.createElement('div');
+function cardHTML(card, {mini=false, trump='', click=false} = {}){
+  if (!card) return '';
+  const red = RED.has(card.s);
+  const isTrump = card.s === trump;
   const cls = ['card'];
-  if (RED_SUITS.has(card.suit)) cls.push('red');
-  if (card.suit === trumpSuit) cls.push('trump');
-  if (opts.mini) cls.push('card-mini');
-  el.className = cls.join(' ');
-  el.innerHTML = `
-    <div class="c-corner"><span class="c-rank">${card.rank}</span><span class="c-suit">${card.suit}</span></div>
-    <div class="c-center">${card.suit}</div>
-    <div class="c-corner bottom"><span class="c-rank">${card.rank}</span><span class="c-suit">${card.suit}</span></div>
-  `;
-  return el;
-}
-function cardBackEl(mini){
-  const el = document.createElement('div');
-  el.className = 'card card-back' + (mini?' card-mini':'');
-  el.innerHTML = `<div class="c-corner"><span class="c-rank">?</span><span class="c-suit">★</span></div><div class="c-center">★</div>`;
-  return el;
+  if (red) cls.push('red');
+  if (isTrump) cls.push('trump');
+  if (mini) cls.push('mini');
+  return `<div class="${cls.join(' ')}" ${click?'data-click="1"':''}>
+    <span class="cn">${card.r}</span>
+    <span class="cs">${card.s}</span>
+    <span class="mid">${card.s}</span>
+    <span class="cn-b">${card.r}</span>
+    <span class="cs-b">${card.s}</span>
+  </div>`;
 }
 
 function renderGame(g){
   if (!g) return;
-  g = normalizeGame(g);
+  State.lastGameState = g;
 
-  $('#gameRoundLabel').textContent = 'Раунд ' + (g.round||1) + (g.finished ? ' • Финал' : '');
-
-  // Trump
-  const trumpBox = $('#uiTrump');
-  trumpBox.innerHTML = '';
-  if (g.trumpCard){
-    const el = cardEl(g.trumpCard, g.trumpSuit, {mini:true});
-    trumpBox.appendChild(el);
-  } else {
-    const el = cardEl({suit:g.trumpSuit, rank:'A'}, g.trumpSuit, {mini:true});
-    el.style.opacity = '.4';
-    trumpBox.appendChild(el);
-  }
-
-  $('#uiDeckCount').textContent = (g.deck||[]).length + (g.trumpCard?1:0);
-
-  // My role
-  const myRole = g.roles?.[USER.id] || 'idle';
-  const myRoleName = myRole === 'attacker' ? 'Атакующий' : myRole === 'defender' ? 'Защита' : 'Ожидание';
-  $('#uiMyRole').textContent = g.finished ? '—' : myRoleName;
-
-  // Opponents
-  const oppRow = $('#opponentsRow');
-  oppRow.innerHTML = '';
+  // === MY INFO ===
   const me = g.hands?.[USER.id] || [];
-  const others = (g.order||[]).filter(pid => pid !== USER.id);
-  others.forEach(pid => {
-    const p = State.lobby.players?.[pid];
-    if (!p) return;
-    const hand = g.hands?.[pid] || [];
-    const role = g.roles?.[pid] || 'idle';
-    const isAtk = role === 'attacker', isDef = role === 'defender';
-    const el = document.createElement('div');
-    el.className = 'opponent' + (isAtk?' is-attacker':'') + (isDef?' is-defender':'') + (p.online===false?' offline':'');
-    const av = p.photo
-      ? `<img src="${esc(p.photo)}" alt="" onerror="this.outerHTML='<div class=&quot;op-av&quot;>${esc((p.name[0]||'★').toUpperCase())}</div>'">`
-      : `<div class="op-av">${esc((p.name[0]||'★').toUpperCase())}</div>`;
-    let roleBadge = '';
-    if (isAtk) roleBadge = '<span class="op-role attacker">Атака</span>';
-    else if (isDef) roleBadge = '<span class="op-role defender">Защита</span>';
-    let offDot = p.online===false ? '<div class="op-offline"></div>' : '';
-    el.innerHTML = `${roleBadge}${offDot}${av}
-      <div class="op-name">${esc(p.name)}</div>
-      <div class="op-cards">🃏 ${hand.length}</div>
-    `;
-    oppRow.appendChild(el);
-  });
+  const amAttacker = g.order[g.attackerIdx] === USER.id;
+  const amDefender = g.order[g.defenderIdx] === USER.id;
+  const isMyTurn = (amAttacker && (g.phase==='attack'||g.phase==='throw')) || (amDefender && g.phase==='defend');
 
-  // Table
-  const tc = $('#tableCenter');
-  tc.innerHTML = '';
-  const tableArr = g.table || [];
-  if (tableArr.length === 0) tc.classList.add('empty'); else tc.classList.remove('empty');
-  for (const pair of tableArr){
-    const wrap = document.createElement('div');
-    wrap.className = 'table-pair';
-    const atkEl = cardEl(pair.attack, g.trumpSuit);
-    atkEl.classList.add('attack');
-    wrap.appendChild(atkEl);
-    if (pair.defend){
-      const defEl = cardEl(pair.defend, g.trumpSuit);
-      defEl.classList.add('defend');
-      wrap.appendChild(defEl);
-    }
-    tc.appendChild(wrap);
+  // === OPPONENTS ===
+  const opps = $('#oppsRow'); opps.innerHTML = '';
+  for (const pid of g.order){
+    if (pid === USER.id) continue;
+    const p = State.lobby.members?.[pid];
+    if (!p) continue;
+    const hand = g.hands?.[pid] || [];
+    const isAtk = g.order[g.attackerIdx] === pid;
+    const isDef = g.order[g.defenderIdx] === pid;
+    const isActive = isAtk || isDef;
+    const off = p.online === false;
+
+    const el = document.createElement('div');
+    el.className = 'opp' + (isActive?' active':'') + (isAtk?' attacker':'') + (isDef?' defender':'') + (off?' offline':'');
+    const av = p.photo
+      ? `<img class="opp-av" src="${esc(p.photo)}" onerror="this.outerHTML='<div class=&quot;opp-av-fb&quot;>${esc((p.name[0]||'★').toUpperCase())}</div>'">`
+      : `<div class="opp-av-fb">${esc((p.name[0]||'★').toUpperCase())}</div>`;
+    let badge = '';
+    if (isAtk) badge = '<div class="opp-badge attacker">атака</div>';
+    else if (isDef) badge = '<div class="opp-badge defender">защита</div>';
+    el.innerHTML = `<div class="opp-av-wrap">${av}<div class="opp-cnt">${hand.length}</div></div><div class="opp-name">${esc(p.name)}</div>${badge}`;
+    opps.appendChild(el);
   }
 
-  // My hand
-  const handBox = $('#myHand');
-  handBox.innerHTML = '';
-  let sortedHand = [...me];
-  if (State.settings.sort) sortedHand = sortHand(sortedHand, g.trumpSuit);
-  const phase = g.phase;
-  const iAmAttacker = myRole === 'attacker';
-  const iAmDefender = myRole === 'defender';
+  // === DECK ===
+  const deckRemaining = (g.deck||[]).length + (g.trumpCard?1:0);
+  $('#deckCount').textContent = deckRemaining;
+  $('#deckStack').style.display = deckRemaining > 0 ? '' : 'none';
 
-  const undefended = tableArr.find(p => !p.defend);
-  const ranksOnTable = new Set();
-  for (const p of tableArr){ ranksOnTable.add(p.attack.rank); if (p.defend) ranksOnTable.add(p.defend.rank); }
+  // === TRUMP ===
+  const tSlot = $('#trumpSlot');
+  if (g.trumpCard){
+    tSlot.innerHTML = cardHTML(g.trumpCard, {trump:g.trumpSuit}) + `<div class="trump-suit-badge">${g.trumpSuit}</div>`;
+  } else {
+    tSlot.innerHTML = `<div style="width:44px;height:64px;display:grid;place-items:center;font-size:32px;color:${RED.has(g.trumpSuit)?'#ff4d5e':'#fff'};opacity:.6">${g.trumpSuit}</div><div class="trump-suit-badge">${g.trumpSuit}</div>`;
+  }
 
-  sortedHand.forEach(card => {
-    const el = cardEl(card, g.trumpSuit);
-    if (g.finished){ el.classList.add('disabled'); handBox.appendChild(el); return; }
+  // === TABLE ===
+  const tc = $('#tableCenter'); tc.innerHTML = '';
+  if ((g.table||[]).length === 0) tc.classList.add('empty'); else tc.classList.remove('empty');
+  for (const pair of g.table||[]){
+    const p = document.createElement('div');
+    p.className = 'pair';
+    let html = `<div class="card atk-wrap">${cardHTML(pair.atk,{trump:g.trumpSuit})}</div>`;
+    // simpler: two absolute cards
+    p.innerHTML = `
+      <div style="position:absolute;top:0;left:0">${cardHTML(pair.atk,{trump:g.trumpSuit})}</div>
+      ${pair.def ? `<div style="position:absolute;top:6px;left:6px;z-index:2;transform:rotate(8deg)">${cardHTML(pair.def,{trump:g.trumpSuit})}</div>` : ''}
+    `;
+    tc.appendChild(p);
+  }
 
+  // === MY HAND ===
+  const hand = State.settings.sort ? sortHand(me, g.trumpSuit) : me;
+  const mh = $('#myHand'); mh.innerHTML = '';
+
+  const tableRanks = new Set();
+  for (const p of g.table||[]){ tableRanks.add(p.atk.r); if (p.def) tableRanks.add(p.def.r); }
+  const undefended = (g.table||[]).find(p => !p.def);
+  const tableLen = (g.table||[]).length;
+
+  hand.forEach(card => {
     let playable = false;
-    if (iAmAttacker && (phase === 'attack' || phase === 'throw')){
-      if (phase === 'attack') playable = true;
-      else if (phase === 'throw'){
-        if (ranksOnTable.has(card.rank) && tableArr.length < 6) playable = true;
-      }
-    } else if (iAmDefender && phase === 'defend' && undefended){
-      if (canBeat(card, undefended.attack, g.trumpSuit)) playable = true;
+    let hint = false;
+    if (!g.finished){
+      if (amAttacker && g.phase === 'attack' && tableLen === 0) playable = true;
+      else if (amAttacker && g.phase === 'throw' && tableRanks.has(card.r) && tableLen < 6) playable = true;
+      else if (amDefender && g.phase === 'defend' && undefended && canBeat(card, undefended.atk, g.trumpSuit)) playable = true;
     }
-    if (playable){
-      el.classList.add('playable');
-      el.onclick = () => playCard(card);
-    } else {
-      el.classList.add('disabled');
-    }
-    handBox.appendChild(el);
+    const inner = cardHTML(card, {trump:g.trumpSuit});
+    const div = document.createElement('div');
+    div.innerHTML = inner;
+    const cardEl = div.firstElementChild;
+    if (g.finished) cardEl.classList.add('disabled');
+    else if (playable){
+      cardEl.classList.add('playable');
+      cardEl.onclick = () => {
+        if (amAttacker && (g.phase==='attack'||g.phase==='throw')) doAttack(card);
+        else if (amDefender && g.phase==='defend') doDefend(card);
+      };
+    } else cardEl.classList.add('disabled');
+    mh.appendChild(cardEl);
   });
 
-  $('#myHandCount').textContent = sortedHand.length;
+  // === MY AVATAR ===
+  const abMe = $('#abMe');
+  const myCnt = me.length;
+  const mp = State.lobby.members?.[USER.id] || {};
+  const av = mp.photo
+    ? `<img class="opp-av" src="${esc(mp.photo)}" onerror="this.outerHTML='<div class=&quot;opp-av-fb&quot;>${esc((mp.name[0]||'★').toUpperCase())}</div>'">`
+    : `<div class="opp-av-fb">${esc((mp.name[0]||'★').toUpperCase())}</div>`;
+  abMe.className = 'ab-me' + (isMyTurn?' active':'') + (amAttacker&&g.phase!=='finished'?' attacker':'') + (amDefender&&g.phase!=='finished'?' defender':'');
+  abMe.innerHTML = `${av}<div class="opp-cnt">${myCnt}</div>`;
 
-  // Actions
-  const actions = $('#gameActions');
-  actions.innerHTML = '';
-  const status = $('#gameStatus');
+  // === ACTION BAR ===
+  const ab = $('#abActions'); ab.innerHTML = '';
 
   if (g.finished){
-    status.className = 'game-status';
-    status.textContent = g.loser === USER.id ? '😭 Вы проиграли' : '🏆 Вы победили!';
+    const iLost = g.loserId === USER.id;
+    const st = document.createElement('div');
+    st.className = 'ab-status hot';
+    st.textContent = iLost ? '😭 Вы проиграли' : '🏆 Победа!';
+    ab.appendChild(st);
     const btn = document.createElement('button');
-    btn.className = 'btn btn-ghost';
-    btn.textContent = '← Выйти';
-    btn.onclick = () => leaveRoom(false);
-    actions.appendChild(btn);
-  } else if (iAmDefender && phase === 'defend'){
-    status.className = 'game-status hot';
-    status.textContent = '🛡 Ваша защита — отбейте или возьмите';
+    btn.className = 'act-btn ' + (iLost ? 'red' : 'green');
+    btn.textContent = 'Выйти';
+    btn.onclick = ()=>leaveRoom(false);
+    ab.appendChild(btn);
+  } else if (amDefender && g.phase === 'defend'){
+    const st = document.createElement('div');
+    st.className = 'ab-status hot';
+    st.textContent = '🛡 Ваш ход';
+    ab.appendChild(st);
     const takeBtn = document.createElement('button');
-    takeBtn.className = 'btn btn-danger';
+    takeBtn.className = 'act-btn red';
     takeBtn.textContent = '🤲 Взять';
-    takeBtn.onclick = takeCards;
-    actions.appendChild(takeBtn);
-  } else if (iAmAttacker && phase === 'throw'){
-    status.className = 'game-status hot';
-    status.textContent = '⚔️ Подкиньте ещё или скажите «Бито»';
-    const bitoBtn = document.createElement('button');
-    bitoBtn.className = 'btn btn-gold';
-    bitoBtn.textContent = '✅ Бито';
-    bitoBtn.onclick = bito;
-    actions.appendChild(bitoBtn);
-  } else if (iAmAttacker && phase === 'attack'){
-    status.className = 'game-status hot';
-    status.textContent = '⚔️ Ваш ход — выберите карту';
+    takeBtn.onclick = doTake;
+    ab.appendChild(takeBtn);
+    // Translate if possible
+    if ((g.table||[]).length === 1 && !g.table[0].def && g.order.length >= 3){
+      const rank = g.table[0].atk.r;
+      const matchIdx = me.findIndex(c => c.r === rank);
+      if (matchIdx >= 0){
+        const trBtn = document.createElement('button');
+        trBtn.className = 'act-btn gold';
+        trBtn.textContent = '↔ Перевести';
+        trBtn.onclick = () => doTranslate(me[matchIdx]);
+        ab.appendChild(trBtn);
+      }
+    }
+  } else if (amAttacker && g.phase === 'throw'){
+    const st = document.createElement('div');
+    st.className = 'ab-status hot';
+    st.textContent = '⚔️ Ваш ход';
+    ab.appendChild(st);
+    const bBtn = document.createElement('button');
+    bBtn.className = 'act-btn green';
+    bBtn.textContent = '✅ Бито';
+    bBtn.onclick = doBito;
+    ab.appendChild(bBtn);
+  } else if (amAttacker && g.phase === 'attack'){
+    const st = document.createElement('div');
+    st.className = 'ab-status hot';
+    st.textContent = '⚔️ Ваш ход — выберите карту';
+    ab.appendChild(st);
   } else {
-    status.className = 'game-status';
-    status.textContent = '⏳ Ожидайте хода другого игрока';
+    const st = document.createElement('div');
+    st.className = 'ab-status';
+    st.textContent = '⏳ Ожидайте хода';
+    ab.appendChild(st);
+  }
+
+  // === TIMER ===
+  if (State.settings.timer && !g.finished && isMyTurn){
+    const elapsed = (Date.now() - (g.turnStartedAt||Date.now())) / 1000;
+    const remaining = Math.max(0, 30 - elapsed);
+    $('#timerFill').style.width = (remaining/30*100) + '%';
+    if (!State.timerInt){
+      State.timerInt = setInterval(()=>{
+        const g2 = State.lastGameState;
+        if (!g2 || g2.finished){ $('#timerFill').style.width='100%'; return; }
+        const e = (Date.now() - (g2.turnStartedAt||Date.now()))/1000;
+        const r = Math.max(0, 30-e);
+        $('#timerFill').style.width = (r/30*100) + '%';
+        if (r <= 0 && State.timerInt){ clearInterval(State.timerInt); State.timerInt = null; }
+      }, 1000);
+    }
+  } else {
+    $('#timerFill').style.width = '100%';
+    if (State.timerInt){ clearInterval(State.timerInt); State.timerInt = null; }
+  }
+
+  // === TRACK last action for haptic ===
+  if (g.lastAction && g.lastAction.at && g.lastAction.at !== State.lastAction.at){
+    State.lastAction = g.lastAction;
+    if (g.lastAction.type === 'attack' && g.lastAction.by !== USER.id) beep(400, 0.06);
+    else if (g.lastAction.type === 'defend' && g.lastAction.by !== USER.id) beep(700, 0.06);
+    else if (g.lastAction.type === 'take' && g.lastAction.by !== USER.id) beep(200, 0.15);
+    else if (g.lastAction.type === 'bito' && g.lastAction.by !== USER.id) beep(820, 0.1);
   }
 }
 
 /* =========================================================
-   14. SOUND (WebAudio simple)
-   ========================================================= */
-let audioCtx = null;
-function beep(freq=440){
-  if (!State.settings.sfx) return;
-  try{
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.frequency.value = freq;
-    osc.type = 'sine';
-    gain.gain.value = (State.settings.sfxVol||70)/100 * 0.1;
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.08);
-  }catch(e){}
-}
-
-/* =========================================================
-   15. BIND UI
+   14. UI BINDINGS
    ========================================================= */
 function bindUI(){
-  $('#btnPlay').addEventListener('click', ()=>{ haptic('medium'); showScreen('screen-lobby'); });
-  $('#btnSettings').addEventListener('click', ()=>{ haptic('light'); showScreen('screen-settings'); });
-  $('#btnSettingsTop').addEventListener('click', ()=>{ haptic('light'); showScreen('screen-settings'); });
+  $('#toPlay').addEventListener('click', ()=>{ haptic('medium'); showScreen('lobby'); });
+  $('#toSettings').addEventListener('click', ()=>{ haptic('light'); showScreen('settings'); });
 
-  $$('.tab').forEach(tab=>{
-    tab.addEventListener('click', ()=>{
-      $$('.tab').forEach(t=>t.classList.remove('active'));
-      tab.classList.add('active');
+  $$('.tab').forEach(t=>{
+    t.addEventListener('click', ()=>{
+      $$('.tab').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
       $$('.tab-panel').forEach(p=>p.classList.remove('active'));
-      const panel = $('#panel-'+tab.dataset.tab); if (panel) panel.classList.add('active');
+      const map = { create:'tabCreate', join:'tabJoin' };
+      $('#'+map[t.dataset.tab])?.classList.add('active');
       haptic('light');
     });
   });
+  $$('[data-seg]').forEach(seg=>{
+    seg.addEventListener('click', e=>{
+      const b = e.target.closest('button'); if(!b) return;
+      $$('button', seg).forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); haptic('light');
+    });
+  });
 
-  $('#btnCreateLobby').addEventListener('click', createLobby);
-  $('#btnJoinLobby').addEventListener('click', ()=>joinLobby($('#joinCode').value));
-  $('#btnQuickMatch').addEventListener('click', quickMatch);
+  $('#btnCreate').addEventListener('click', createLobby);
+  $('#btnJoin').addEventListener('click', ()=>joinLobby($('#joinCode').value));
+  $('#btnQuick').addEventListener('click', quickMatch);
   $('#joinCode').addEventListener('input', e=>{ e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''); });
-  $('#joinCode').addEventListener('keydown', e=>{ if (e.key==='Enter') joinLobby(e.target.value); });
+  $('#joinCode').addEventListener('keydown', e=>{ if(e.key==='Enter') joinLobby(e.target.value); });
 
-  $('#btnCopyCode').addEventListener('click', copyCode);
-  $('#btnLeaveRoom').addEventListener('click', ()=>leaveRoom(true));
-  $('#btnLeaveRoom2').addEventListener('click', ()=>leaveRoom(true));
-  $('#btnStartGame').addEventListener('click', startGame);
+  $('#copyCode').addEventListener('click', ()=>{
+    const c = $('#roomCode').textContent;
+    if (!c || c.includes('—')) return;
+    const done = ()=>{ haptic('success'); toast('Скопировано: '+c,'ok'); };
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(c).then(done).catch(()=>toast(c,'info'));
+    else toast(c,'info');
+  });
+  $('#roomCode').addEventListener('click', ()=>$('#copyCode').click());
 
+  $('#leaveRoom1').addEventListener('click', ()=>leaveRoom(true));
+  $('#btnStart').addEventListener('click', startGame);
   $('#btnReady').addEventListener('click', ()=>{
-    if (!State.lobbyId) return;
-    const me = State.lobby?.players?.[USER.id];
+    if (!State.code) return;
+    const me = State.lobby?.members?.[USER.id];
     const next = !me?.ready;
-    db.ref(`lobbies/${State.lobbyId}/players/${USER.id}/ready`).set(next)
-      .then(()=>{ haptic(next?'success':'light'); toast(next?'Вы готовы!':'Готовность снята', next?'ok':'info', 1500); })
-      .catch(e=>toast('Ошибка: '+(e.message||''),'err'));
+    db.ref(`lobbies/${State.code}/members/${USER.id}/ready`).set(next)
+      .then(()=>{ haptic(next?'success':'light'); toast(next?'Готов!':'Отменено', next?'ok':'info',1500); })
+      .catch(()=>toast('Ошибка','err'));
   });
 
-  $('#btnLeaveGame').addEventListener('click', ()=>{
-    modal({ icon:'🚪', title:'Покинуть игру?',
-      text:'Вы выйдете из игры. Если вы хост — лобби будет закрыто.',
-      actions:[{label:'Остаться',style:'btn-ghost'},{label:'Выйти',style:'btn-danger',onClick:()=>leaveRoom(false)}]
+  $('#gtBack').addEventListener('click', ()=>{
+    modal({ icon:'🚪', title:'Выйти из игры?',
+      text: State.isHost ? 'Вы хост — лобби закроется.' : 'Вы выйдете из игры.',
+      actions:[{label:'Остаться',style:'btn-outline'},{label:'Выйти',style:'btn-red',onClick:()=>leaveRoom(false)}]
     });
   });
-  $('#btnGameRules').addEventListener('click', ()=>{
-    modal({ icon:'ℹ', title:'Дурак на Звёзды',
-      text:'• Атакующий кладёт карту\n• Защитник бьёт старшей картой той же масти или козырем\n• Атакующий может подкидывать карты того же ранга\n• Если защитник взял — карты уходят в его руку\n• Кто первый сбросил все карты — победил\n• Последний с картами — «дурак» 🃏',
-      actions:[{label:'Понятно',style:'btn-primary'}]
+  $('#gtSound').addEventListener('click', ()=>{
+    State.settings.sfx = !State.settings.sfx;
+    saveSettings();
+    $('#gtSound').textContent = State.settings.sfx ? '🔊' : '🔇';
+    toast(State.settings.sfx?'Звук вкл':'Звук выкл','info',1200);
+  });
+  $('#gtSound').textContent = State.settings.sfx ? '🔊' : '🔇';
+  $('#gtHelp').addEventListener('click', ()=>{
+    modal({ icon:'❓', title:'Правила',
+      text:'• Атакующий кладёт карту\n• Защитник бьёт старшей картой той же масти или козырем\n• Атакующий может подкидывать карты того же ранга\n• Защитник может «взять» или «перевести»\n• Первый сбросивший все карты — победил\n• Последний — «дурак»',
+      actions:[{label:'OK',style:'btn-gold'}]
     });
   });
 
-  let tx=0, ty=0;
-  document.addEventListener('touchstart', e=>{ tx=e.touches[0].clientX; ty=e.touches[0].clientY; }, {passive:true});
+  // Emotes
+  $$('.emote-btn').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const emoji = b.dataset.emote;
+      haptic('light');
+      // float animation locally
+      const el = document.createElement('div');
+      el.className = 'float-emote';
+      el.textContent = emoji;
+      el.style.left = (Math.random()*60+20)+'%';
+      el.style.bottom = '120px';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(), 2500);
+      // Send to others
+      if (State.code && db) db.ref(`lobbies/${State.code}/emotes`).push({ e:emoji, from:USER.id, at:Date.now() });
+    });
+  });
+  // Listen for others' emotes
+  if (db) db.ref('.info/connected').on('value', ()=>{});
+
+  // Swipe back
+  let tx=0,ty=0;
+  document.addEventListener('touchstart', e=>{ tx=e.touches[0].clientX; ty=e.touches[0].clientY; },{passive:true});
   document.addEventListener('touchend', e=>{
     const dx = e.changedTouches[0].clientX - tx;
     const dy = Math.abs(e.changedTouches[0].clientY - ty);
-    if (dx>90 && dy<60 && tx<45 && State.screen!=='screen-menu' && State.screen!=='screen-loading'){
-      if (State.screen==='screen-room') leaveRoom(true);
-      else if (State.screen==='screen-game') leaveRoom(true);
+    if (dx>100 && dy<50 && tx<40 && State.screen !== 'menu' && State.screen !== 'loading'){
+      if (State.screen === 'room') leaveRoom(true);
+      else if (State.screen === 'game') $('#gtBack').click();
       else goBack();
     }
-  }, {passive:true});
+  },{passive:true});
 
   tg?.BackButton?.onClick(()=>{
-    if (State.screen==='screen-room' || State.screen==='screen-game') leaveRoom(true);
-    else if (State.screen!=='screen-menu') goBack();
+    if (State.screen === 'room') leaveRoom(true);
+    else if (State.screen === 'game') $('#gtBack').click();
+    else if (State.screen !== 'menu') goBack();
     else tg.close();
   });
 
-  // Возвращение в приложение — обновить online
+  // Vis: online refresh
   document.addEventListener('visibilitychange', ()=>{
-    if (!document.hidden && State.lobbyId && db){
-      db.ref(`lobbies/${State.lobbyId}/players/${USER.id}/online`).set(true).catch(()=>{});
-      db.ref(`lobbies/${State.lobbyId}/players/${USER.id}/lastSeen`).set(Date.now()).catch(()=>{});
+    if (!document.hidden && State.code && db){
+      db.ref(`lobbies/${State.code}/members/${USER.id}/online`).set(true).catch(()=>{});
+      db.ref(`lobbies/${State.code}/members/${USER.id}/lastSeen`).set(Date.now()).catch(()=>{});
     }
   });
 }
 
-/* =========================================================
-   16. AUTO-REJOIN
-   ========================================================= */
-async function tryAutoRejoin(){
-  try{
-    const code = localStorage.getItem(LS_LAST_LOBBY);
-    if (!code || !db) return false;
-    const snap = await db.ref('lobbies/'+code).get();
-    if (!snap.exists()){ localStorage.removeItem(LS_LAST_LOBBY); return false; }
-    const lobby = snap.val();
-    if (!lobby.players?.[USER.id]){ localStorage.removeItem(LS_LAST_LOBBY); return false; }
-    const isHost = String(lobby.hostId) === USER.id;
-    haptic('light');
-    toast('Возвращаемся в лобби...','info',1800);
-    enterRoom(code, isHost);
-    return true;
-  } catch(e){ console.warn('auto-rejoin:', e); return false; }
+/* Emote listener when in room */
+function listenEmotes(){
+  if (!State.code || !db) return;
+  const ref = db.ref(`lobbies/${State.code}/emotes`).limitToLast(1);
+  ref.on('child_added', snap=>{
+    const d = snap.val();
+    if (!d || d.from === USER.id) return;
+    const el = document.createElement('div');
+    el.className = 'float-emote';
+    el.textContent = d.e;
+    el.style.left = (Math.random()*60+20)+'%';
+    el.style.bottom = '120px';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 2500);
+  });
 }
 
 /* =========================================================
-   17. BOOT
+   15. AUTO REJOIN
+   ========================================================= */
+async function tryAutoRejoin(){
+  if (!db) return false;
+  let code = null;
+  try{ code = localStorage.getItem(LS_CODE); }catch{}
+  if (!code) return false;
+  try{
+    const snap = await db.ref('lobbies/'+code).get();
+    if (!snap.exists()){ try{ localStorage.removeItem(LS_CODE); }catch{} return false; }
+    const l = snap.val();
+    if (!l.members || !l.members[USER.id]){ try{ localStorage.removeItem(LS_CODE); }catch{} return false; }
+    const isHost = String(l.host) === USER.id;
+    toast('Возвращаемся...','info',1500);
+    enterRoom(code, isHost);
+    listenEmotes();
+    return true;
+  }catch(e){ console.warn('rejoin:', e); return false; }
+}
+
+/* =========================================================
+   16. BOOT
    ========================================================= */
 async function boot(){
   loadSettings();
@@ -1400,20 +1640,27 @@ async function boot(){
   bindSettings();
 
   if (db){
-    db.ref('.info/connected').on('value', snap=>console.log('🔌 Firebase:', snap.val()));
+    db.ref('.info/connected').on('value', s=>console.log('🔌 Firebase:', s.val()));
   }
 
-  await new Promise(r=>setTimeout(r, 1500));
+  // Register user presence
+  if (db){
+    const userRef = db.ref('users/'+USER.id);
+    userRef.child('online').onDisconnect().set(false);
+    userRef.child('online').set(true).catch(()=>{});
+  }
+
+  await new Promise(r => setTimeout(r, 1400));
 
   const rejoined = await tryAutoRejoin();
   if (!rejoined){
-    showScreen('screen-menu', { push:false, replace:true });
+    showScreen('menu', { push:false });
     State.history = [];
   }
   haptic('light');
 }
 window.addEventListener('load', boot);
-window.addEventListener('error', e => console.warn('JS error:', e.message));
+window.addEventListener('error', e => console.warn('JS:', e.message));
 </script>
 </body>
 </html>
