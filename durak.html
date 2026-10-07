@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#05060f">
+<title>Дурак на Звёзды</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+:root{--bg:#05060f;--bg-2:#0b0d1f;--panel:rgba(255,255,255,.055);--panel-2:rgba(255,255,255,.09);--stroke:rgba(255,255,255,.11);--stroke-2:rgba(255,255,255,.2);--text:#ececf7;--muted:#8b8cb8;--accent:#7c5cff;--accent-2:#00e0ff;--accent-3:#ff4ecd;--gold:#ffcf5c;--ok:#37e6a0;--danger:#ff5b6e;--radius:22px;--radius-sm:14px;--card-back-1:#3a1e7a;--card-back-2:#0f2a6b;--anim-speed:1;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;user-select:none;overscroll-behavior:none}
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+#nebula{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 45% at 15% 8%,rgba(124,92,255,.30) 0%,transparent 65%),radial-gradient(55% 40% at 88% 18%,rgba(0,224,255,.20) 0%,transparent 65%),radial-gradient(70% 50% at 50% 105%,rgba(255,78,205,.22) 0%,transparent 70%);filter:blur(12px);animation:nebulaFloat calc(26s/var(--anim-speed)) ease-in-out infinite alternate}
+@keyframes nebulaFloat{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(0,-22px,0) scale(1.07)}}
+#app{position:relative;z-index:2;height:100%;width:100%}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;padding:calc(var(--safe-top) + 14px) 18px calc(var(--safe-bottom) + 18px);opacity:0;visibility:hidden;transform:translateY(18px) scale(.985);transition:opacity .34s cubic-bezier(.22,1,.36,1),transform .34s cubic-bezier(.22,1,.36,1),visibility .34s;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.screen.active{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.screen::-webkit-scrollbar{display:none}
+#screen-loading{align-items:center;justify-content:center;text-align:center}
+.loader-logo{font-size:70px;line-height:1;background:linear-gradient(135deg,var(--accent-2),var(--accent),var(--accent-3));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 26px rgba(124,92,255,.85));animation:spinPulse 2.4s ease-in-out infinite}
+@keyframes spinPulse{0%,100%{transform:rotate(0deg) scale(1)}50%{transform:rotate(180deg) scale(1.18)}}
+.loader-text{margin-top:22px;font-size:20px;font-weight:900;letter-spacing:.32em;text-transform:uppercase;background:linear-gradient(90deg,var(--accent-2),#fff,var(--accent-3));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 2.6s linear infinite}
+@keyframes shimmer{to{background-position:200% center}}
+.loader-bar{margin-top:26px;width:190px;height:4px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden}
+.loader-bar>i{display:block;height:100%;width:35%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent-2));animation:loadSlide 1.15s ease-in-out infinite}
+@keyframes loadSlide{0%{transform:translateX(-120%)}100%{transform:translateX(400%)}}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+.brand .star{font-size:17px;background:linear-gradient(135deg,var(--accent-2),var(--accent-3));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 8px rgba(0,224,255,.7));animation:twinkle calc(2.6s/var(--anim-speed)) ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.82)}}
+.icon-btn{width:44px;height:44px;flex-shrink:0;display:grid;place-items:center;border-radius:14px;border:1px solid var(--stroke);background:var(--panel);color:var(--text);font-size:19px;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform .16s,background .2s,border-color .2s}
+.icon-btn:active{transform:scale(.9);background:var(--panel-2);border-color:var(--stroke-2)}
+.title-center{font-size:14px;font-weight:900;letter-spacing:.2em;text-transform:uppercase}
+.profile-card{position:relative;display:flex;align-items:center;gap:15px;padding:18px;border-radius:var(--radius);border:1px solid var(--stroke);background:linear-gradient(135deg,rgba(124,92,255,.18),rgba(0,224,255,.08) 55%,rgba(255,78,205,.13));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 18px 44px -22px rgba(124,92,255,.9);overflow:hidden;flex-shrink:0}
+.profile-card::after{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.22) 50%,transparent 70%);background-size:250% 250%;animation:shine calc(5s/var(--anim-speed)) linear infinite;opacity:.5}
+@keyframes shine{0%{background-position:150% 0}100%{background-position:-150% 0}}
+.avatar-wrap{position:relative;flex-shrink:0}
+.avatar{width:66px;height:66px;border-radius:50%;object-fit:cover;border:2.5px solid transparent;background:linear-gradient(var(--bg-2),var(--bg-2)) padding-box,linear-gradient(135deg,var(--accent-2),var(--accent),var(--accent-3)) border-box;box-shadow:0 0 24px -4px rgba(124,92,255,.85)}
+.avatar-fallback{width:66px;height:66px;border-radius:50%;display:grid;place-items:center;font-size:26px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-3))}
+.avatar-status{position:absolute;right:1px;bottom:1px;width:15px;height:15px;border-radius:50%;background:var(--ok);border:2.5px solid var(--bg-2);box-shadow:0 0 10px var(--ok)}
+.profile-info{min-width:0;flex:1}
+.profile-name{font-size:19px;font-weight:800;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profile-username{font-size:13px;color:var(--accent-2);font-weight:600;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profile-id{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:4px 10px;border-radius:99px;font-size:10.5px;font-weight:700;letter-spacing:.09em;background:rgba(0,0,0,.3);border:1px solid var(--stroke);color:var(--muted)}
+.profile-id b{color:var(--gold);font-weight:800}
+.btn{position:relative;width:100%;padding:17px 20px;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:15px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;cursor:pointer;overflow:hidden;transition:transform .16s cubic-bezier(.34,1.56,.64,1),filter .2s,box-shadow .25s}
+.btn:active{transform:scale(.965)}
+.btn:disabled{opacity:.42;pointer-events:none}
+.btn-primary{color:#fff;background:linear-gradient(115deg,var(--accent) 0%,#5b46ff 38%,var(--accent-2) 100%);background-size:200% auto;box-shadow:0 16px 38px -14px rgba(124,92,255,1),inset 0 1px 0 rgba(255,255,255,.28);animation:btnFlow calc(4.5s/var(--anim-speed)) linear infinite}
+@keyframes btnFlow{to{background-position:200% center}}
+.btn-primary::after{content:"";position:absolute;top:0;left:-70%;width:45%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);transform:skewX(-22deg);animation:sweep calc(3.2s/var(--anim-speed)) ease-in-out infinite}
+@keyframes sweep{0%{left:-70%}55%,100%{left:150%}}
+.btn-ghost{color:var(--text);background:var(--panel);border:1px solid var(--stroke);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.btn-ghost:active{background:var(--panel-2)}
+.btn-danger{color:#fff;background:linear-gradient(115deg,#ff4b62,#c81e4f);box-shadow:0 14px 32px -14px rgba(255,75,98,.95)}
+.btn-sm{padding:13px 16px;font-size:12.5px;letter-spacing:.1em}
+.menu-actions{display:flex;flex-direction:column;gap:12px;margin-top:auto;padding-top:26px;flex-shrink:0}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;flex-shrink:0}
+.stat{padding:13px 9px;border-radius:var(--radius-sm);text-align:center;background:var(--panel);border:1px solid var(--stroke);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.stat-val{font-size:18px;font-weight:900;background:linear-gradient(135deg,var(--accent-2),var(--accent-3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat-lbl{font-size:9.5px;color:var(--muted);letter-spacing:.13em;text-transform:uppercase;margin-top:4px;font-weight:700}
+.section-title{font-size:11px;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:22px 0 11px;flex-shrink:0}
+.tabs{display:flex;gap:6px;padding:5px;border-radius:16px;background:var(--panel);border:1px solid var(--stroke);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);flex-shrink:0;margin-bottom:18px}
+.tab{flex:1;padding:12px;border:none;border-radius:12px;background:transparent;color:var(--muted);font-family:inherit;font-size:12.5px;font-weight:900;letter-spacing:.11em;text-transform:uppercase;cursor:pointer;transition:all .25s cubic-bezier(.22,1,.36,1)}
+.tab.active{color:#fff;background:linear-gradient(115deg,var(--accent),var(--accent-2));box-shadow:0 8px 22px -10px rgba(124,92,255,1)}
+.tab-panel{display:none;animation:fadeUp .3s cubic-bezier(.22,1,.36,1)}
+.tab-panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.field{margin-bottom:14px}
+.field-label{display:block;font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.input{width:100%;padding:15px 16px;border-radius:var(--radius-sm);border:1px solid var(--stroke);background:rgba(0,0,0,.32);color:var(--text);font-family:inherit;font-size:15px;font-weight:700;outline:none;transition:border-color .22s,box-shadow .22s,background .22s}
+.input::placeholder{color:#4d4e75;font-weight:600}
+.input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(124,92,255,.18);background:rgba(0,0,0,.45)}
+.input-code{text-align:center;font-size:28px;font-weight:900;letter-spacing:.5em;text-indent:.5em;text-transform:uppercase;padding:19px 16px;font-family:'SF Mono',Menlo,Consolas,monospace}
+.seg{display:flex;gap:7px}
+.seg button{flex:1;padding:12px 6px;border-radius:12px;border:1px solid var(--stroke);background:rgba(0,0,0,.28);color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:800;letter-spacing:.05em;cursor:pointer;transition:all .22s}
+.seg button.active{color:#fff;border-color:transparent;background:linear-gradient(115deg,var(--accent),var(--accent-2));box-shadow:0 8px 20px -10px rgba(124,92,255,1)}
+.settings-group{border-radius:var(--radius);border:1px solid var(--stroke);background:var(--panel);overflow:hidden;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);margin-bottom:14px;flex-shrink:0}
+.set-row{display:flex;align-items:center;gap:13px;padding:15px 16px;border-bottom:1px solid rgba(255,255,255,.055)}
+.set-row:last-child{border-bottom:none}
+.set-icon{width:38px;height:38px;flex-shrink:0;border-radius:11px;display:grid;place-items:center;font-size:17px;background:rgba(255,255,255,.06);border:1px solid var(--stroke)}
+.set-body{flex:1;min-width:0}
+.set-name{font-size:13.5px;font-weight:700}
+.set-desc{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+.switch{position:relative;width:50px;height:29px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0;position:absolute}
+.switch .track{position:absolute;inset:0;border-radius:99px;cursor:pointer;background:rgba(255,255,255,.12);border:1px solid var(--stroke);transition:background .28s,border-color .28s}
+.switch .track::before{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.45);transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
+.switch input:checked+.track{background:linear-gradient(115deg,var(--accent),var(--accent-2));border-color:transparent}
+.switch input:checked+.track::before{transform:translateX(21px)}
+.range{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:99px;outline:none;background:rgba(255,255,255,.13);margin-top:11px}
+.range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;cursor:pointer;background:linear-gradient(135deg,var(--accent-2),var(--accent));box-shadow:0 0 14px rgba(124,92,255,.95),0 2px 6px rgba(0,0,0,.5);border:2px solid #fff}
+.range::-moz-range-thumb{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid #fff;background:linear-gradient(135deg,var(--accent-2),var(--accent))}
+.card-back-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:4px 16px 16px}
+.cb{aspect-ratio:.72;border-radius:9px;cursor:pointer;border:2px solid transparent;transition:all .22s;position:relative;overflow:hidden}
+.cb::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.14) 0 4px,transparent 4px 8px);opacity:.7}
+.cb.active{border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(0,224,255,.28),0 0 22px rgba(0,224,255,.65);transform:scale(1.05)}
+.cb[data-back="space"]{background:linear-gradient(135deg,#3a1e7a,#0f2a6b)}
+.cb[data-back="neon"]{background:linear-gradient(135deg,#00e0ff,#ff4ecd)}
+.cb[data-back="gold"]{background:linear-gradient(135deg,#7a5b12,#ffcf5c)}
+.cb[data-back="crimson"]{background:linear-gradient(135deg,#7a0f24,#ff5b6e)}
+.code-box{position:relative;padding:22px 18px;border-radius:var(--radius);text-align:center;background:linear-gradient(135deg,rgba(124,92,255,.2),rgba(0,224,255,.1));border:1px solid var(--stroke-2);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);overflow:hidden}
+.code-box::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(0,224,255,.25),transparent 70%);pointer-events:none}
+.code-lbl{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);font-weight:800;position:relative}
+.code-val{margin-top:9px;font-size:38px;font-weight:900;letter-spacing:.2em;text-indent:.2em;background:linear-gradient(115deg,var(--accent-2),#fff,var(--accent-3));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 3.2s linear infinite;position:relative;font-family:'SF Mono',Menlo,Consolas,monospace}
+.code-hint{font-size:11px;color:var(--muted);margin-top:7px;position:relative;font-weight:600}
+.players-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:11px;margin-top:12px}
+.player{position:relative;padding:13px 7px;border-radius:16px;text-align:center;background:var(--panel);border:1px solid var(--stroke);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);animation:playerIn .4s cubic-bezier(.34,1.56,.64,1) backwards;transition:border-color .25s,transform .25s}
+@keyframes playerIn{from{opacity:0;transform:scale(.72)}to{opacity:1;transform:scale(1)}}
+.player.is-host{border-color:rgba(255,207,92,.55);box-shadow:0 0 22px -8px rgba(255,207,92,.8)}
+.player.is-me{border-color:var(--accent-2);box-shadow:0 0 22px -8px rgba(0,224,255,.9)}
+.player img,.player .pf{width:44px;height:44px;border-radius:50%;object-fit:cover;margin:0 auto 8px;display:block}
+.player .pf{display:grid;place-items:center;font-size:17px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-3))}
+.player-name{font-size:10.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-badge{position:absolute;top:-6px;right:-4px;padding:3px 7px;border-radius:99px;font-size:8.5px;font-weight:900;letter-spacing:.07em;text-transform:uppercase}
+.badge-host{background:linear-gradient(115deg,#ffcf5c,#ff9d3c);color:#2a1a00}
+.badge-ready{background:linear-gradient(115deg,var(--ok),#12b57a);color:#032a1c}
+.player-slot{padding:13px 7px;border-radius:16px;text-align:center;border:1.5px dashed rgba(255,255,255,.14);background:rgba(255,255,255,.02)}
+.player-slot .ps-icon{font-size:22px;opacity:.28;margin-bottom:7px}
+.player-slot .ps-text{font-size:9.5px;color:var(--muted);letter-spacing:.1em;font-weight:700}
+#toast-wrap{position:fixed;left:0;right:0;top:calc(var(--safe-top) + 14px);z-index:999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 16px}
+.toast{max-width:100%;padding:13px 20px;border-radius:15px;font-size:13px;font-weight:700;background:rgba(14,16,34,.94);border:1px solid var(--stroke-2);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 18px 44px -14px rgba(0,0,0,1);animation:toastIn .34s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;gap:9px}
+.toast.out{animation:toastOut .28s ease forwards}
+@keyframes toastIn{from{opacity:0;transform:translateY(-24px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toastOut{to{opacity:0;transform:translateY(-18px) scale(.94)}}
+.toast.ok{border-color:rgba(55,230,160,.5)}
+.toast.err{border-color:rgba(255,91,110,.5)}
+.toast.info{border-color:rgba(0,224,255,.5)}
+#modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:26px;background:rgba(3,4,14,.82);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}
+#modal.show{display:flex;animation:fadeIn .22s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-box{width:100%;max-width:330px;padding:26px 22px;border-radius:26px;text-align:center;background:linear-gradient(160deg,rgba(30,24,68,.97),rgba(10,12,30,.98));border:1px solid var(--stroke-2);box-shadow:0 34px 80px -26px rgba(0,0,0,1);animation:modalIn .34s cubic-bezier(.34,1.56,.64,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(.85) translateY(24px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-icon{font-size:46px;margin-bottom:13px}
+.modal-title{font-size:18px;font-weight:900;margin-bottom:9px}
+.modal-text{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:21px}
+.modal-actions{display:flex;flex-direction:column;gap:9px}
+.spacer{flex:1;min-height:12px}
+.hidden{display:none !important}
+.center-text{text-align:center}
+body.no-anim *{animation-duration:.001s !important;animation-iteration-count:1 !important}
+</style>
+</head>
+<body data-table="cosmos">
+<canvas id="stars"></canvas>
+<div id="nebula"></div>
+<div id="toast-wrap"></div>
+
+<div id="app">
+  <section class="screen active" id="screen-loading">
+    <div class="loader-logo">★</div>
+    <div class="loader-text">Дурак на Звёзды</div>
+    <div class="loader-bar"><i></i></div>
+  </section>
+
+  <section class="screen" id="screen-menu">
+    <div class="topbar">
+      <div class="brand"><span class="star">★</span> Дурак на Звёзды</div>
+      <button class="icon-btn" id="btnSettingsTop">⚙</button>
+    </div>
+    <div class="profile-card">
+      <div class="avatar-wrap"><div id="avatarHost"></div><div class="avatar-status"></div></div>
+      <div class="profile-info">
+        <div class="profile-name" id="uiName">—</div>
+        <div class="profile-username" id="uiUsername">@—</div>
+        <div class="profile-id">ID <b id="uiId">—</b></div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-val" id="statGames">0</div><div class="stat-lbl">Игр</div></div>
+      <div class="stat"><div class="stat-val" id="statWins">0</div><div class="stat-lbl">Побед</div></div>
+      <div class="stat"><div class="stat-val" id="statStars">0</div><div class="stat-lbl">Звёзд</div></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="menu-actions">
+      <button class="btn btn-primary" id="btnPlay">▶ Играть</button>
+      <button class="btn btn-ghost" id="btnSettings">⚙ Настройки</button>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-settings">
+    <div class="topbar">
+      <button class="icon-btn" data-back="screen-menu">‹</button>
+      <div class="title-center">Настройки</div>
+      <div style="width:44px"></div>
+    </div>
+    <div class="section-title">Звук и вибрация</div>
+    <div class="settings-group">
+      <div class="set-row"><div class="set-icon">🔊</div><div class="set-body"><div class="set-name">Звуковые эффекты</div><div class="set-desc">Ходы, взятки, победы</div></div><label class="switch"><input type="checkbox" id="setSfx" checked><span class="track"></span></label></div>
+      <div class="set-row" style="flex-direction:column;align-items:stretch"><div style="display:flex;align-items:center;gap:13px"><div class="set-icon">🎚</div><div class="set-body"><div class="set-name">Громкость эффектов</div><div class="set-desc"><span id="lblSfxVol">70</span>%</div></div></div><input type="range" class="range" id="setSfxVol" min="0" max="100" value="70"></div>
+      <div class="set-row"><div class="set-icon">🎵</div><div class="set-body"><div class="set-name">Фоновая музыка</div><div class="set-desc">Космический эмбиент</div></div><label class="switch"><input type="checkbox" id="setMusic"><span class="track"></span></label></div>
+      <div class="set-row" style="flex-direction:column;align-items:stretch"><div style="display:flex;align-items:center;gap:13px"><div class="set-icon">🎼</div><div class="set-body"><div class="set-name">Громкость музыки</div><div class="set-desc"><span id="lblMusicVol">40</span>%</div></div></div><input type="range" class="range" id="setMusicVol" min="0" max="100" value="40"></div>
+      <div class="set-row"><div class="set-icon">📳</div><div class="set-body"><div class="set-name">Вибрация</div><div class="set-desc">Тактильный отклик</div></div><label class="switch"><input type="checkbox" id="setVibe" checked><span class="track"></span></label></div>
+    </div>
+    <div class="section-title">Внешний вид</div>
+    <div class="settings-group">
+      <div class="set-row" style="flex-direction:column;align-items:stretch"><div style="display:flex;align-items:center;gap:13px"><div class="set-icon">🚀</div><div class="set-body"><div class="set-name">Уровень анимаций</div><div class="set-desc">Влияет на плавность</div></div></div><div class="seg" style="margin-top:12px" data-seg="anim"><button data-val="low">Низкий</button><button data-val="mid" class="active">Средний</button><button data-val="high">Высокий</button></div></div>
+      <div class="set-row" style="flex-direction:column;align-items:stretch"><div style="display:flex;align-items:center;gap:13px"><div class="set-icon">🎴</div><div class="set-body"><div class="set-name">Рубашка карт</div><div class="set-desc">Дизайн обратной стороны</div></div></div><div class="card-back-picker" style="padding:14px 0 0"><div class="cb active" data-back="space"></div><div class="cb" data-back="neon"></div><div class="cb" data-back="gold"></div><div class="cb" data-back="crimson"></div></div></div>
+      <div class="set-row" style="flex-direction:column;align-items:stretch"><div style="display:flex;align-items:center;gap:13px"><div class="set-icon">🪐</div><div class="set-body"><div class="set-name">Тема стола</div><div class="set-desc">Оформление поля</div></div></div><div class="seg" style="margin-top:12px" data-seg="table"><button data-val="cosmos" class="active">Космос</button><button data-val="neon">Неон</button><button data-val="royal">Пурпур</button></div></div>
+    </div>
+    <div class="section-title">Игровой процесс</div>
+    <div class="settings-group">
+      <div class="set-row"><div class="set-icon">🃏</div><div class="set-body"><div class="set-name">Автосортировка карт</div><div class="set-desc">По мастям и рангу</div></div><label class="switch"><input type="checkbox" id="setSort" checked><span class="track"></span></label></div>
+      <div class="set-row"><div class="set-icon">✅</div><div class="set-body"><div class="set-name">Подтверждать ход</div><div class="set-desc">Спрашивать перед сбросом</div></div><label class="switch"><input type="checkbox" id="setConfirm"><span class="track"></span></label></div>
+      <div class="set-row"><div class="set-icon">👁</div><div class="set-body"><div class="set-name">Показывать ID</div><div class="set-desc">Telegram ID в меню</div></div><label class="switch"><input type="checkbox" id="setShowId" checked><span class="track"></span></label></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost btn-sm" id="btnResetSettings" style="margin-top:14px">↺ Сбросить настройки</button>
+  </section>
+
+  <section class="screen" id="screen-lobby">
+    <div class="topbar">
+      <button class="icon-btn" data-back="screen-menu">‹</button>
+      <div class="title-center">Лобби</div>
+      <div style="width:44px"></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="create">Создать</button>
+      <button class="tab" data-tab="join">Войти</button>
+    </div>
+    <div class="tab-panel active" id="panel-create">
+      <div class="field"><label class="field-label">Название лобби</label><input class="input" id="lobbyName" maxlength="24" placeholder="Космический дурак"></div>
+      <div class="field"><label class="field-label">Максимум игроков</label><div class="seg" data-seg="maxp"><button data-val="2">2</button><button data-val="3" class="active">3</button><button data-val="4">4</button><button data-val="6">6</button></div></div>
+      <div class="field"><label class="field-label">Колода</label><div class="seg" data-seg="deck"><button data-val="36" class="active">36 карт</button><button data-val="52">52 карты</button></div></div>
+      <div class="field"><label class="field-label">Режим</label><div class="seg" data-seg="mode"><button data-val="classic" class="active">Классика</button><button data-val="podkidnoy">Подкидной</button><button data-val="perevod">Переводной</button></div></div>
+      <div class="field"><label class="field-label">Приватность</label><div class="seg" data-seg="privacy"><button data-val="private" class="active">По коду</button><button data-val="public">Публичное</button></div></div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary" id="btnCreateLobby" style="margin-top:12px">★ Создать лобби</button>
+    </div>
+    <div class="tab-panel" id="panel-join">
+      <div class="field"><label class="field-label">Код лобби</label><input class="input input-code" id="joinCode" maxlength="6" placeholder="A1B2D3" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text"></div>
+      <p class="set-desc center-text" style="margin:4px 0 20px">Введите 6-символьный код, например <b style="color:var(--accent-2)">A1B2D3</b></p>
+      <button class="btn btn-primary" id="btnJoinLobby">→ Войти в лобби</button>
+      <button class="btn btn-ghost" id="btnQuickMatch" style="margin-top:10px">⚡ Быстрый поиск</button>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-room">
+    <div class="topbar">
+      <button class="icon-btn" id="btnLeaveRoom">‹</button>
+      <div class="title-center">Комната</div>
+      <button class="icon-btn" id="btnCopyCode">⧉</button>
+    </div>
+    <div class="code-box">
+      <div class="code-lbl">Код лобби</div>
+      <div class="code-val" id="roomCode">——————</div>
+      <div class="code-hint">Нажмите ⧉ чтобы скопировать</div>
+    </div>
+    <div class="section-title" style="display:flex;justify-content:space-between;align-items:center"><span>Игроки</span><span style="color:var(--accent-2)" id="roomCount">0/4</span></div>
+    <div class="players-grid" id="playersGrid"></div>
+    <div class="section-title">Параметры</div>
+    <div class="settings-group" id="roomParams"></div>
+    <div class="spacer"></div>
+    <div id="hostControls" class="hidden">
+      <button class="btn btn-primary" id="btnStartGame">🚀 Начать игру</button>
+      <p class="set-desc center-text" style="margin-top:9px">Вы хост — только вы можете запустить игру</p>
+    </div>
+    <div id="guestControls" class="hidden">
+      <button class="btn btn-ghost" id="btnReady">⏳ Я готов</button>
+      <p class="set-desc center-text" style="margin-top:9px">Ожидайте запуска от хоста</p>
+    </div>
+    <button class="btn btn-danger btn-sm" id="btnLeaveRoom2" style="margin-top:10px">Покинуть лобби</button>
+  </section>
+</div>
+
+<div id="modal">
+  <div class="modal-box">
+    <div class="modal-icon" id="modalIcon">★</div>
+    <div class="modal-title" id="modalTitle">Заголовок</div>
+    <div class="modal-text" id="modalText">Текст</div>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   TELEGRAM
+   ========================================================= */
+const tg = window.Telegram?.WebApp;
+if (tg){ tg.ready(); tg.expand(); try{ tg.setHeaderColor('#05060f'); tg.setBackgroundColor('#05060f'); tg.disableVerticalSwipes?.(); }catch(e){} }
+
+const tgUser = tg?.initDataUnsafe?.user || { id: 100000000, first_name:'Гость', last_name:'', username:'guest', photo_url:'' };
+const USER = {
+  id: String(tgUser.id),
+  name: [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || 'Игрок',
+  username: tgUser.username ? '@' + tgUser.username : '@нет_юзернейма',
+  photo: tgUser.photo_url || ''
+};
+
+/* =========================================================
+   FIREBASE — только RTDB
+   ========================================================= */
+const firebaseConfig = {
+  databaseURL: "https://test-raq-default-rtdb.firebaseio.com/"
+};
+
+let db = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+  console.log('🔥 RTDB:', firebaseConfig.databaseURL);
+} catch (e){
+  console.error('Firebase init error:', e);
+}
+
+/* =========================================================
+   STATE
+   ========================================================= */
+const State = {
+  screen: 'screen-loading',
+  history: [],
+  lobby: null,
+  lobbyId: null,
+  lobbyRef: null,
+  playerRef: null,
+  isHost: false,
+  listener: null,   // активный on('value')
+  settings: {}
+};
+
+const DEFAULTS = {
+  sfx:true, sfxVol:70, music:false, musicVol:40, vibe:true,
+  anim:'mid', cardBack:'space', table:'cosmos',
+  sort:true, confirm:false, showId:true
+};
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+const $  = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function haptic(t='light'){
+  if (!State.settings.vibe || !tg?.HapticFeedback) return;
+  try{
+    if (t==='success') tg.HapticFeedback.notificationOccurred('success');
+    else if (t==='error') tg.HapticFeedback.notificationOccurred('error');
+    else tg.HapticFeedback.impactOccurred(t);
+  }catch(e){}
+}
+
+function toast(text, type='info', ms=2600){
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  const icon = { ok:'✅', err:'⚠️', info:'💫' }[type] || '💫';
+  el.innerHTML = `<span>${icon}</span><span>${esc(text)}</span>`;
+  $('#toast-wrap').appendChild(el);
+  setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),300); }, ms);
+}
+
+function modal({ icon='★', title='', text='', actions=[] }){
+  $('#modalIcon').textContent = icon;
+  $('#modalTitle').textContent = title;
+  $('#modalText').textContent = text;
+  const w = $('#modalActions'); w.innerHTML='';
+  actions.forEach(a => {
+    const b = document.createElement('button');
+    b.className = 'btn ' + (a.style || 'btn-ghost');
+    b.textContent = a.label;
+    b.onclick = () => { closeModal(); a.onClick?.(); };
+    w.appendChild(b);
+  });
+  $('#modal').classList.add('show');
+}
+function closeModal(){ $('#modal').classList.remove('show'); }
+$('#modal').addEventListener('click', e => { if (e.target.id==='modal') closeModal(); });
+
+/* =========================================================
+   ЗВЁЗДНЫЙ ФОН
+   ========================================================= */
+(function starfield(){
+  const canvas = $('#stars'), ctx = canvas.getContext('2d');
+  let stars=[], w=0, h=0, raf=null;
+  function count(){
+    const a = State.settings.anim || 'mid';
+    const ar = w*h;
+    if (a==='low') return Math.min(70, ar/22000);
+    if (a==='high') return Math.min(300, ar/7000);
+    return Math.min(160, ar/12000);
+  }
+  function build(){
+    const n = Math.floor(count());
+    stars = Array.from({length:n},()=>({
+      x:Math.random()*w, y:Math.random()*h,
+      r:Math.random()*1.5+0.35, a:Math.random()*0.65+0.25,
+      sp:Math.random()*0.16+0.03, tw:Math.random()*Math.PI*2,
+      hue: Math.random()<0.2 ? 190 : (Math.random()<0.3 ? 285 : 0)
+    }));
+  }
+  function resize(){
+    const dpr = Math.min(window.devicePixelRatio||1, 2);
+    w = canvas.clientWidth = window.innerWidth;
+    h = canvas.clientHeight = window.innerHeight;
+    canvas.width = w*dpr; canvas.height = h*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    build();
+  }
+  let last=0;
+  function loop(t){
+    raf = requestAnimationFrame(loop);
+    const f = State.settings.anim==='low' ? 0.4 : State.settings.anim==='high' ? 1.4 : 1;
+    if (t-last < (State.settings.anim==='low'?55:16)) return;
+    last = t;
+    ctx.clearRect(0,0,w,h);
+    for (const s of stars){
+      s.tw += 0.022*f; s.y += s.sp*f;
+      if (s.y > h+2){ s.y=-2; s.x=Math.random()*w; }
+      const a = s.a*(0.6+0.4*Math.sin(s.tw));
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = s.hue===0 ? `rgba(255,255,255,${a})` :
+                     s.hue===190 ? `rgba(120,235,255,${a})` :
+                     `rgba(190,150,255,${a})`;
+      ctx.fill();
+    }
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  raf = requestAnimationFrame(loop);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden){ cancelAnimationFrame(raf); raf=null; }
+    else if (!raf){ raf = requestAnimationFrame(loop); }
+  });
+})();
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+function showScreen(id, { push=true, replace=false } = {}){
+  if (State.screen === id) return;
+  if (push && !replace && State.screen !== 'screen-loading'){
+    State.history.push(State.screen);
+  }
+  $$('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+  State.screen = id;
+  const el = document.getElementById(id);
+  if (el) el.scrollTop = 0;
+}
+function goBack(){
+  const prev = State.history.pop() || 'screen-menu';
+  showScreen(prev, { push:false });
+}
+$$('[data-back]').forEach(b => b.addEventListener('click', () => { haptic('light'); goBack(); }));
+
+/* =========================================================
+   SETTINGS
+   ========================================================= */
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem('dnz_settings');
+    State.settings = raw ? { ...DEFAULTS, ...JSON.parse(raw) } : { ...DEFAULTS };
+  }catch{ State.settings = { ...DEFAULTS }; }
+}
+function saveSettings(){
+  try{ localStorage.setItem('dnz_settings', JSON.stringify(State.settings)); }catch{}
+  if (db && USER.id){
+    db.ref('users/'+USER.id+'/settings').set(State.settings).catch(()=>{});
+  }
+}
+function applySettings(){
+  const s = State.settings;
+  document.documentElement.style.setProperty('--anim-speed',
+    s.anim==='low' ? '0.55' : s.anim==='high' ? '1.45' : '1');
+  document.body.classList.toggle('no-anim', s.anim==='low');
+  document.body.dataset.table = s.table || 'cosmos';
+
+  const backs = {
+    space:['#3a1e7a','#0f2a6b'], neon:['#00e0ff','#ff4ecd'],
+    gold:['#7a5b12','#ffcf5c'], crimson:['#7a0f24','#ff5b6e']
+  };
+  const b = backs[s.cardBack] || backs.space;
+  document.documentElement.style.setProperty('--card-back-1', b[0]);
+  document.documentElement.style.setProperty('--card-back-2', b[1]);
+
+  $('#uiId').parentElement.style.display = s.showId ? '' : 'none';
+
+  $('#setSfx').checked = s.sfx;
+  $('#setSfxVol').value = s.sfxVol; $('#lblSfxVol').textContent = s.sfxVol;
+  $('#setMusic').checked = s.music;
+  $('#setMusicVol').value = s.musicVol; $('#lblMusicVol').textContent = s.musicVol;
+  $('#setVibe').checked = s.vibe;
+  $('#setSort').checked = s.sort;
+  $('#setConfirm').checked = s.confirm;
+  $('#setShowId').checked = s.showId;
+
+  $$('[data-seg="anim"] button').forEach(b => b.classList.toggle('active', b.dataset.val===s.anim));
+  $$('[data-seg="table"] button').forEach(b => b.classList.toggle('active', b.dataset.val===s.table));
+  $$('.cb').forEach(c => c.classList.toggle('active', c.dataset.back===s.cardBack));
+}
+function bindSettings(){
+  const on = (id,key) => {
+    const el = $(id); if (!el) return;
+    el.addEventListener('change', () => {
+      State.settings[key] = el.type==='checkbox' ? el.checked : el.value;
+      haptic('light'); saveSettings(); applySettings();
+    });
+  };
+  ['#setSfx|sfx','#setMusic|music','#setVibe|vibe','#setSort|sort','#setConfirm|confirm','#setShowId|showId']
+    .forEach(p => { const [id,k]=p.split('|'); on(id,k); });
+
+  const onRange = (id,key,label) => {
+    const el = $(id);
+    el.addEventListener('input', () => { State.settings[key]=Number(el.value); $(label).textContent = el.value; });
+    el.addEventListener('change', () => { haptic('light'); saveSettings(); });
+  };
+  onRange('#setSfxVol','sfxVol','#lblSfxVol');
+  onRange('#setMusicVol','musicVol','#lblMusicVol');
+
+  $$('[data-seg]').forEach(seg => {
+    seg.addEventListener('click', e => {
+      const btn = e.target.closest('button'); if (!btn) return;
+      $$('button', seg).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const k = seg.dataset.seg;
+      if (k==='anim') State.settings.anim = btn.dataset.val;
+      if (k==='table') State.settings.table = btn.dataset.val;
+      haptic('light'); saveSettings(); applySettings();
+    });
+  });
+
+  $('.card-back-picker').addEventListener('click', e => {
+    const cb = e.target.closest('.cb'); if (!cb) return;
+    $$('.cb').forEach(c => c.classList.remove('active'));
+    cb.classList.add('active');
+    State.settings.cardBack = cb.dataset.back;
+    haptic('light'); saveSettings(); applySettings();
+  });
+
+  $('#btnResetSettings').addEventListener('click', () => {
+    modal({ icon:'↺', title:'Сбросить настройки?', text:'Все параметры вернутся к значениям по умолчанию.',
+      actions:[
+        { label:'Отмена', style:'btn-ghost' },
+        { label:'Сбросить', style:'btn-danger', onClick:()=>{ State.settings={...DEFAULTS}; saveSettings(); applySettings(); toast('Настройки сброшены','ok'); } }
+      ]
+    });
+  });
+}
+
+/* =========================================================
+   PROFILE
+   ========================================================= */
+function renderProfile(){
+  $('#uiName').textContent = USER.name;
+  $('#uiUsername').textContent = USER.username;
+  $('#uiId').textContent = USER.id;
+
+  const host = $('#avatarHost');
+  if (USER.photo){
+    host.innerHTML = `<img class="avatar" src="${esc(USER.photo)}" alt=""
+      onerror="this.outerHTML='<div class=\\'avatar-fallback\\'>${esc(USER.name[0]||'★')}</div>'">`;
+  } else {
+    host.innerHTML = `<div class="avatar-fallback">${esc((USER.name[0]||'★').toUpperCase())}</div>`;
+  }
+
+  if (db){
+    db.ref('users/'+USER.id+'/stats').on('value', snap => {
+      const s = snap.val() || {};
+      $('#statGames').textContent = s.games || 0;
+      $('#statWins').textContent = s.wins || 0;
+      $('#statStars').textContent = s.stars || 0;
+    }, err => console.warn('stats read:', err.message));
+
+    db.ref('users/'+USER.id+'/profile').update({
+      name: USER.name, username: USER.username, photo: USER.photo,
+      lastSeen: Date.now()
+    }).catch(()=>{});
+  }
+}
+
+/* =========================================================
+   LOBBY
+   ========================================================= */
+function genCode(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let out = '';
+  for (let i=0;i<6;i++) out += chars[Math.floor(Math.random()*chars.length)];
+  return out;
+}
+function getSegValue(name){
+  const el = $(`[data-seg="${name}"] button.active`);
+  return el ? el.dataset.val : null;
+}
+function checkFirebase(){
+  if (!db){
+    modal({ icon:'🔌', title:'Firebase не подключён',
+      text:'Проверьте интернет или URL базы данных.',
+      actions:[{label:'Понятно', style:'btn-primary'}] });
+    return false;
+  }
+  return true;
+}
+
+/* ---------- СОЗДАНИЕ ЛОББИ ---------- */
+async function createLobby(){
+  if (!checkFirebase()) return;
+  const btn = $('#btnCreateLobby');
+  btn.disabled = true; btn.textContent = '⏳ Создание...';
+
+  try {
+    let code = genCode();
+    // Проверка уникальности — только если чтение разрешено
+    try {
+      for (let i=0;i<5;i++){
+        const snap = await db.ref('lobbies/'+code).get();
+        if (!snap.exists()) break;
+        code = genCode();
+      }
+    } catch (readErr){
+      console.warn('Пропускаем проверку уникальности кода:', readErr.message);
+    }
+
+    const lobby = {
+      code,
+      hostId: USER.id,
+      hostName: USER.name,
+      hostPhoto: USER.photo,
+      name: $('#lobbyName').value.trim() || (USER.name + ' ★ Космос'),
+      createdAt: Date.now(),
+      status: 'waiting',
+      maxPlayers: Number(getSegValue('maxp') || 3),
+      deck: Number(getSegValue('deck') || 36),
+      mode: getSegValue('mode') || 'classic',
+      privacy: getSegValue('privacy') || 'private',
+      players: {
+        [USER.id]: {
+          id: USER.id, name: USER.name, username: USER.username,
+          photo: USER.photo, ready: true, isHost: true, joinedAt: Date.now()
+        }
+      }
+    };
+
+    await db.ref('lobbies/'+code).set(lobby);
+    haptic('success');
+    toast('Лобби создано! Код: ' + code, 'ok', 3200);
+    enterRoom(code, true);
+  } catch (e){
+    console.error('createLobby:', e);
+    haptic('error');
+    toast('Ошибка: ' + (e.message || 'не удалось создать'), 'err', 4000);
+    showRulesHint(e);
+  } finally {
+    btn.disabled = false; btn.textContent = '★ Создать лобби';
+  }
+}
+
+/* ---------- ВХОД ПО КОДУ ---------- */
+async function joinLobby(codeRaw){
+  if (!checkFirebase()) return;
+  const code = String(codeRaw || '').trim().toUpperCase();
+  if (code.length !== 6){
+    haptic('error'); toast('Введите 6-символьный код', 'err'); return;
+  }
+
+  const btn = $('#btnJoinLobby');
+  btn.disabled = true; btn.textContent = '⏳ Вход...';
+
+  try {
+    const snap = await db.ref('lobbies/'+code).get();
+    if (!snap.exists()){
+      haptic('error'); toast('Лобби с кодом ' + code + ' не найдено', 'err'); return;
+    }
+    const lobby = snap.val();
+    const players = lobby.players || {};
+    const count = Object.keys(players).length;
+
+    if (lobby.status !== 'waiting'){
+      haptic('error'); toast('Игра уже началась', 'err'); return;
+    }
+    if (count >= lobby.maxPlayers && !players[USER.id]){
+      haptic('error'); toast('Лобби заполнено', 'err'); return;
+    }
+
+    const isHost = String(lobby.hostId) === USER.id;
+
+    await db.ref(`lobbies/${code}/players/${USER.id}`).set({
+      id: USER.id, name: USER.name, username: USER.username, photo: USER.photo,
+      ready: isHost, isHost: isHost, joinedAt: Date.now()
+    });
+
+    haptic('success');
+    toast('Вы вошли в лобби', 'ok');
+    enterRoom(code, isHost);
+  } catch (e){
+    console.error('joinLobby:', e);
+    haptic('error');
+    toast('Не удалось войти: ' + (e.message || ''), 'err', 4000);
+    showRulesHint(e);
+  } finally {
+    btn.disabled = false; btn.textContent = '→ Войти в лобби';
+  }
+}
+
+/* ---------- БЫСТРЫЙ ПОИСК (без orderByChild!) ---------- */
+async function quickMatch(){
+  if (!checkFirebase()) return;
+  const btn = $('#btnQuickMatch');
+  btn.disabled = true; btn.textContent = '⏳ Поиск...';
+
+  try {
+    // Загружаем весь корень lobbies и фильтруем в JS — не требует индекса в правилах
+    const snap = await db.ref('lobbies').get();
+
+    if (!snap.exists()){
+      toast('Публичных лобби нет — создайте своё!', 'info', 3200);
+      return;
+    }
+
+    let found = null;
+    snap.forEach(child => {
+      if (found) return;
+      const l = child.val();
+      if (!l || !l.players || l.privacy !== 'public' || l.status !== 'waiting') return;
+      const n = Object.keys(l.players).length;
+      if (n < (l.maxPlayers || 4) && !l.players[USER.id]){
+        found = l;
+      }
+    });
+
+    if (!found){
+      toast('Свободных публичных лобби нет', 'info', 3200);
+      return;
+    }
+    await joinLobby(found.code);
+  } catch (e){
+    console.error('quickMatch:', e);
+    haptic('error');
+    if (e.code === 'PERMISSION_DENIED' || /permission/i.test(e.message)){
+      toast('Нет доступа к БД. Откройте Rules в Firebase.', 'err', 5000);
+      showRulesHint(e);
+    } else {
+      toast('Ошибка поиска: ' + (e.message || ''), 'err', 4000);
+    }
+  } finally {
+    btn.disabled = false; btn.textContent = '⚡ Быстрый поиск';
+  }
+}
+
+/* ---------- ПОДСКАЗКА ПРО ПРАВИЛА ---------- */
+function showRulesHint(err){
+  if (!err) return;
+  const msg = (err.message || '').toLowerCase();
+  const code = err.code || '';
+  if (code === 'PERMISSION_DENIED' || msg.includes('permission')){
+    modal({
+      icon:'🔐', title:'Нет доступа к базе',
+      text:'В Firebase Console → Realtime Database → Rules установите:\n\n{ "rules": { ".read": true, ".write": true } }',
+      actions:[{ label:'Понятно', style:'btn-primary' }]
+    });
+  }
+}
+
+/* ---------- ВХОД В КОМНАТУ ---------- */
+function enterRoom(code, isHost){
+  // Снимаем прежние слушатели
+  if (State.lobbyRef){ State.lobbyRef.off(); State.lobbyRef = null; }
+  if (State.playerRef){ State.playerRef.onDisconnect().cancel(); State.playerRef = null; }
+
+  State.lobbyId = code;
+  State.isHost = isHost;
+  State.lobbyRef = db.ref('lobbies/'+code);
+  State.playerRef = db.ref(`lobbies/${code}/players/${USER.id}`);
+
+  $('#roomCode').textContent = code;
+
+  // Первичная загрузка (на случай если on не сработает сразу)
+  State.lobbyRef.once('value')
+    .then(snap => {
+      if (!snap.exists()){
+        toast('Лобби больше не существует', 'err');
+        leaveRoom(false); return;
+      }
+      State.lobby = snap.val();
+      renderRoom(State.lobby);
+    })
+    .catch(err => {
+      console.error('initial fetch:', err);
+      toast('Ошибка загрузки лобби', 'err');
+      showRulesHint(err);
+    });
+
+  // Live-слушатель
+  const listener = State.lobbyRef.on('value',
+    snap => {
+      if (!snap.exists()){
+        toast('Лобби закрыто', 'err');
+        leaveRoom(false);
+        return;
+      }
+      State.lobby = snap.val();
+      renderRoom(State.lobby);
+    },
+    err => {
+      console.error('lobby on(value) error:', err);
+      toast('Синхронизация недоступна: ' + (err.message||''), 'err', 4000);
+      showRulesHint(err);
+    }
+  );
+  State.listener = listener;
+
+  // onDisconnect для игрока (не для всего лобби — чтобы хост случайно не удалил комнату)
+  State.playerRef.onDisconnect().remove();
+
+  State.history = ['screen-menu', 'screen-lobby'];
+  showScreen('screen-room', { push:false });
+}
+
+/* ---------- ОТРИСОВКА ---------- */
+function renderRoom(lobby){
+  try {
+    if (!lobby) return;
+
+    const players = Object.values(lobby.players || {})
+      .sort((a,b) => (b.isHost?1:0)-(a.isHost?1:0) || (a.joinedAt||0)-(b.joinedAt||0));
+
+    $('#roomCount').textContent = `${players.length}/${lobby.maxPlayers}`;
+
+    const grid = $('#playersGrid');
+    grid.innerHTML = '';
+    players.forEach((p,i) => {
+      const isMe = String(p.id) === USER.id;
+      const el = document.createElement('div');
+      el.className = 'player' + (p.isHost?' is-host':'') + (isMe?' is-me':'');
+      el.style.animationDelay = (i*0.05)+'s';
+
+      const av = p.photo
+        ? `<img src="${esc(p.photo)}" alt="" onerror="this.outerHTML='<div class=&quot;pf&quot;>${esc((p.name[0]||'★').toUpperCase())}</div>'">`
+        : `<div class="pf">${esc((p.name[0]||'★').toUpperCase())}</div>`;
+
+      let badge = '';
+      if (p.isHost) badge = '<span class="player-badge badge-host">👑 Хост</span>';
+      else if (p.ready) badge = '<span class="player-badge badge-ready">Готов</span>';
+
+      el.innerHTML = `${badge}${av}<div class="player-name">${esc(isMe?'Вы':p.name)}</div>`;
+      grid.appendChild(el);
+    });
+
+    for (let i=players.length; i<lobby.maxPlayers; i++){
+      const el = document.createElement('div');
+      el.className = 'player-slot';
+      el.innerHTML = `<div class="ps-icon">＋</div><div class="ps-text">Свободно</div>`;
+      grid.appendChild(el);
+    }
+
+    const modeNames = { classic:'Классика', podkidnoy:'Подкидной', perevod:'Переводной' };
+    $('#roomParams').innerHTML = `
+      <div class="set-row"><div class="set-icon">🏷</div><div class="set-body"><div class="set-name">${esc(lobby.name||'Лобби')}</div><div class="set-desc">Название комнаты</div></div></div>
+      <div class="set-row"><div class="set-icon">👑</div><div class="set-body"><div class="set-name">${esc(lobby.hostName||'Хост')}</div><div class="set-desc">Создатель лобби</div></div></div>
+      <div class="set-row"><div class="set-icon">🎴</div><div class="set-body"><div class="set-name">Колода ${lobby.deck} карт</div><div class="set-desc">${modeNames[lobby.mode]||'Классика'}</div></div></div>
+      <div class="set-row"><div class="set-icon">${lobby.privacy==='public'?'🌐':'🔒'}</div><div class="set-body"><div class="set-name">${lobby.privacy==='public'?'Публичное':'Приватное'}</div><div class="set-desc">${lobby.privacy==='public'?'Видно в быстром поиске':'Только по коду'}</div></div></div>
+    `;
+
+    const amHost = String(lobby.hostId) === USER.id;
+    State.isHost = amHost;
+    const me = lobby.players?.[USER.id];
+
+    $('#hostControls').classList.toggle('hidden', !amHost);
+    $('#guestControls').classList.toggle('hidden', amHost);
+
+    if (!amHost && me){
+      const rbtn = $('#btnReady');
+      rbtn.textContent = me.ready ? '✅ Готов (нажмите чтобы отменить)' : '⏳ Я готов';
+      rbtn.className = me.ready ? 'btn btn-primary' : 'btn btn-ghost';
+    }
+
+    // Хост вышел?
+    const hostHere = players.some(p => String(p.id) === String(lobby.hostId));
+    if (!hostHere && !amHost){
+      toast('Хост покинул лобби', 'err', 3500);
+    }
+  } catch (e){
+    console.error('renderRoom:', e);
+  }
+}
+
+/* ---------- ВЫХОД ---------- */
+function leaveRoom(confirm = true){
+  const doLeave = () => {
+    if (State.lobbyRef){
+      try { State.lobbyRef.off(); } catch(e){}
+      State.lobbyRef = null;
+    }
+    if (State.playerRef && State.lobbyId && db){
+      try { State.playerRef.onDisconnect().cancel(); } catch(e){}
+      State.playerRef.remove().catch(()=>{});
+      State.playerRef = null;
+    }
+    // Если это был хост — удаляем всю комнату
+    if (State.lobbyId && State.isHost && db){
+      db.ref('lobbies/'+State.lobbyId).remove().catch(()=>{});
+    }
+    State.lobbyId = null;
+    State.lobby = null;
+    State.isHost = false;
+    State.listener = null;
+
+    haptic('light');
+    showScreen('screen-lobby', { push:false });
+    State.history = ['screen-menu'];
+  };
+
+  if (!confirm) return doLeave();
+  modal({
+    icon:'🚪', title:'Покинуть лобби?',
+    text: State.isHost ? 'Вы хост — лобби будет закрыто для всех.' : 'Вы сможете вернуться по коду.',
+    actions:[
+      { label:'Остаться', style:'btn-ghost' },
+      { label:'Выйти', style:'btn-danger', onClick: doLeave }
+    ]
+  });
+}
+
+/* ---------- КОПИРОВАНИЕ КОДА ---------- */
+function copyCode(){
+  const code = $('#roomCode').textContent;
+  if (!code || code.includes('—')) return;
+  const done = () => { haptic('success'); toast('Код скопирован: ' + code, 'ok'); };
+  const fail = () => modal({ icon:'📋', title:'Код лобби', text: code, actions:[{label:'Закрыть', style:'btn-primary'}] });
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(code).then(done).catch(fail);
+  else fail();
+}
+
+/* ---------- НАЧАТЬ ИГРУ (только хост) ---------- */
+async function startGame(){
+  if (!State.lobbyId || !State.lobby){ toast('Лобби не загружено', 'err'); return; }
+  if (String(State.lobby.hostId) !== USER.id){
+    haptic('error'); toast('Только хост может начать игру', 'err'); return;
+  }
+  const players = Object.keys(State.lobby.players || {});
+  if (players.length < 2){
+    haptic('error'); toast('Нужно минимум 2 игрока', 'err'); return;
+  }
+
+  const btn = $('#btnStartGame');
+  btn.disabled = true; btn.textContent = '⏳ Запуск...';
+
+  try {
+    await db.ref('lobbies/'+State.lobbyId).update({
+      status: 'playing',
+      startedAt: Date.now()
+    });
+    haptic('success');
+    toast('Игра начинается! 🚀', 'ok');
+  } catch (e){
+    console.error('startGame:', e);
+    haptic('error');
+    toast('Ошибка запуска: ' + (e.message||''), 'err', 4000);
+    showRulesHint(e);
+  } finally {
+    btn.disabled = false; btn.textContent = '🚀 Начать игру';
+  }
+}
+
+/* =========================================================
+   BIND UI
+   ========================================================= */
+function bindUI(){
+  $('#btnPlay').addEventListener('click', () => { haptic('medium'); showScreen('screen-lobby'); });
+  $('#btnSettings').addEventListener('click', () => { haptic('light'); showScreen('screen-settings'); });
+  $('#btnSettingsTop').addEventListener('click', () => { haptic('light'); showScreen('screen-settings'); });
+
+  $$('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      $$('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      $$('.tab-panel').forEach(p => p.classList.remove('active'));
+      const panel = $('#panel-'+tab.dataset.tab);
+      if (panel) panel.classList.add('active');
+      haptic('light');
+    });
+  });
+
+  $('#btnCreateLobby').addEventListener('click', createLobby);
+  $('#btnJoinLobby').addEventListener('click', () => joinLobby($('#joinCode').value));
+  $('#btnQuickMatch').addEventListener('click', quickMatch);
+
+  $('#joinCode').addEventListener('input', e => {
+    e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  });
+  $('#joinCode').addEventListener('keydown', e => { if (e.key==='Enter') joinLobby(e.target.value); });
+
+  $('#btnCopyCode').addEventListener('click', copyCode);
+  $('#btnLeaveRoom').addEventListener('click', () => leaveRoom(true));
+  $('#btnLeaveRoom2').addEventListener('click', () => leaveRoom(true));
+  $('#btnStartGame').addEventListener('click', startGame);
+
+  $('#btnReady').addEventListener('click', () => {
+    if (!State.lobbyId) return;
+    const me = State.lobby?.players?.[USER.id];
+    const next = !me?.ready;
+    db.ref(`lobbies/${State.lobbyId}/players/${USER.id}/ready`).set(next)
+      .then(() => { haptic(next?'success':'light'); toast(next?'Вы готовы!':'Готовность снята', next?'ok':'info', 1500); })
+      .catch(e => toast('Ошибка: ' + (e.message||''), 'err'));
+  });
+
+  // Свайп-назад
+  let tx=0, ty=0;
+  document.addEventListener('touchstart', e => { tx=e.touches[0].clientX; ty=e.touches[0].clientY; }, {passive:true});
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    const dy = Math.abs(e.changedTouches[0].clientY - ty);
+    if (dx>90 && dy<60 && tx<45 && State.screen!=='screen-menu' && State.screen!=='screen-loading'){
+      if (State.screen==='screen-room') leaveRoom(true);
+      else goBack();
+    }
+  }, {passive:true});
+
+  tg?.BackButton?.onClick(() => {
+    if (State.screen==='screen-room') leaveRoom(true);
+    else if (State.screen!=='screen-menu') goBack();
+    else tg.close();
+  });
+}
+
+/* =========================================================
+   BOOT
+   ========================================================= */
+function boot(){
+  loadSettings();
+  applySettings();
+  renderProfile();
+  bindUI();
+  bindSettings();
+
+  // Проверим связь с Firebase
+  if (db){
+    db.ref('.info/connected').on('value', snap => {
+      console.log('🔌 Firebase connected:', snap.val());
+    }, err => console.warn('info/connected error:', err.message));
+  }
+
+  setTimeout(() => {
+    showScreen('screen-menu', { push:false, replace:true });
+    State.history = [];
+    haptic('light');
+  }, 1750);
+}
+window.addEventListener('load', boot);
+window.addEventListener('error', e => console.warn('JS error:', e.message));
+</script>
+</body>
+</html>
