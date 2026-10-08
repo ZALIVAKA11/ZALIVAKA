@@ -27,7 +27,6 @@ body{
     radial-gradient(ellipse at 50% 0%, var(--felt-3) 0%, transparent 55%),
     radial-gradient(ellipse at 50% 100%, var(--felt-deep) 0%, transparent 60%),
     linear-gradient(180deg, var(--felt-2) 0%, var(--felt-1) 100%);
-  background-attachment:fixed;
 }
 body::before{
   content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.4;mix-blend-mode:overlay;
@@ -39,8 +38,6 @@ body::after{
 }
 button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:none}
 .hidden{display:none!important}
-
-/* ============ SCREENS ============ */
 .screen{position:fixed;inset:0;display:none;flex-direction:column;z-index:2}
 .screen.active{display:flex}
 
@@ -49,123 +46,49 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
 .loader-card{
   width:120px;height:168px;border-radius:12px;position:relative;
   background:linear-gradient(135deg,#1a4d2e 0%,#0a2818 100%);
-  border:2px solid var(--gold);
-  box-shadow:0 0 40px var(--gold-glow), 0 0 80px rgba(212,175,55,.3);
-  animation:loaderFloat 2.4s ease-in-out infinite;
-  display:grid;place-items:center;
+  border:2px solid var(--gold);box-shadow:0 0 40px var(--gold-glow);
+  animation:loaderFloat 2.4s ease-in-out infinite;display:grid;place-items:center;
 }
-.loader-card::before{
-  content:'';position:absolute;inset:8px;border:1px solid var(--gold-dim);border-radius:6px;
-}
-.loader-card::after{
-  content:'★';font-size:60px;color:var(--gold);
-  text-shadow:0 0 20px var(--gold-glow),0 0 40px var(--gold-glow);
-  animation:starPulse 1.6s ease-in-out infinite;
-}
-@keyframes loaderFloat{
-  0%,100%{transform:translateY(0) rotate(-3deg)}
-  50%{transform:translateY(-14px) rotate(3deg)}
-}
-@keyframes starPulse{
-  0%,100%{opacity:1;transform:scale(1);text-shadow:0 0 20px var(--gold-glow),0 0 40px var(--gold-glow)}
-  50%{opacity:.7;transform:scale(.9);text-shadow:0 0 12px var(--gold-glow)}
-}
-.loader-title{
-  margin-top:30px;font-size:20px;font-weight:900;letter-spacing:.35em;text-transform:uppercase;
-  color:var(--gold);text-shadow:0 0 20px var(--gold-glow);
-  animation:titleShine 2.4s ease-in-out infinite;
-}
-@keyframes titleShine{
-  0%,100%{opacity:.8;text-shadow:0 0 12px var(--gold-glow)}
-  50%{opacity:1;text-shadow:0 0 28px var(--gold-glow),0 0 50px rgba(212,175,55,.5)}
-}
+.loader-card::before{content:'';position:absolute;inset:8px;border:1px solid var(--gold-dim);border-radius:6px}
+.loader-card::after{content:'★';font-size:60px;color:var(--gold);text-shadow:0 0 20px var(--gold-glow);animation:starPulse 1.6s ease-in-out infinite}
+@keyframes loaderFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-14px) rotate(3deg)}}
+@keyframes starPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.9)}}
+.loader-title{margin-top:30px;font-size:20px;font-weight:900;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);text-shadow:0 0 20px var(--gold-glow)}
 
 /* ============ MENU ============ */
 #menu{padding:calc(var(--safe-top) + 24px) 20px calc(var(--safe-bottom) + 24px);align-items:stretch}
 .menu-hero{text-align:center;margin-bottom:24px}
-.menu-hero .logo-star{
-  font-size:64px;color:var(--gold);display:block;
-  text-shadow:0 0 24px var(--gold-glow),0 0 48px rgba(212,175,55,.5);
-  animation:starSpin 8s linear infinite;
-}
-@keyframes starSpin{
-  0%{transform:rotateY(0) scale(1);filter:drop-shadow(0 0 20px var(--gold-glow))}
-  50%{transform:rotateY(180deg) scale(1.1);filter:drop-shadow(0 0 36px var(--gold-glow))}
-  100%{transform:rotateY(360deg) scale(1);filter:drop-shadow(0 0 20px var(--gold-glow))}
-}
-.menu-hero h1{
-  font-size:26px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;
-  margin-top:14px;color:var(--gold-bright);
-  text-shadow:0 0 16px var(--gold-glow);
-}
+.menu-hero .logo-star{font-size:64px;color:var(--gold);display:block;text-shadow:0 0 24px var(--gold-glow);animation:starSpin 8s linear infinite}
+@keyframes starSpin{0%{transform:rotateY(0)}50%{transform:rotateY(180deg) scale(1.1)}100%{transform:rotateY(360deg)}}
+.menu-hero h1{font-size:26px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;margin-top:14px;color:var(--gold-bright);text-shadow:0 0 16px var(--gold-glow)}
 .menu-hero p{font-size:11px;color:var(--muted);letter-spacing:.3em;text-transform:uppercase;margin-top:6px}
-
-.profile-box{
-  display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;
-  background:linear-gradient(135deg,rgba(212,175,55,.12),rgba(0,0,0,.35));
-  border:1px solid var(--stroke);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 8px 24px -12px rgba(0,0,0,.8);
-  margin-bottom:22px;position:relative;overflow:hidden;
-}
-.profile-box::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(120deg,transparent 30%,rgba(212,175,55,.15) 50%,transparent 70%);
-  background-size:250% 250%;animation:shine 5s linear infinite;pointer-events:none;
-}
+.profile-box{display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;background:linear-gradient(135deg,rgba(212,175,55,.12),rgba(0,0,0,.35));border:1px solid var(--stroke);box-shadow:inset 0 1px 0 rgba(255,255,255,.06);margin-bottom:22px;position:relative;overflow:hidden}
+.profile-box::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(212,175,55,.15) 50%,transparent 70%);background-size:250% 250%;animation:shine 5s linear infinite;pointer-events:none}
 @keyframes shine{0%{background-position:150% 0}100%{background-position:-150% 0}}
 .profile-av{width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);box-shadow:0 0 14px var(--gold-glow);position:relative;z-index:1}
 .profile-av-fb{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;font-size:24px;font-weight:900;background:linear-gradient(135deg,var(--gold),#8a6a15);color:#0d2e1a;border:2px solid var(--gold);position:relative;z-index:1}
 .profile-name{font-size:17px;font-weight:800;position:relative;z-index:1}
 .profile-un{font-size:12px;color:var(--gold);margin-top:3px;position:relative;z-index:1;font-weight:600}
 .profile-id{display:inline-block;font-size:10px;background:rgba(0,0,0,.4);border:1px solid var(--stroke);padding:3px 8px;border-radius:10px;margin-top:6px;color:var(--muted);position:relative;z-index:1}
-
 .menu-btns{display:flex;flex-direction:column;gap:14px;margin-top:auto}
 
 /* ============ BUTTONS ============ */
-.btn{
-  padding:17px 20px;border-radius:14px;font-size:14px;font-weight:900;
-  letter-spacing:.15em;text-transform:uppercase;transition:transform .12s,box-shadow .2s;
-  position:relative;overflow:hidden;
-}
+.btn{padding:17px 20px;border-radius:14px;font-size:14px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;transition:transform .12s;position:relative;overflow:hidden}
 .btn:active{transform:scale(.97)}
 .btn:disabled{opacity:.4;pointer-events:none}
-.btn-gold{
-  background:linear-gradient(135deg,var(--gold) 0%,#a88521 60%,var(--gold) 100%);
-  background-size:200% auto;color:#0d2e1a;
-  box-shadow:0 6px 20px -6px var(--gold-glow),inset 0 1px 0 rgba(255,255,255,.4);
-  animation:goldFlow 4s linear infinite;
-}
+.btn-gold{background:linear-gradient(135deg,var(--gold) 0%,#a88521 60%,var(--gold) 100%);background-size:200% auto;color:#0d2e1a;box-shadow:0 6px 20px -6px var(--gold-glow),inset 0 1px 0 rgba(255,255,255,.4);animation:goldFlow 4s linear infinite}
 @keyframes goldFlow{to{background-position:200% center}}
-.btn-gold::after{
-  content:'';position:absolute;top:0;left:-70%;width:40%;height:100%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);
-  transform:skewX(-22deg);animation:sweep 3s ease-in-out infinite;
-}
+.btn-gold::after{content:'';position:absolute;top:0;left:-70%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);transform:skewX(-22deg);animation:sweep 3s ease-in-out infinite}
 @keyframes sweep{0%{left:-70%}60%,100%{left:150%}}
-.btn-outline{
-  background:rgba(0,0,0,.3);border:1px solid var(--stroke);color:var(--text);
-  backdrop-filter:blur(6px);
-}
+.btn-outline{background:rgba(0,0,0,.3);border:1px solid var(--stroke);color:var(--text);backdrop-filter:blur(6px)}
 .btn-outline:active{background:rgba(212,175,55,.15)}
-.btn-green{
-  background:linear-gradient(135deg,#2e7d4f,#1a4d2e);color:#fff;
-  border:1px solid var(--stroke);box-shadow:0 6px 20px -8px #1a4d2e;
-}
-.btn-red{background:linear-gradient(135deg,#b41c28,#7a0f18);color:#fff;border:1px solid rgba(255,77,94,.4);box-shadow:0 6px 20px -8px #b41c28}
+.btn-green{background:linear-gradient(135deg,#2e7d4f,#1a4d2e);color:#fff;border:1px solid var(--stroke)}
+.btn-red{background:linear-gradient(135deg,#b41c28,#7a0f18);color:#fff;border:1px solid rgba(255,77,94,.4)}
 .btn-sm{padding:12px 16px;font-size:12px;letter-spacing:.1em}
 
 /* ============ TOP BAR ============ */
-.topbar{
-  display:flex;justify-content:space-between;align-items:center;padding:12px 16px;
-  flex-shrink:0;background:linear-gradient(180deg,rgba(0,0,0,.4),transparent);
-  border-bottom:1px solid rgba(212,175,55,.12);
-}
-.tb-btn{
-  width:42px;height:42px;border-radius:12px;
-  background:rgba(0,0,0,.35);border:1px solid var(--stroke);
-  display:grid;place-items:center;font-size:20px;color:var(--gold);
-  transition:all .2s;backdrop-filter:blur(6px);
-}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex-shrink:0;background:linear-gradient(180deg,rgba(0,0,0,.4),transparent);border-bottom:1px solid rgba(212,175,55,.12)}
+.tb-btn{width:42px;height:42px;border-radius:12px;background:rgba(0,0,0,.35);border:1px solid var(--stroke);display:grid;place-items:center;font-size:20px;color:var(--gold);transition:all .2s;backdrop-filter:blur(6px)}
 .tb-btn:active{background:rgba(212,175,55,.2);transform:scale(.92)}
 .tb-title{font-size:14px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-bright);text-shadow:0 0 12px var(--gold-glow)}
 
@@ -174,35 +97,18 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
 .form-body::-webkit-scrollbar{display:none}
 .tabs{display:flex;gap:6px;background:rgba(0,0,0,.4);padding:5px;border-radius:14px;margin-bottom:20px;border:1px solid var(--stroke)}
 .tab{flex:1;padding:12px;border-radius:10px;color:var(--muted);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;transition:all .22s}
-.tab.active{background:linear-gradient(135deg,var(--gold),#a88521);color:#0d2e1a;box-shadow:0 4px 14px -4px var(--gold-glow)}
+.tab.active{background:linear-gradient(135deg,var(--gold),#a88521);color:#0d2e1a}
 .tab-panel{display:none;animation:fadeUp .3s cubic-bezier(.22,1,.36,1)}
 .tab-panel.active{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .field{margin-bottom:16px}
 .field-lbl{display:block;font-size:11px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.15em;margin-bottom:8px}
-.input{
-  width:100%;padding:15px 16px;border-radius:12px;
-  border:1px solid var(--stroke);background:rgba(0,0,0,.45);
-  color:var(--text);font-size:15px;font-weight:700;outline:none;font-family:inherit;
-  transition:border-color .2s,box-shadow .2s;
-}
-.input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,.2),inset 0 0 0 1px var(--gold-dim)}
-.input-code{
-  text-align:center;font-size:28px;letter-spacing:.4em;text-indent:.4em;
-  font-family:'SF Mono',Menlo,monospace;text-transform:uppercase;padding:20px 16px;
-  color:var(--gold-bright);text-shadow:0 0 12px var(--gold-glow);
-}
+.input{width:100%;padding:15px 16px;border-radius:12px;border:1px solid var(--stroke);background:rgba(0,0,0,.45);color:var(--text);font-size:15px;font-weight:700;outline:none;font-family:inherit}
+.input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,.2)}
+.input-code{text-align:center;font-size:28px;letter-spacing:.4em;text-indent:.4em;font-family:'SF Mono',Menlo,monospace;text-transform:uppercase;padding:20px 16px;color:var(--gold-bright);text-shadow:0 0 12px var(--gold-glow)}
 .seg{display:flex;gap:6px}
-.seg button{
-  flex:1;padding:12px 6px;border-radius:10px;
-  background:rgba(0,0,0,.4);border:1px solid var(--stroke);
-  color:var(--muted);font-size:12px;font-weight:800;transition:all .2s;
-}
-.seg button.active{
-  background:linear-gradient(135deg,var(--gold),#a88521);color:#0d2e1a;
-  border-color:transparent;box-shadow:0 4px 12px -4px var(--gold-glow);
-}
-
+.seg button{flex:1;padding:12px 6px;border-radius:10px;background:rgba(0,0,0,.4);border:1px solid var(--stroke);color:var(--muted);font-size:12px;font-weight:800;transition:all .2s}
+.seg button.active{background:linear-gradient(135deg,var(--gold),#a88521);color:#0d2e1a;border-color:transparent}
 .set-group{background:rgba(0,0,0,.4);border:1px solid var(--stroke);border-radius:14px;overflow:hidden;margin-bottom:14px}
 .set-row{display:flex;align-items:center;gap:12px;padding:15px 16px;border-bottom:1px solid rgba(212,175,55,.08)}
 .set-row:last-child{border-bottom:none}
@@ -220,38 +126,18 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
 /* ============ ROOM ============ */
 .room-code-big{text-align:center;margin:18px}
 .room-code-big .lbl{font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.3em;font-weight:800}
-.room-code-big .val{
-  font-size:44px;font-weight:900;letter-spacing:.22em;text-indent:.22em;margin-top:10px;
-  color:var(--gold-bright);font-family:'SF Mono',Menlo,monospace;cursor:pointer;
-  text-shadow:0 0 24px var(--gold-glow),0 0 48px rgba(212,175,55,.3);
-  animation:codePulse 3s ease-in-out infinite;
-}
-@keyframes codePulse{
-  0%,100%{text-shadow:0 0 20px var(--gold-glow),0 0 40px rgba(212,175,55,.25)}
-  50%{text-shadow:0 0 32px var(--gold-bright),0 0 64px rgba(212,175,55,.45)}
-}
+.room-code-big .val{font-size:44px;font-weight:900;letter-spacing:.22em;text-indent:.22em;margin-top:10px;color:var(--gold-bright);font-family:'SF Mono',Menlo,monospace;cursor:pointer;text-shadow:0 0 24px var(--gold-glow);animation:codePulse 3s ease-in-out infinite}
+@keyframes codePulse{0%,100%{text-shadow:0 0 20px var(--gold-glow)}50%{text-shadow:0 0 32px var(--gold-bright)}}
 .room-code-big .hint{font-size:11px;color:var(--muted);margin-top:8px}
-
-.p2p-status{
-  font-size:11px;text-align:center;padding:8px 16px;color:var(--muted);
-  letter-spacing:.1em;font-weight:700;transition:color .3s;
-}
+.p2p-status{font-size:11px;text-align:center;padding:8px 16px;color:var(--muted);letter-spacing:.1em;font-weight:700;transition:color .3s}
 .p2p-status.on{color:#4ade80}
 .p2p-status.off{color:#ff8b9a}
-
 .room-players{display:grid;grid-template-columns:repeat(auto-fill,minmax(94px,1fr));gap:10px;padding:0 20px;margin-bottom:20px}
-.rp{
-  position:relative;padding:14px 6px;border-radius:14px;
-  background:linear-gradient(135deg,rgba(0,0,0,.4),rgba(212,175,55,.05));
-  border:1px solid var(--stroke);text-align:center;transition:all .3s;
-}
+.rp{position:relative;padding:14px 6px;border-radius:14px;background:linear-gradient(135deg,rgba(0,0,0,.4),rgba(212,175,55,.05));border:1px solid var(--stroke);text-align:center;transition:all .3s}
 .rp.host{border-color:var(--gold);box-shadow:0 0 20px -6px var(--gold-glow)}
 .rp.ready{border-color:#4ade80;box-shadow:0 0 14px -6px #4ade80}
 .rp.me{border-color:rgba(124,92,255,.6)}
-.rp.p2p::after{
-  content:'';position:absolute;top:6px;left:6px;width:7px;height:7px;border-radius:50%;
-  background:#4ade80;box-shadow:0 0 8px #4ade80;animation:dotPulse 1.6s ease-in-out infinite;
-}
+.rp.p2p::after{content:'';position:absolute;top:6px;left:6px;width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80;animation:dotPulse 1.6s ease-in-out infinite}
 @keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
 .rp img,.rp .fb{width:44px;height:44px;border-radius:50%;object-fit:cover;margin:0 auto 6px;display:block;border:2px solid var(--stroke)}
 .rp.host img,.rp.host .fb{border-color:var(--gold)}
@@ -264,314 +150,127 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
 .rp-slot{padding:14px 6px;border-radius:14px;border:1.5px dashed rgba(212,175,55,.2);display:grid;place-items:center;color:rgba(212,175,55,.3);font-size:22px}
 .room-params{margin:0 20px 20px;background:rgba(0,0,0,.4);border:1px solid var(--stroke);border-radius:14px;overflow:hidden}
 
-/* ============ GAME SCREEN ============ */
+/* ============ GAME ============ */
 #game{padding:0;overflow:hidden;background:radial-gradient(ellipse at 50% 45%, #1e5c35 0%, #16492a 40%, #0d2e1a 75%, #08180d 100%)}
-
-.game-topbar{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:calc(var(--safe-top) + 8px) 12px 8px;flex-shrink:0;gap:6px;z-index:10;
-}
+.game-topbar{display:flex;justify-content:space-between;align-items:center;padding:calc(var(--safe-top) + 8px) 12px 8px;flex-shrink:0;gap:6px;z-index:10}
 .gt-left,.gt-right{display:flex;gap:6px;align-items:center}
-.gt-btn{
-  width:38px;height:38px;border-radius:11px;
-  background:rgba(0,0,0,.45);border:1px solid var(--stroke);
-  display:grid;place-items:center;font-size:17px;color:var(--gold);
-  backdrop-filter:blur(8px);transition:all .15s;
-}
+.gt-btn{width:38px;height:38px;border-radius:11px;background:rgba(0,0,0,.45);border:1px solid var(--stroke);display:grid;place-items:center;font-size:17px;color:var(--gold);backdrop-filter:blur(8px);transition:all .15s}
 .gt-btn:active{background:rgba(212,175,55,.2);transform:scale(.92)}
-.gt-status{
-  font-size:10.5px;font-weight:800;padding:5px 12px;border-radius:20px;
-  background:rgba(0,0,0,.5);border:1px solid var(--stroke);letter-spacing:.1em;
-  transition:all .3s;
-}
-.gt-status.on{color:#4ade80;border-color:rgba(74,222,128,.5);box-shadow:0 0 12px -4px #4ade80}
+.gt-status{font-size:10.5px;font-weight:800;padding:5px 12px;border-radius:20px;background:rgba(0,0,0,.5);border:1px solid var(--stroke);letter-spacing:.1em;transition:all .3s}
+.gt-status.on{color:#4ade80;border-color:rgba(74,222,128,.5)}
 .gt-status.off{color:#ff8b9a;border-color:rgba(255,139,154,.4)}
-
-/* Opponents */
-.opps{
-  display:flex;gap:10px;padding:6px 12px;overflow-x:auto;flex-shrink:0;
-  justify-content:center;min-height:92px;scrollbar-width:none;
-}
+.opps{display:flex;gap:10px;padding:6px 12px;overflow-x:auto;flex-shrink:0;justify-content:center;min-height:92px;scrollbar-width:none}
 .opps::-webkit-scrollbar{display:none}
-.opp{flex-shrink:0;position:relative;text-align:center;width:76px;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.opp{flex-shrink:0;position:relative;text-align:center;width:76px;transition:transform .3s}
 .opp-av-wrap{position:relative;width:60px;height:60px;margin:0 auto}
-.opp-av{
-  width:60px;height:60px;border-radius:10px;object-fit:cover;
-  border:2px solid rgba(212,175,55,.3);display:block;transition:all .3s;
-}
-.opp-av-fb{
-  width:60px;height:60px;border-radius:10px;display:grid;place-items:center;
-  font-size:24px;font-weight:900;color:var(--gold-bright);
-  background:linear-gradient(135deg,#1a4d2e,#0d2e1a);
-  border:2px solid rgba(212,175,55,.3);transition:all .3s;
-}
-.opp.attacker .opp-av,.opp.attacker .opp-av-fb{
-  border-color:#ff5b6e;box-shadow:0 0 18px #ff5b6e,0 0 0 2px rgba(255,91,110,.4);
-  animation:attackerPulse 1.6s ease-in-out infinite;
-}
-@keyframes attackerPulse{
-  0%,100%{box-shadow:0 0 18px #ff5b6e,0 0 0 2px rgba(255,91,110,.4)}
-  50%{box-shadow:0 0 28px #ff5b6e,0 0 0 3px rgba(255,91,110,.7)}
-}
-.opp.defender .opp-av,.opp.defender .opp-av-fb{
-  border-color:var(--gold);box-shadow:0 0 18px var(--gold-glow),0 0 0 2px rgba(212,175,55,.4);
-  animation:defenderPulse 1.6s ease-in-out infinite;
-}
-@keyframes defenderPulse{
-  0%,100%{box-shadow:0 0 18px var(--gold-glow),0 0 0 2px rgba(212,175,55,.4)}
-  50%{box-shadow:0 0 28px var(--gold-bright),0 0 0 3px rgba(212,175,55,.7)}
-}
+.opp-av{width:60px;height:60px;border-radius:10px;object-fit:cover;border:2px solid rgba(212,175,55,.3);display:block;transition:all .3s}
+.opp-av-fb{width:60px;height:60px;border-radius:10px;display:grid;place-items:center;font-size:24px;font-weight:900;color:var(--gold-bright);background:linear-gradient(135deg,#1a4d2e,#0d2e1a);border:2px solid rgba(212,175,55,.3);transition:all .3s}
+.opp.attacker .opp-av,.opp.attacker .opp-av-fb{border-color:#ff5b6e;box-shadow:0 0 18px #ff5b6e,0 0 0 2px rgba(255,91,110,.4);animation:attackerPulse 1.6s ease-in-out infinite}
+@keyframes attackerPulse{0%,100%{box-shadow:0 0 18px #ff5b6e}50%{box-shadow:0 0 28px #ff5b6e,0 0 0 3px rgba(255,91,110,.7)}}
+.opp.defender .opp-av,.opp.defender .opp-av-fb{border-color:var(--gold);box-shadow:0 0 18px var(--gold-glow);animation:defenderPulse 1.6s ease-in-out infinite}
+@keyframes defenderPulse{0%,100%{box-shadow:0 0 18px var(--gold-glow)}50%{box-shadow:0 0 28px var(--gold-bright),0 0 0 3px rgba(212,175,55,.7)}}
 .opp.offline{opacity:.45;filter:grayscale(.5)}
-.opp-cnt{
-  position:absolute;top:-5px;right:-5px;background:linear-gradient(135deg,#0d2e1a,#08180d);
-  border:1.5px solid var(--gold);border-radius:11px;padding:2px 7px;
-  font-size:11px;font-weight:900;color:var(--gold-bright);min-width:24px;text-align:center;
-  box-shadow:0 0 8px rgba(212,175,55,.5);line-height:1.3;
-}
-.opp-name{
-  font-size:11px;font-weight:700;margin-top:5px;color:var(--text);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  text-shadow:0 1px 3px rgba(0,0,0,.9);
-}
-.opp-badge{
-  position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
-  font-size:8.5px;font-weight:900;text-transform:uppercase;padding:2px 7px;
-  border-radius:8px;letter-spacing:.08em;white-space:nowrap;
-  box-shadow:0 2px 8px rgba(0,0,0,.6);
-}
+.opp-cnt{position:absolute;top:-5px;right:-5px;background:linear-gradient(135deg,#0d2e1a,#08180d);border:1.5px solid var(--gold);border-radius:11px;padding:2px 7px;font-size:11px;font-weight:900;color:var(--gold-bright);min-width:24px;text-align:center;box-shadow:0 0 8px rgba(212,175,55,.5);line-height:1.3}
+.opp-name{font-size:11px;font-weight:700;margin-top:5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px rgba(0,0,0,.9)}
+.opp-badge{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);font-size:8.5px;font-weight:900;text-transform:uppercase;padding:2px 7px;border-radius:8px;letter-spacing:.08em;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.6)}
 .opp-badge.attacker{background:linear-gradient(135deg,#ff4d5e,#b41c28);color:#fff}
 .opp-badge.defender{background:linear-gradient(135deg,var(--gold),#a88521);color:#0d2e1a}
-
-/* Table area */
-.table-area{
-  flex:1;position:relative;display:flex;padding:6px 12px;min-height:0;
-}
+.table-area{flex:1;position:relative;display:flex;padding:6px 12px;min-height:0}
 .deck-area{position:absolute;top:10px;left:14px;display:flex;align-items:flex-start;gap:8px;z-index:5}
 .deck-stack{position:relative;width:50px;height:72px}
 .deck-stack .card.back{position:absolute;top:0;left:0}
 .deck-stack .card.back:nth-child(2){top:-2px;left:1px;opacity:.85}
 .deck-stack .card.back:nth-child(3){top:-4px;left:2px;opacity:.7}
-.deck-cnt{
-  position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);
-  background:linear-gradient(135deg,#0d2e1a,#08180d);border:1.5px solid var(--gold);
-  border-radius:11px;padding:2px 9px;font-size:12px;font-weight:900;
-  color:var(--gold-bright);min-width:30px;text-align:center;z-index:10;
-  box-shadow:0 0 12px rgba(212,175,55,.5);
-}
+.deck-cnt{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0d2e1a,#08180d);border:1.5px solid var(--gold);border-radius:11px;padding:2px 9px;font-size:12px;font-weight:900;color:var(--gold-bright);min-width:30px;text-align:center;z-index:10;box-shadow:0 0 12px rgba(212,175,55,.5)}
 .trump-slot{position:relative;width:50px;height:72px}
 .trump-slot .card{transform:rotate(90deg);transform-origin:center;position:absolute;top:0;left:0}
-.trump-suit-badge{
-  position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);
-  background:linear-gradient(135deg,var(--gold),#a88521);color:#0d2e1a;
-  border-radius:11px;padding:2px 9px;font-size:15px;font-weight:900;
-  min-width:30px;text-align:center;z-index:10;box-shadow:0 0 12px var(--gold-glow);
-}
-
-.table-center{
-  flex:1;display:flex;flex-wrap:wrap;gap:8px;
-  align-content:center;justify-content:center;
-  padding:80px 8px 8px;position:relative;
-  perspective:800px;
-}
-.table-center .pair{
-  position:relative;width:50px;height:72px;
-  animation:dropIn .22s cubic-bezier(.34,1.56,.64,1);
-  transform-style:preserve-3d;
-}
-@keyframes dropIn{
-  from{opacity:0;transform:translateY(-30px) scale(.7) rotateX(45deg)}
-  to{opacity:1;transform:translateY(0) scale(1) rotateX(0)}
-}
+.trump-suit-badge{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--gold),#a88521);color:#0d2e1a;border-radius:11px;padding:2px 9px;font-size:15px;font-weight:900;min-width:30px;text-align:center;z-index:10;box-shadow:0 0 12px var(--gold-glow)}
+.table-center{flex:1;display:flex;flex-wrap:wrap;gap:8px;align-content:center;justify-content:center;padding:80px 8px 8px;position:relative;perspective:800px;transition:background .2s,box-shadow .2s;border-radius:16px}
+.table-center .pair{position:relative;width:50px;height:72px;animation:dropIn .22s cubic-bezier(.34,1.56,.64,1);transform-style:preserve-3d;transition:transform .15s}
+@keyframes dropIn{from{opacity:0;transform:translateY(-30px) scale(.7) rotateX(45deg)}to{opacity:1;transform:translateY(0) scale(1) rotateX(0)}}
 .table-center .pair .atk-card{position:absolute;top:0;left:0;z-index:1}
-.table-center .pair .def-card{
-  position:absolute;top:5px;left:5px;z-index:2;transform:rotate(7deg);
-  animation:defendIn .28s cubic-bezier(.34,1.56,.64,1);
+.table-center .pair .def-card{position:absolute;top:5px;left:5px;z-index:2;transform:rotate(7deg);animation:defendIn .28s cubic-bezier(.34,1.56,.64,1)}
+@keyframes defendIn{0%{opacity:0;transform:translate(-30px,-30px) scale(.6)}60%{opacity:1;transform:translate(8px,8px) rotate(10deg) scale(1.05)}100%{transform:translate(0,0) rotate(7deg) scale(1)}}
+
+/* DROP TARGETS */
+.table-center.drop-target{
+  background:radial-gradient(ellipse at center, rgba(255,217,102,.2) 0%, rgba(255,217,102,.08) 40%, transparent 70%);
+  box-shadow:inset 0 0 60px rgba(255,217,102,.25), 0 0 40px rgba(255,217,102,.3);
+  animation:dropGlow 1s ease-in-out infinite;
 }
-@keyframes defendIn{
-  0%{opacity:0;transform:translate(-30px,-30px) rotate(0deg) scale(.6)}
-  60%{opacity:1;transform:translate(8px,8px) rotate(10deg) scale(1.05)}
-  100%{transform:translate(0,0) rotate(7deg) scale(1)}
-}
+@keyframes dropGlow{0%,100%{box-shadow:inset 0 0 60px rgba(255,217,102,.25), 0 0 40px rgba(255,217,102,.3)}50%{box-shadow:inset 0 0 80px rgba(255,217,102,.4), 0 0 60px rgba(255,217,102,.5)}}
+.pair.drop-target{transform:scale(1.1);z-index:5}
+.pair.drop-target::before{content:'';position:absolute;inset:-8px;border:2.5px dashed var(--gold-bright);border-radius:12px;animation:dashPulse .9s ease-in-out infinite;pointer-events:none;box-shadow:0 0 24px var(--gold-bright)}
+@keyframes dashPulse{0%,100%{opacity:1}50%{opacity:.45}}
 
 /* CARD */
-.card{
-  width:50px;height:72px;border-radius:6px;
-  position:relative;flex-shrink:0;font-family:'Times New Roman',Georgia,serif;
-  transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .18s,opacity .2s;
-  border:1px solid rgba(0,0,0,.4);
-  box-shadow:1px 2px 6px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.5);
-  background:#fdfcf7;
-  will-change:transform;
-}
+.card{width:50px;height:72px;border-radius:6px;position:relative;flex-shrink:0;font-family:'Times New Roman',Georgia,serif;transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .18s,opacity .2s;border:1px solid rgba(0,0,0,.4);box-shadow:1px 2px 6px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.5);background:#fdfcf7;will-change:transform}
 .card.red{color:var(--card-red)}
 .card:not(.red){color:var(--card-black)}
 .card .cn{position:absolute;top:3px;left:4px;font-size:14px;font-weight:900;line-height:1;letter-spacing:-.5px}
 .card .cs{position:absolute;top:17px;left:4px;font-size:12px;line-height:1}
 .card .cn-b{position:absolute;bottom:3px;right:4px;font-size:14px;font-weight:900;line-height:1;transform:rotate(180deg);letter-spacing:-.5px}
 .card .cs-b{position:absolute;bottom:17px;right:4px;font-size:12px;line-height:1;transform:rotate(180deg)}
-.card .mid{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:26px;line-height:1;opacity:.92;text-shadow:0 1px 1px rgba(0,0,0,.15)}
-.card.trump::before{
-  content:"★";position:absolute;top:2px;right:3px;font-size:10px;
-  color:var(--gold);text-shadow:0 0 6px var(--gold-glow),0 0 2px rgba(0,0,0,.8);
-}
-.card.back{
-  background:
-    url("data:image/svg+xml;utf8,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.15 0 0 0 0 0.35 0 0 0 0 0.2 0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    linear-gradient(135deg,#1a4d2e 0%,#0a2818 100%);
-  border:1.5px solid var(--gold);
-  box-shadow:0 0 8px rgba(212,175,55,.4),inset 0 0 8px rgba(0,0,0,.5),1px 2px 6px rgba(0,0,0,.6);
-}
-.card.back::before{
-  content:'';position:absolute;inset:5px;
-  border:1px solid rgba(212,175,55,.5);border-radius:3px;
-}
-.card.back::after{
-  content:"★";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  color:var(--gold);font-size:26px;line-height:1;
-  text-shadow:0 0 10px var(--gold-glow),0 0 20px rgba(212,175,55,.5);
-}
+.card .mid{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:26px;line-height:1;opacity:.92}
+.card.trump::before{content:"★";position:absolute;top:2px;right:3px;font-size:10px;color:var(--gold);text-shadow:0 0 6px var(--gold-glow)}
+.card.back{background:url("data:image/svg+xml;utf8,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.15 0 0 0 0 0.35 0 0 0 0 0.2 0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),linear-gradient(135deg,#1a4d2e 0%,#0a2818 100%);border:1.5px solid var(--gold);box-shadow:0 0 8px rgba(212,175,55,.4),inset 0 0 8px rgba(0,0,0,.5),1px 2px 6px rgba(0,0,0,.6)}
+.card.back::before{content:'';position:absolute;inset:5px;border:1px solid rgba(212,175,55,.5);border-radius:3px}
+.card.back::after{content:"★";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--gold);font-size:26px;line-height:1;text-shadow:0 0 10px var(--gold-glow)}
 .card.back .cn,.card.back .cs,.card.back .cn-b,.card.back .cs-b,.card.back .mid{display:none}
 
 /* HAND */
-.hand-area{
-  flex-shrink:0;padding:0 8px 8px;
-  background:linear-gradient(to top,rgba(0,0,0,.4),transparent 60%);
-  position:relative;z-index:5;
-}
-.hand-outer{
-  display:flex;justify-content:center;align-items:flex-end;
-  min-height:104px;padding:16px 8px 6px;gap:0;
-  overflow-x:auto;overflow-y:visible;scrollbar-width:none;
-}
+.hand-area{flex-shrink:0;padding:0 8px 8px;background:linear-gradient(to top,rgba(0,0,0,.4),transparent 60%);position:relative;z-index:5}
+.hand-outer{display:flex;justify-content:center;align-items:flex-end;min-height:104px;padding:16px 8px 6px;gap:0;overflow-x:auto;overflow-y:visible;scrollbar-width:none}
 .hand-outer::-webkit-scrollbar{display:none}
-.hand-outer .card{
-  margin-left:-18px;cursor:pointer;transform-origin:bottom center;
-}
+.hand-outer .card{margin-left:-18px;cursor:grab;transform-origin:bottom center;touch-action:pan-x}
 .hand-outer .card:first-child{margin-left:0}
-.hand-outer .card.playable{box-shadow:1px 2px 6px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.5),0 0 12px var(--gold-glow)}
-.hand-outer .card.playable:hover{transform:translateY(-8px)}
-.hand-outer .card.playing-out{
-  animation:cardPlayOut .22s forwards cubic-bezier(.6,0,.3,1);
-  pointer-events:none;
-}
-@keyframes cardPlayOut{
-  0%{transform:translateY(0) scale(1)}
-  100%{transform:translateY(-80px) scale(.7);opacity:0}
-}
+.hand-outer .card.playable{box-shadow:1px 2px 6px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.5),0 0 12px var(--gold-glow);cursor:grab}
+.hand-outer .card.playable:active{cursor:grabbing}
+.hand-outer .card.playing-out{animation:cardPlayOut .22s forwards cubic-bezier(.6,0,.3,1);pointer-events:none}
+@keyframes cardPlayOut{0%{transform:translateY(0) scale(1)}100%{transform:translateY(-80px) scale(.7);opacity:0}}
 .hand-outer .card.dealing-in{animation:cardDealIn .32s cubic-bezier(.34,1.56,.64,1)}
-@keyframes cardDealIn{
-  from{opacity:0;transform:translateY(-120px) scale(.4) rotate(20deg)}
-  to{opacity:1;transform:translateY(0) scale(1) rotate(0)}
-}
+@keyframes cardDealIn{from{opacity:0;transform:translateY(-120px) scale(.4) rotate(20deg)}to{opacity:1;transform:translateY(0) scale(1) rotate(0)}}
+.hand-outer .card.dragging{opacity:.25}
+
+/* GHOST CARD (during drag) */
+.ghost-card{position:fixed;pointer-events:none;z-index:9999;will-change:transform;filter:drop-shadow(0 20px 32px rgba(0,0,0,.8)) drop-shadow(0 0 24px rgba(255,217,102,.7))}
 
 /* ACTION BAR */
-.action-bar{
-  flex-shrink:0;padding:10px 12px calc(var(--safe-bottom) + 10px);
-  background:linear-gradient(to top,rgba(0,0,0,.6),rgba(0,0,0,.2) 60%,transparent);
-  display:flex;align-items:center;gap:10px;position:relative;z-index:5;
-}
+.action-bar{flex-shrink:0;padding:10px 12px calc(var(--safe-bottom) + 10px);background:linear-gradient(to top,rgba(0,0,0,.6),rgba(0,0,0,.2) 60%,transparent);display:flex;align-items:center;gap:10px;position:relative;z-index:5}
 .ab-me{width:56px;height:56px;border-radius:12px;position:relative;flex-shrink:0}
 .ab-me .opp-av,.ab-me .opp-av-fb{width:56px;height:56px;border-radius:12px}
-.ab-me.attacker .opp-av,.ab-me.attacker .opp-av-fb{
-  border-color:#ff5b6e;box-shadow:0 0 20px #ff5b6e,0 0 0 2px rgba(255,91,110,.5);
-  animation:attackerPulse 1.6s ease-in-out infinite;
-}
-.ab-me.defender .opp-av,.ab-me.defender .opp-av-fb{
-  border-color:var(--gold);box-shadow:0 0 20px var(--gold-glow),0 0 0 2px rgba(212,175,55,.5);
-  animation:defenderPulse 1.6s ease-in-out infinite;
-}
+.ab-me.attacker .opp-av,.ab-me.attacker .opp-av-fb{border-color:#ff5b6e;box-shadow:0 0 20px #ff5b6e;animation:attackerPulse 1.6s ease-in-out infinite}
+.ab-me.defender .opp-av,.ab-me.defender .opp-av-fb{border-color:var(--gold);box-shadow:0 0 20px var(--gold-glow);animation:defenderPulse 1.6s ease-in-out infinite}
 .ab-me .opp-cnt{position:absolute;top:-6px;right:-6px}
 .ab-actions{flex:1;display:flex;gap:8px;align-items:center;justify-content:center;min-height:56px}
-.act-btn{
-  padding:15px 20px;border-radius:13px;font-size:13px;font-weight:900;
-  letter-spacing:.1em;text-transform:uppercase;flex:1;max-width:140px;
-  transition:transform .12s,box-shadow .2s;position:relative;overflow:hidden;
-}
+.act-btn{padding:15px 20px;border-radius:13px;font-size:13px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;flex:1;max-width:140px;transition:transform .12s}
 .act-btn:active{transform:scale(.94)}
-.act-btn.gold{
-  background:linear-gradient(135deg,var(--gold),#a88521);color:#0d2e1a;
-  box-shadow:0 6px 20px -6px var(--gold-glow),inset 0 1px 0 rgba(255,255,255,.4);
-}
-.act-btn.red{
-  background:linear-gradient(135deg,#ff4d5e,#b41c28);color:#fff;
-  box-shadow:0 6px 20px -8px #b41c28;
-}
-.act-btn.green{
-  background:linear-gradient(135deg,#4ade80,#1e7a4d);color:#052e16;
-  box-shadow:0 6px 20px -8px #1e7a4d;
-}
-.ab-status{
-  flex:1;text-align:center;font-size:12px;font-weight:700;color:var(--text);
-  padding:10px 14px;background:rgba(0,0,0,.55);border-radius:12px;
-  border:1px solid var(--stroke);letter-spacing:.05em;
-}
-.ab-status.hot{
-  background:linear-gradient(135deg,rgba(212,175,55,.35),rgba(212,175,55,.15));
-  color:var(--gold-bright);border-color:var(--gold);
-  box-shadow:0 0 20px -6px var(--gold-glow);
-  animation:statusPulse 2s ease-in-out infinite;
-}
-@keyframes statusPulse{
-  0%,100%{box-shadow:0 0 20px -6px var(--gold-glow)}
-  50%{box-shadow:0 0 28px -4px var(--gold-glow)}
-}
+.act-btn.gold{background:linear-gradient(135deg,var(--gold),#a88521);color:#0d2e1a;box-shadow:0 6px 20px -6px var(--gold-glow)}
+.act-btn.red{background:linear-gradient(135deg,#ff4d5e,#b41c28);color:#fff}
+.act-btn.green{background:linear-gradient(135deg,#4ade80,#1e7a4d);color:#052e16}
+.ab-status{flex:1;text-align:center;font-size:12px;font-weight:700;color:var(--text);padding:10px 14px;background:rgba(0,0,0,.55);border-radius:12px;border:1px solid var(--stroke)}
+.ab-status.hot{background:linear-gradient(135deg,rgba(212,175,55,.35),rgba(212,175,55,.15));color:var(--gold-bright);border-color:var(--gold)}
 
 /* Emotes */
 .emotes{display:flex;gap:5px;justify-content:center;padding:4px 0;flex-shrink:0;z-index:5}
-.emote-btn{
-  width:40px;height:40px;border-radius:12px;
-  background:rgba(0,0,0,.5);border:1px solid var(--stroke);
-  display:grid;place-items:center;font-size:20px;
-  transition:transform .12s,background .2s;backdrop-filter:blur(6px);
-}
+.emote-btn{width:40px;height:40px;border-radius:12px;background:rgba(0,0,0,.5);border:1px solid var(--stroke);display:grid;place-items:center;font-size:20px;transition:transform .12s}
 .emote-btn:active{transform:scale(.85);background:rgba(212,175,55,.25)}
-.float-emote{
-  position:fixed;font-size:56px;pointer-events:none;z-index:999;
-  animation:floatUp 2.5s ease-out forwards;
-  filter:drop-shadow(0 4px 12px rgba(0,0,0,.7));
-}
-@keyframes floatUp{
-  0%{opacity:0;transform:translateY(0) scale(.4)}
-  12%{opacity:1;transform:translateY(-30px) scale(1.3)}
-  25%{transform:translateY(-40px) scale(1)}
-  100%{opacity:0;transform:translateY(-220px) scale(.85)}
-}
+.float-emote{position:fixed;font-size:56px;pointer-events:none;z-index:999;animation:floatUp 2.5s ease-out forwards;filter:drop-shadow(0 4px 12px rgba(0,0,0,.7))}
+@keyframes floatUp{0%{opacity:0;transform:translateY(0) scale(.4)}12%{opacity:1;transform:translateY(-30px) scale(1.3)}100%{opacity:0;transform:translateY(-220px) scale(.85)}}
 
-/* ============ TOAST ============ */
-#toast-wrap{
-  position:fixed;top:calc(var(--safe-top) + 70px);left:0;right:0;
-  z-index:999;display:flex;flex-direction:column;align-items:center;gap:8px;
-  pointer-events:none;padding:0 20px;
-}
-.toast{
-  padding:13px 20px;border-radius:14px;font-size:13px;font-weight:700;
-  background:linear-gradient(135deg,rgba(13,46,26,.98),rgba(8,24,13,.98));
-  border:1px solid var(--gold);color:var(--text);
-  backdrop-filter:blur(14px);animation:toastIn .35s cubic-bezier(.34,1.56,.64,1);
-  max-width:100%;box-shadow:0 8px 28px -8px rgba(0,0,0,.9),0 0 20px -8px var(--gold-glow);
-}
+/* TOAST */
+#toast-wrap{position:fixed;top:calc(var(--safe-top) + 70px);left:0;right:0;z-index:999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 20px}
+.toast{padding:13px 20px;border-radius:14px;font-size:13px;font-weight:700;background:linear-gradient(135deg,rgba(13,46,26,.98),rgba(8,24,13,.98));border:1px solid var(--gold);color:var(--text);backdrop-filter:blur(14px);animation:toastIn .35s cubic-bezier(.34,1.56,.64,1);max-width:100%;box-shadow:0 8px 28px -8px rgba(0,0,0,.9),0 0 20px -8px var(--gold-glow)}
 @keyframes toastIn{from{opacity:0;transform:translateY(-20px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
-.toast.ok{border-color:#4ade80;box-shadow:0 8px 28px -8px rgba(0,0,0,.9),0 0 20px -8px #4ade80}
-.toast.err{border-color:#ff4d5e;box-shadow:0 8px 28px -8px rgba(0,0,0,.9),0 0 20px -8px #ff4d5e}
+.toast.ok{border-color:#4ade80}.toast.err{border-color:#ff4d5e}
 
-/* ============ MODAL ============ */
-#modal{
-  position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.8);
-  display:none;align-items:center;justify-content:center;padding:24px;
-  backdrop-filter:blur(8px);
-}
-#modal.show{display:flex;animation:fadeIn .25s}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal-box{
-  width:100%;max-width:340px;
-  background:linear-gradient(160deg,#16492a,#0d2e1a);
-  border:1px solid var(--gold);border-radius:22px;padding:26px 22px;text-align:center;
-  box-shadow:0 24px 60px -12px rgba(0,0,0,.9),0 0 40px -12px var(--gold-glow);
-  animation:modalIn .35s cubic-bezier(.34,1.56,.64,1);
-}
+/* MODAL */
+#modal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(8px)}
+#modal.show{display:flex}
+.modal-box{width:100%;max-width:340px;background:linear-gradient(160deg,#16492a,#0d2e1a);border:1px solid var(--gold);border-radius:22px;padding:26px 22px;text-align:center;box-shadow:0 24px 60px -12px rgba(0,0,0,.9),0 0 40px -12px var(--gold-glow);animation:modalIn .35s cubic-bezier(.34,1.56,.64,1)}
 @keyframes modalIn{from{opacity:0;transform:scale(.85) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
 .modal-icon{font-size:48px;margin-bottom:14px;color:var(--gold);text-shadow:0 0 20px var(--gold-glow)}
-.modal-title{font-size:18px;font-weight:900;margin-bottom:10px;color:var(--gold-bright);letter-spacing:.05em}
+.modal-title{font-size:18px;font-weight:900;margin-bottom:10px;color:var(--gold-bright)}
 .modal-text{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:22px;white-space:pre-line}
 .modal-actions{display:flex;flex-direction:column;gap:9px}
 </style>
@@ -642,7 +341,7 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
   </div>
   <div class="form-body">
     <div class="set-group">
-      <div class="set-row"><div class="set-ic">🔊</div><div class="set-info"><div class="set-name">Звуки</div><div class="set-desc">Ходы, победы</div></div><label class="switch"><input type="checkbox" id="setSfx" checked><span class="track"></span></label></div>
+      <div class="set-row"><div class="set-ic">🔊</div><div class="set-info"><div class="set-name">Звуки</div></div><label class="switch"><input type="checkbox" id="setSfx" checked><span class="track"></span></label></div>
       <div class="set-row"><div class="set-ic">📳</div><div class="set-info"><div class="set-name">Вибрация</div></div><label class="switch"><input type="checkbox" id="setVibe" checked><span class="track"></span></label></div>
       <div class="set-row"><div class="set-ic">🃏</div><div class="set-info"><div class="set-name">Сортировка карт</div></div><label class="switch"><input type="checkbox" id="setSort" checked><span class="track"></span></label></div>
       <div class="set-row"><div class="set-ic">👁</div><div class="set-info"><div class="set-name">Показывать ID</div></div><label class="switch"><input type="checkbox" id="setShowId" checked><span class="track"></span></label></div>
@@ -732,9 +431,7 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
 </div>
 
 <script>
-/* =========================================================
-   1. TELEGRAM + USER
-   ========================================================= */
+/* ============ 1. TELEGRAM ============ */
 const tg = window.Telegram?.WebApp;
 if (tg){ tg.ready(); tg.expand(); try{ tg.setHeaderColor('#0d2e1a'); tg.setBackgroundColor('#0d2e1a'); tg.disableVerticalSwipes?.(); }catch(e){} }
 const tgUser = tg?.initDataUnsafe?.user || { id: 100000000 + Math.floor(Math.random()*99999), first_name:'Гость'+Math.floor(Math.random()*99), username:'guest', photo_url:'' };
@@ -745,98 +442,75 @@ const USER = {
   photo: tgUser.photo_url || ''
 };
 
-/* =========================================================
-   2. FIREBASE (signaling only)
-   ========================================================= */
+/* ============ 2. FIREBASE ============ */
 const firebaseConfig = { databaseURL: "https://test-raq-default-rtdb.firebaseio.com/" };
 let db = null;
 try { firebase.initializeApp(firebaseConfig); db = firebase.database(); }
 catch(e){ console.error('FB init:', e); }
 
-/* =========================================================
-   3. ICE CONFIG
-   ========================================================= */
+/* ============ 3. ICE CONFIG (minimal for fast gathering) ============ */
 const ICE_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun.cloudflare.com:3478' },
     { urls: 'turn:openrelay.metered.ca:80', username:'openrelayproject', credential:'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443', username:'openrelayproject', credential:'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username:'openrelayproject', credential:'openrelayproject' }
-  ],
-  iceCandidatePoolSize: 10
+    { urls: 'turn:openrelay.metered.ca:443', username:'openrelayproject', credential:'openrelayproject' }
+  ]
 };
 
-/* =========================================================
-   4. STATE
-   ========================================================= */
+/* ============ 4. STATE ============ */
 const State = {
   screen:'loading', history:[],
   code:null, isHost:false,
-  lobbyRef:null, playerRef:null, signalsRef:null,
+  lobbyRef:null, playerRef:null,
   peers:{}, hostPeerId:null,
   lobby:null, gameState:null,
   settings:{}, heartbeat:null,
   connectedPeers:new Set(),
   signalsListener:null,
-  myLastGame:null,          // for diff rendering
-  pendingCard:null          // optimistic UI
+  processedSignals:new Set(),
+  myLastGame:null,
+  pendingIce:{}       // peerId -> queued ICE candidates
 };
 const DEFAULTS = { sfx:true, vibe:true, sort:true, showId:true };
 const LS_CODE = 'dnz_code';
 const LS_SET = 'dnz_set';
 
-/* =========================================================
-   5. HELPERS
-   ========================================================= */
+/* ============ 5. HELPERS ============ */
 const $ = (s,r=document)=>r.querySelector(s);
 const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
 const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-
 function haptic(t='light'){
   if (!State.settings.vibe || !tg?.HapticFeedback) return;
-  try{
-    if (t==='success') tg.HapticFeedback.notificationOccurred('success');
-    else if (t==='error') tg.HapticFeedback.notificationOccurred('error');
-    else tg.HapticFeedback.impactOccurred(t);
-  }catch(e){}
+  try{ if (t==='success') tg.HapticFeedback.notificationOccurred('success');
+       else if (t==='error') tg.HapticFeedback.notificationOccurred('error');
+       else tg.HapticFeedback.impactOccurred(t); }catch(e){}
 }
 function toast(text, type='info', ms=2400){
-  const el = document.createElement('div');
-  el.className = 'toast ' + type;
-  el.textContent = text;
+  const el = document.createElement('div'); el.className = 'toast ' + type; el.textContent = text;
   $('#toast-wrap').appendChild(el);
   setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, ms);
 }
 function modal({icon='★',title='',text='',actions=[]}){
-  $('#modalIcon').textContent = icon;
-  $('#modalTitle').textContent = title;
-  $('#modalText').textContent = text;
+  $('#modalIcon').textContent = icon; $('#modalTitle').textContent = title; $('#modalText').textContent = text;
   const w = $('#modalActions'); w.innerHTML='';
   actions.forEach(a=>{
-    const b = document.createElement('button');
-    b.className = 'btn ' + (a.style||'btn-outline');
-    b.textContent = a.label;
-    b.onclick = ()=>{ closeModal(); a.onClick?.(); };
-    w.appendChild(b);
+    const b = document.createElement('button'); b.className = 'btn ' + (a.style||'btn-outline'); b.textContent = a.label;
+    b.onclick = ()=>{ closeModal(); a.onClick?.(); }; w.appendChild(b);
   });
   $('#modal').classList.add('show');
 }
 function closeModal(){ $('#modal').classList.remove('show'); }
 $('#modal').addEventListener('click', e=>{ if(e.target.id==='modal') closeModal(); });
-
 let audioCtx = null;
 function beep(freq=440, dur=0.08){
   if (!State.settings.sfx) return;
   try{
     if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
     const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.frequency.value = freq; o.type='sine';
-    g.gain.value = 0.08;
+    o.frequency.value = freq; o.type='sine'; g.gain.value = 0.08;
     g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime+dur);
+    o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+dur);
   }catch(e){}
 }
 function rulesHint(){
@@ -845,13 +519,10 @@ function rulesHint(){
     actions:[{label:'Понятно', style:'btn-gold'}] });
 }
 
-/* =========================================================
-   6. CARD MODEL + GAME ENGINE
-   ========================================================= */
+/* ============ 6. CARD MODEL + GAME ENGINE ============ */
 const RANK_VAL = {'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14,'2':15,'3':16,'4':17,'5':18};
 const RED = new Set(['♥','♦']);
 const SUITS = ['♠','♥','♦','♣'];
-
 function makeDeck(count=36){
   const ranks = count===52 ? ['6','7','8','9','10','J','Q','K','A','2','3','4','5'] : ['6','7','8','9','10','J','Q','K','A'];
   const d = [];
@@ -875,7 +546,6 @@ function sortHand(hand, trump){
     return RANK_VAL[a.r]-RANK_VAL[b.r];
   });
 }
-
 function createGame(lobby){
   const pids = Object.keys(lobby.members);
   for (let i=pids.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pids[i],pids[j]]=[pids[j],pids[i]]; }
@@ -890,26 +560,19 @@ function createGame(lobby){
   }
   const ai = pids.indexOf(firstAtt);
   const di = (ai + 1) % pids.length;
-  return {
-    deck, trumpCard, trumpSuit, hands, order:pids,
-    table:[], discardCount:0,
+  return { deck, trumpCard, trumpSuit, hands, order:pids, table:[], discardCount:0,
     attackerIdx:ai, defenderIdx:di, phase:'attack', round:1,
     turnStartedAt:Date.now(), finished:false, loserId:null, winnerId:null,
-    lastAction:{ type:'start', at:Date.now() }
-  };
+    lastAction:{ type:'start', at:Date.now() } };
 }
 const gAttackerId = g => g.order[g.attackerIdx];
 const gDefenderId = g => g.order[g.defenderIdx];
-
 function gAttack(g, pid, card){
-  if (g.finished) return false;
-  if (g.phase !== 'attack' && g.phase !== 'throw') return false;
-  if (gAttackerId(g) !== pid) return false;
+  if (g.finished || (g.phase!=='attack' && g.phase!=='throw') || gAttackerId(g)!==pid) return false;
   if (g.table.some(p => !p.def)) return false;
   const hand = g.hands[pid] || [];
   const idx = hand.findIndex(c => cardEq(c, card));
-  if (idx < 0) return false;
-  if (g.table.length >= 6) return false;
+  if (idx < 0 || g.table.length >= 6) return false;
   if (g.phase === 'throw'){
     const ranks = new Set();
     for (const p of g.table){ ranks.add(p.atk.r); if (p.def) ranks.add(p.def.r); }
@@ -917,10 +580,8 @@ function gAttack(g, pid, card){
     const defHand = (g.hands[gDefenderId(g)] || []).length;
     if (g.table.filter(p=>p.def).length >= defHand) return false;
   }
-  hand.splice(idx, 1);
-  g.table.push({ atk: card, def: null });
-  g.phase = 'defend';
-  g.turnStartedAt = Date.now();
+  hand.splice(idx, 1); g.table.push({ atk: card, def: null });
+  g.phase = 'defend'; g.turnStartedAt = Date.now();
   g.lastAction = { type:'attack', by:pid, card, at:Date.now() };
   return true;
 }
@@ -931,10 +592,8 @@ function gDefend(g, pid, card){
   if (idx < 0) return false;
   const target = g.table.find(p => !p.def);
   if (!target || !canBeat(card, target.atk, g.trumpSuit)) return false;
-  hand.splice(idx, 1);
-  target.def = card;
-  g.phase = 'throw';
-  g.turnStartedAt = Date.now();
+  hand.splice(idx, 1); target.def = card;
+  g.phase = 'throw'; g.turnStartedAt = Date.now();
   g.lastAction = { type:'defend', by:pid, card, at:Date.now() };
   return true;
 }
@@ -942,35 +601,27 @@ function gTake(g, pid){
   if (g.finished || g.phase !== 'defend' || gDefenderId(g) !== pid) return false;
   const defHand = g.hands[pid] || [];
   for (const p of g.table){ defHand.push(p.atk); if (p.def) defHand.push(p.def); }
-  g.hands[pid] = defHand;
-  g.table = [];
+  g.hands[pid] = defHand; g.table = [];
   g.lastAction = { type:'take', by:pid, at:Date.now() };
-  endRound(g, 'took');
-  return true;
+  endRound(g, 'took'); return true;
 }
 function gBito(g, pid){
   if (g.finished || g.phase !== 'throw' || gAttackerId(g) !== pid) return false;
   if (g.table.some(p => !p.def)) return false;
-  g.discardCount += g.table.length;
-  g.table = [];
+  g.discardCount += g.table.length; g.table = [];
   g.lastAction = { type:'bito', by:pid, at:Date.now() };
-  endRound(g, 'defended');
-  return true;
+  endRound(g, 'defended'); return true;
 }
 function gTranslate(g, pid, card){
   if (g.finished || g.phase !== 'defend' || gDefenderId(g) !== pid) return false;
-  if (g.table.length !== 1 || g.table[0].def) return false;
-  if (g.order.length < 3) return false;
+  if (g.table.length !== 1 || g.table[0].def || g.order.length < 3) return false;
   const matchIdx = (g.hands[pid]||[]).findIndex(c => c.r === g.table[0].atk.r);
   if (matchIdx < 0) return false;
   const nextDefIdx = (g.defenderIdx + 1) % g.order.length;
   if (nextDefIdx === g.attackerIdx) return false;
   const c = g.hands[pid].splice(matchIdx, 1)[0];
-  g.attackerIdx = g.defenderIdx;
-  g.defenderIdx = nextDefIdx;
-  g.table.push({ atk:c, def:null });
-  g.phase = 'defend';
-  g.turnStartedAt = Date.now();
+  g.attackerIdx = g.defenderIdx; g.defenderIdx = nextDefIdx;
+  g.table.push({ atk:c, def:null }); g.phase = 'defend'; g.turnStartedAt = Date.now();
   g.lastAction = { type:'translate', by:pid, card:c, at:Date.now() };
   return true;
 }
@@ -998,40 +649,25 @@ function endRound(g, result){
   const n = g.order.length;
   if (result === 'defended'){
     if (n === 2){ [g.attackerIdx, g.defenderIdx] = [g.defenderIdx, g.attackerIdx]; }
-    else {
-      g.attackerIdx = g.defenderIdx;
-      g.defenderIdx = (g.defenderIdx + 1) % n;
-      if (g.defenderIdx === g.attackerIdx) g.defenderIdx = (g.defenderIdx + 1) % n;
-    }
+    else { g.attackerIdx = g.defenderIdx; g.defenderIdx = (g.defenderIdx + 1) % n;
+           if (g.defenderIdx === g.attackerIdx) g.defenderIdx = (g.defenderIdx + 1) % n; }
   } else {
     if (n === 2){ [g.attackerIdx, g.defenderIdx] = [g.defenderIdx, g.attackerIdx]; }
-    else {
-      g.attackerIdx = (g.defenderIdx + 1) % n;
-      g.defenderIdx = (g.defenderIdx + 2) % n;
-    }
+    else { g.attackerIdx = (g.defenderIdx + 1) % n; g.defenderIdx = (g.defenderIdx + 2) % n; }
   }
-  g.phase = 'attack';
-  g.round++;
-  g.turnStartedAt = Date.now();
+  g.phase = 'attack'; g.round++; g.turnStartedAt = Date.now();
 }
 
-/* =========================================================
-   7. NET LAYER (WebRTC DataChannel + Firebase signaling)
-   ========================================================= */
+/* ============ 7. NET LAYER (optimized P2P) ============ */
 const Net = {
+  // --- HOST: handle incoming offer ---
   async hostHandleOffer(guestId, offer){
     let entry = State.peers[guestId];
     if (!entry){
       const pc = new RTCPeerConnection(ICE_CONFIG);
-      entry = { pc, dc:null };
+      entry = { pc, dc:null, iceBuf:[], iceTimer:null };
       State.peers[guestId] = entry;
-      pc.onicecandidate = e => {
-        if (e.candidate && db && State.code){
-          db.ref(`lobbies/${State.code}/signals`).push({
-            from:USER.id, to:guestId, kind:'ice', cand:e.candidate.toJSON(), at:Date.now()
-          }).catch(()=>{});
-        }
-      };
+      pc.onicecandidate = e => Net.onIce(guestId, e);
       pc.onconnectionstatechange = () => {
         if (pc.connectionState==='failed' || pc.connectionState==='disconnected') Net.dropPeer(guestId);
       };
@@ -1040,57 +676,120 @@ const Net = {
         Net.setupChannel(guestId, entry.dc);
       };
     }
-    await entry.pc.setRemoteDescription({ type:'offer', sdp:offer });
-    const answer = await entry.pc.createAnswer();
-    await entry.pc.setLocalDescription(answer);
-    await db.ref(`lobbies/${State.code}/signals`).push({
-      from:USER.id, to:guestId, kind:'answer', sdp:entry.pc.localDescription.sdp, at:Date.now()
-    });
+    try {
+      await entry.pc.setRemoteDescription({ type:'offer', sdp:offer });
+      // Flush any queued ICE candidates
+      if (State.pendingIce[guestId]?.length){
+        for (const c of State.pendingIce[guestId]){
+          try { await entry.pc.addIceCandidate(c); } catch(e){}
+        }
+        State.pendingIce[guestId] = [];
+      }
+      const answer = await entry.pc.createAnswer();
+      await entry.pc.setLocalDescription(answer);
+      // Push answer IMMEDIATELY — don't wait for ICE
+      db.ref(`lobbies/${State.code}/signals`).push({
+        from:USER.id, to:guestId, kind:'answer', sdp:entry.pc.localDescription.sdp, at:Date.now()
+      }).catch(()=>{});
+    } catch(e){ console.warn('hostHandleOffer:', e); }
   },
-  async hostHandleIce(guestId, cand){
+
+  async hostHandleIceBatch(guestId, cands){
     const entry = State.peers[guestId];
-    if (!entry || !entry.pc.remoteDescription) return;
-    try{ await entry.pc.addIceCandidate(cand); }catch(e){}
+    if (!entry || !entry.pc.remoteDescription){
+      // Queue until remote desc is set
+      State.pendingIce[guestId] = (State.pendingIce[guestId] || []).concat(cands);
+      return;
+    }
+    for (const c of cands){
+      try { await entry.pc.addIceCandidate(c); } catch(e){}
+    }
   },
+
+  // --- GUEST: create offer, connect to host ---
   async guestConnectToHost(){
     const hostId = State.hostPeerId;
     if (!hostId || State.peers[hostId]) return;
     const pc = new RTCPeerConnection(ICE_CONFIG);
-    const entry = { pc, dc:null };
+    const entry = { pc, dc:null, iceBuf:[], iceTimer:null };
     State.peers[hostId] = entry;
     const dc = pc.createDataChannel('game', { ordered:true });
     entry.dc = dc;
     Net.setupChannel(hostId, dc);
-    pc.onicecandidate = e => {
-      if (e.candidate && db && State.code){
-        db.ref(`lobbies/${State.code}/signals`).push({
-          from:USER.id, to:hostId, kind:'ice', cand:e.candidate.toJSON(), at:Date.now()
-        }).catch(()=>{});
-      }
-    };
+    pc.onicecandidate = e => Net.onIce(hostId, e);
     pc.onconnectionstatechange = () => {
       if (pc.connectionState==='failed' || pc.connectionState==='disconnected'){
         Net.updateP2PStatus('off');
         delete State.peers[hostId];
         State.connectedPeers.delete(hostId);
-        setTimeout(()=>Net.guestConnectToHost(), 2500);
+        setTimeout(()=>Net.guestConnectToHost(), 2000);
       }
     };
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    await db.ref(`lobbies/${State.code}/signals`).push({
-      from:USER.id, to:hostId, kind:'offer', sdp:pc.localDescription.sdp, at:Date.now()
-    });
+    try {
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      db.ref(`lobbies/${State.code}/signals`).push({
+        from:USER.id, to:hostId, kind:'offer', sdp:pc.localDescription.sdp, at:Date.now()
+      }).catch(()=>{});
+    } catch(e){ console.warn('guest offer:', e); }
   },
+
   async guestHandleSignal(msg){
     const entry = State.peers[State.hostPeerId];
     if (!entry) return;
-    if (msg.kind==='answer' && entry.pc.signalingState==='have-local-offer'){
-      try{ await entry.pc.setRemoteDescription({ type:'answer', sdp:msg.sdp }); }catch(e){}
-    } else if (msg.kind==='ice' && entry.pc.remoteDescription){
-      try{ await entry.pc.addIceCandidate(msg.cand); }catch(e){}
+    try {
+      if (msg.kind==='answer' && entry.pc.signalingState==='have-local-offer'){
+        await entry.pc.setRemoteDescription({ type:'answer', sdp:msg.sdp });
+        // Flush queued ICE
+        if (State.pendingIce[State.hostPeerId]?.length){
+          for (const c of State.pendingIce[State.hostPeerId]){
+            try { await entry.pc.addIceCandidate(c); } catch(e){}
+          }
+          State.pendingIce[State.hostPeerId] = [];
+        }
+      } else if (msg.kind==='ice-batch'){
+        if (!entry.pc.remoteDescription){
+          State.pendingIce[State.hostPeerId] = (State.pendingIce[State.hostPeerId] || []).concat(msg.cands);
+        } else {
+          for (const c of msg.cands){ try { await entry.pc.addIceCandidate(c); } catch(e){} }
+        }
+      }
+    } catch(e){ console.warn('guest signal:', e); }
+  },
+
+  // --- ICE batching ---
+  onIce(peerId, e){
+    const entry = State.peers[peerId];
+    if (!entry) return;
+    if (e.candidate){
+      entry.iceBuf.push(e.candidate.toJSON());
+      // Send first candidate alone for fastest start
+      if (entry.iceBuf.length === 1){
+        Net.pushIceBatch(peerId, [entry.iceBuf.shift()]);
+      }
+      // Buffer the rest, flush after 250ms
+      if (!entry.iceTimer){
+        entry.iceTimer = setTimeout(()=>{ entry.iceTimer = null; Net.flushIce(peerId); }, 250);
+      }
+    } else {
+      // gathering complete
+      if (entry.iceTimer){ clearTimeout(entry.iceTimer); entry.iceTimer = null; }
+      Net.flushIce(peerId);
     }
   },
+  flushIce(peerId){
+    const entry = State.peers[peerId];
+    if (!entry || entry.iceBuf.length === 0) return;
+    const batch = entry.iceBuf.splice(0);
+    Net.pushIceBatch(peerId, batch);
+  },
+  pushIceBatch(peerId, cands){
+    if (!cands.length) return;
+    db.ref(`lobbies/${State.code}/signals`).push({
+      from:USER.id, to:peerId, kind:'ice-batch', cands, at:Date.now()
+    }).catch(()=>{});
+  },
+
   setupChannel(peerId, dc){
     dc.binaryType = 'arraybuffer';
     dc.onopen = () => {
@@ -1102,6 +801,7 @@ const Net = {
         Net.sendTo(peerId, { t:'hello', id:USER.id, name:USER.name });
       }
       renderRoom();
+      haptic('success');
     };
     dc.onclose = () => {
       State.connectedPeers.delete(peerId);
@@ -1114,6 +814,7 @@ const Net = {
       Net.onMessage(peerId, msg);
     };
   },
+
   onMessage(fromId, msg){
     if (State.isHost){
       if (msg.t==='hello'){
@@ -1124,19 +825,12 @@ const Net = {
         Net.broadcast({ t:'chat', from:fromId, e:msg.e }, fromId);
       }
     } else {
-      if (msg.t==='state'){
-        State.gameState = msg.state;
-        route();
-      } else if (msg.t==='chat'){
-        Net.showEmote(msg.e);
-      } else if (msg.t==='err'){
-        toast(msg.msg || 'Ход не принят','err',1500);
-        // revert optimistic
-        State.pendingCard = null;
-        renderGame(State.gameState);
-      }
+      if (msg.t==='state'){ State.gameState = msg.state; route(); }
+      else if (msg.t==='chat'){ Net.showEmote(msg.e); }
+      else if (msg.t==='err'){ toast(msg.msg || 'Ход не принят','err',1500); renderGame(State.gameState); }
     }
   },
+
   hostApplyAction(pid, msg){
     const g = State.gameState;
     if (!g) return;
@@ -1147,11 +841,9 @@ const Net = {
     else if (msg.a==='bito') ok = gBito(g, pid);
     else if (msg.a==='translate') ok = gTranslate(g, pid, msg.card);
     if (!ok){ Net.sendTo(pid, { t:'err', msg:'Ход не принят' }); return; }
-    // Broadcast to all peers (including sender)
     Net.broadcast({ t:'state', state: g });
-    // Also apply locally if host
-    if (pid === USER.id) { State.gameState = g; route(); }
-    else { State.gameState = g; route(); }
+    State.gameState = g;
+    route();
   },
   broadcast(msg, exceptId){
     for (const pid of Object.keys(State.peers)){
@@ -1165,10 +857,7 @@ const Net = {
     try{ entry.dc.send(JSON.stringify(msg)); return true; }catch(e){ return false; }
   },
   sendToHost(msg){
-    if (State.isHost){
-      Net.hostApplyAction(USER.id, msg);
-      return true;
-    }
+    if (State.isHost){ Net.hostApplyAction(USER.id, msg); return true; }
     return Net.sendTo(State.hostPeerId, msg);
   },
   dropPeer(peerId){
@@ -1194,52 +883,56 @@ const Net = {
     }
   },
   showEmote(e){
-    const el = document.createElement('div');
-    el.className = 'float-emote';
-    el.textContent = e;
-    el.style.left = (Math.random()*50+25)+'%';
-    el.style.bottom = '180px';
+    const el = document.createElement('div'); el.className = 'float-emote'; el.textContent = e;
+    el.style.left = (Math.random()*50+25)+'%'; el.style.bottom = '180px';
     document.body.appendChild(el);
     setTimeout(()=>el.remove(), 2500);
   },
+
+  // FAST signals — use on('value') and process whole snapshot
   setupSignaling(){
-    if (State.signalsListener){
-      try{ State.signalsListener.ref.off('child_added', State.signalsListener.cb); }catch{}
-    }
-    const since = Date.now() - 45000;
-    const ref = db.ref(`lobbies/${State.code}/signals`).orderByChild('at').startAt(since);
-    const cb = snap => {
-      const msg = snap.val();
-      if (!msg || !msg.to) return;
-      if (String(msg.to) !== USER.id) return;
-      if (String(msg.from) === USER.id) return;
-      snap.ref.remove().catch(()=>{});
-      if (State.isHost){
-        if (msg.kind==='offer') Net.hostHandleOffer(msg.from, msg.sdp).catch(()=>{});
-        else if (msg.kind==='ice') Net.hostHandleIce(msg.from, msg.cand).catch(()=>{});
-      } else {
-        Net.guestHandleSignal(msg).catch(()=>{});
-      }
+    if (State.signalsListener){ try{ State.signalsListener.off(); }catch{} }
+    State.processedSignals.clear();
+    const ref = db.ref(`lobbies/${State.code}/signals`);
+    const handler = snap => {
+      snap.forEach(child => {
+        const key = child.key;
+        if (State.processedSignals.has(key)) return;
+        const msg = child.val();
+        if (!msg) return;
+        if (String(msg.to) !== USER.id) return;
+        if (String(msg.from) === USER.id) return;
+        State.processedSignals.add(key);
+        child.ref.remove().catch(()=>{});
+        // Process
+        if (State.isHost){
+          if (msg.kind==='offer') Net.hostHandleOffer(msg.from, msg.sdp).catch(()=>{});
+          else if (msg.kind==='ice-batch') Net.hostHandleIceBatch(msg.from, msg.cands).catch(()=>{});
+        } else {
+          Net.guestHandleSignal(msg).catch(()=>{});
+        }
+      });
     };
-    ref.on('child_added', cb);
-    State.signalsListener = { ref, cb };
+    ref.on('value', handler);
+    State.signalsListener = ref;
+    State.signalsHandler = handler;
   },
   cleanup(){
     if (State.signalsListener){
-      try{ State.signalsListener.ref.off('child_added', State.signalsListener.cb); }catch{}
+      try{ State.signalsListener.off('value', State.signalsHandler); }catch{}
       State.signalsListener = null;
     }
+    State.processedSignals.clear();
+    State.pendingIce = {};
     for (const pid of Object.keys(State.peers)){
-      try{ State.peers[pid].pc.close(); }catch{}
+      try{ if (State.peers[pid].iceTimer) clearTimeout(State.peers[pid].iceTimer); State.peers[pid].pc.close(); }catch{}
     }
     State.peers = {};
     State.connectedPeers.clear();
   }
 };
 
-/* =========================================================
-   8. NAV
-   ========================================================= */
+/* ============ 8. NAV ============ */
 function showScreen(id, { push=true } = {}){
   if (State.screen === id) return;
   if (push && State.screen !== 'loading') State.history.push(State.screen);
@@ -1249,9 +942,7 @@ function showScreen(id, { push=true } = {}){
 function goBack(){ const p = State.history.pop() || 'menu'; showScreen(p, {push:false}); }
 $$('[data-back]').forEach(b => b.addEventListener('click', ()=>{ haptic('light'); goBack(); }));
 
-/* =========================================================
-   9. SETTINGS
-   ========================================================= */
+/* ============ 9. SETTINGS ============ */
 function loadSettings(){
   try{ const r = localStorage.getItem(LS_SET); State.settings = r ? {...DEFAULTS,...JSON.parse(r)} : {...DEFAULTS}; }
   catch{ State.settings = {...DEFAULTS}; }
@@ -1259,10 +950,8 @@ function loadSettings(){
 function saveSettings(){ try{ localStorage.setItem(LS_SET, JSON.stringify(State.settings)); }catch{} }
 function applySettings(){
   const s = State.settings;
-  $('#setSfx').checked = s.sfx;
-  $('#setVibe').checked = s.vibe;
-  $('#setSort').checked = s.sort;
-  $('#setShowId').checked = s.showId;
+  $('#setSfx').checked = s.sfx; $('#setVibe').checked = s.vibe;
+  $('#setSort').checked = s.sort; $('#setShowId').checked = s.showId;
   $('#menuId').style.display = s.showId ? '' : 'none';
   $('#gtSound').textContent = s.sfx ? '🔊' : '🔇';
 }
@@ -1272,9 +961,7 @@ function bindSettings(){
   $('#btnReset').addEventListener('click', ()=>{ State.settings = {...DEFAULTS}; saveSettings(); applySettings(); renderRoom(); toast('Сброшено','ok'); });
 }
 
-/* =========================================================
-   10. PROFILE
-   ========================================================= */
+/* ============ 10. PROFILE ============ */
 function renderProfile(){
   $('#menuName').textContent = USER.name;
   $('#menuUsername').textContent = USER.username;
@@ -1287,9 +974,7 @@ function renderProfile(){
   }
 }
 
-/* =========================================================
-   11. LOBBY
-   ========================================================= */
+/* ============ 11. LOBBY ============ */
 function genCode(){ const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let o=''; for(let i=0;i<6;i++) o+=c[Math.floor(Math.random()*c.length)]; return o; }
 function segVal(n){ const el = $(`[data-seg="${n}"] button.active`); return el ? el.dataset.val : null; }
 
@@ -1299,15 +984,11 @@ async function createLobby(){
   try{
     let code = genCode();
     try{ for(let i=0;i<5;i++){ const s = await db.ref('lobbies/'+code+'/meta').get(); if(!s.exists()) break; code = genCode(); } }catch(e){}
-    const lobby = {
-      code, host:USER.id, hostName:USER.name,
+    const lobby = { code, host:USER.id, hostName:USER.name,
       name: $('#lobbyName').value.trim() || (USER.name+' ★'),
       createdAt:Date.now(), status:'waiting',
-      maxPlayers:Number(segVal('maxp')||3),
-      deck:Number(segVal('deck')||36),
-      mode:segVal('mode')||'classic',
-      privacy:segVal('privacy')||'private'
-    };
+      maxPlayers:Number(segVal('maxp')||3), deck:Number(segVal('deck')||36),
+      mode:segVal('mode')||'classic', privacy:segVal('privacy')||'private' };
     await db.ref('lobbies/'+code+'/meta').set(lobby);
     await db.ref(`lobbies/${code}/members/${USER.id}`).set({
       id:USER.id, name:USER.name, username:USER.username, photo:USER.photo,
@@ -1338,8 +1019,7 @@ async function joinLobby(raw){
     const isHost = String(meta.host) === USER.id;
     await db.ref(`lobbies/${code}/members/${USER.id}`).set({
       id:USER.id, name:USER.name, username:USER.username, photo:USER.photo,
-      ready: isHost ? true : false, host: isHost,
-      online:true, lastSeen:Date.now(),
+      ready: isHost ? true : false, host: isHost, online:true, lastSeen:Date.now(),
       joinedAt: members[USER.id]?.joinedAt || Date.now()
     });
     haptic('success'); toast('Добро пожаловать!','ok');
@@ -1369,29 +1049,22 @@ async function quickMatch(){
     await joinLobby(found.code);
   }catch(e){
     console.error(e);
-    if (e.code==='PERMISSION_DENIED') rulesHint();
-    else toast('Ошибка поиска','err');
+    if (e.code==='PERMISSION_DENIED') rulesHint(); else toast('Ошибка поиска','err');
   }finally{ btn.disabled = false; btn.textContent = '⚡ Быстрый поиск'; }
 }
 
-/* =========================================================
-   12. ROOM
-   ========================================================= */
+/* ============ 12. ROOM ============ */
 function enterRoom(code, isHost){
   Net.cleanup();
   if (State.lobbyRef){ try{ State.lobbyRef.off(); }catch{} }
   if (State.heartbeat) clearInterval(State.heartbeat);
 
-  State.code = code;
-  State.isHost = isHost;
+  State.code = code; State.isHost = isHost;
   State.lobbyRef = db.ref('lobbies/'+code);
   State.playerRef = db.ref(`lobbies/${code}/members/${USER.id}`);
-  State.hostPeerId = null;
-  State.gameState = null;
-  State.myLastGame = null;
+  State.hostPeerId = null; State.gameState = null; State.myLastGame = null;
 
   try{ localStorage.setItem(LS_CODE, code); }catch{}
-
   $('#roomCode').textContent = code;
   Net.updateP2PStatus('off');
 
@@ -1411,13 +1084,15 @@ function enterRoom(code, isHost){
     const v = snap.val();
     State.lobby = { ...(v.meta||{}), members: v.members||{}, status: v.meta?.status||'waiting' };
     State.hostPeerId = String(v.meta?.host || '');
+
+    // === Guest: connect immediately, no delay ===
+    if (!State.isHost && State.hostPeerId && !State.peers[State.hostPeerId]){
+      Net.guestConnectToHost();
+    }
     route();
-  }, err=>{
-    if (err.code==='PERMISSION_DENIED') rulesHint();
-  });
+  }, err=>{ if (err.code==='PERMISSION_DENIED') rulesHint(); });
 
   Net.setupSignaling();
-  if (!isHost) setTimeout(()=>Net.guestConnectToHost(), 700);
 
   State.history = ['menu','lobby'];
   showScreen('room', { push:false });
@@ -1457,14 +1132,13 @@ function renderRoom(){
     g.appendChild(el);
   });
   for (let i=mem.length; i<(l.maxPlayers||0); i++){
-    const el = document.createElement('div'); el.className = 'rp-slot'; el.textContent = '+';
-    g.appendChild(el);
+    const el = document.createElement('div'); el.className = 'rp-slot'; el.textContent = '+'; g.appendChild(el);
   }
 
   const modes = { classic:'Классика', podkidnoy:'Подкидной' };
   $('#roomParams').innerHTML = `
     <div class="set-row"><div class="set-ic">★</div><div class="set-info"><div class="set-name">${esc(l.name||'—')}</div><div class="set-desc">Название</div></div></div>
-    <div class="set-row"><div class="set-ic">👑</div><div class="set-info"><div class="set-name">${esc(l.hostName||'—')}</div><div class="set-desc">Хост = сервер P2P</div></div></div>
+    <div class="set-row"><div class="set-ic">👑</div><div class="set-info"><div class="set-name">${esc(l.hostName||'—')}</div><div class="set-desc">Хост = P2P сервер</div></div></div>
     <div class="set-row"><div class="set-ic">🎴</div><div class="set-info"><div class="set-name">${l.deck} карт • ${modes[l.mode]||'Классика'}</div><div class="set-desc">${l.privacy==='public'?'Публичное':'Приватное'}</div></div></div>
   `;
 
@@ -1502,9 +1176,7 @@ function leaveRoom(confirm=true){
     if (State.code && State.isHost && db) db.ref('lobbies/'+State.code).remove().catch(()=>{});
     try{ localStorage.removeItem(LS_CODE); }catch{}
     State.code = null; State.lobby = null; State.isHost = false; State.gameState = null;
-    haptic('light');
-    showScreen('lobby', { push:false });
-    State.history = ['menu'];
+    haptic('light'); showScreen('lobby', { push:false }); State.history = ['menu'];
   };
   if (!confirm) return doLeave();
   modal({ icon:'🚪', title:'Покинуть лобби?',
@@ -1529,14 +1201,11 @@ async function startGame(){
     Net.broadcast({ t:'state', state: g });
     haptic('success'); toast('Игра началась!','ok');
     route();
-  }catch(e){
-    console.error(e); toast('Ошибка','err');
-  }finally{ btn.disabled = false; btn.textContent = '🚀 Начать игру'; }
+  }catch(e){ console.error(e); toast('Ошибка','err'); }
+  finally{ btn.disabled = false; btn.textContent = '🚀 Начать игру'; }
 }
 
-/* =========================================================
-   13. GAME ACTIONS (optimistic + P2P)
-   ========================================================= */
+/* ============ 13. GAME ACTIONS ============ */
 function sendAction(a, card){
   const msg = { t:'action', a };
   if (card) msg.card = card;
@@ -1544,29 +1213,21 @@ function sendAction(a, card){
   if (!ok) toast('Нет связи с хостом','err',1500);
   return ok;
 }
-
-// === OPTIMISTIC: immediately fly the card off the hand ===
 function animateCardOut(card){
   const key = cardKey(card);
   const el = document.querySelector(`#myHand [data-key="${key}"]`);
   if (!el) return;
   el.classList.add('playing-out');
   el.style.pointerEvents = 'none';
-  // Remove after animation
-  setTimeout(()=>{
-    if (el.parentNode) el.remove();
-  }, 220);
+  setTimeout(()=>{ if (el.parentNode) el.remove(); }, 220);
 }
-
 function doAttack(card){ animateCardOut(card); if (sendAction('attack', card)) haptic('medium'); }
 function doDefend(card){ animateCardOut(card); if (sendAction('defend', card)) haptic('success'); }
 function doTake(){ if (sendAction('take')) haptic('medium'); }
 function doBito(){ if (sendAction('bito')) haptic('success'); }
 function doTranslate(card){ animateCardOut(card); if (sendAction('translate', card)) haptic('success'); }
 
-/* =========================================================
-   14. RENDER GAME (with diff to avoid re-creating unchanged cards)
-   ========================================================= */
+/* ============ 14. RENDER GAME ============ */
 function cardHTML(card, trump){
   if (!card) return '';
   const red = RED.has(card.s);
@@ -1583,25 +1244,21 @@ function cardHTML(card, trump){
 
 function renderGame(g){
   if (!g) return;
-  const prev = State.myLastGame;
   const me = g.hands?.[USER.id] || [];
   const amAttacker = g.order[g.attackerIdx] === USER.id;
   const amDefender = g.order[g.defenderIdx] === USER.id;
-  const isMyTurn = (amAttacker && (g.phase==='attack'||g.phase==='throw')) || (amDefender && g.phase==='defend');
 
-  // === Opponents ===
+  // Opponents
   const opps = $('#oppsRow');
-  const oppSignature = g.order.join('|') + '|' + g.attackerIdx + '|' + g.defenderIdx + '|' + g.order.map(pid=>{
+  const oppSig = g.order.join('|') + '|' + g.attackerIdx + '|' + g.defenderIdx + '|' + g.order.map(pid=>{
     const p = State.lobby.members?.[pid]; const h = g.hands?.[pid] || [];
     return (p?.online?'1':'0') + h.length;
   }).join('');
-  if (opps.dataset.sig !== oppSignature){
-    opps.dataset.sig = oppSignature;
-    opps.innerHTML = '';
+  if (opps.dataset.sig !== oppSig){
+    opps.dataset.sig = oppSig; opps.innerHTML = '';
     for (const pid of g.order){
       if (pid === USER.id) continue;
-      const p = State.lobby.members?.[pid];
-      if (!p) continue;
+      const p = State.lobby.members?.[pid]; if (!p) continue;
       const hand = g.hands?.[pid] || [];
       const isAtk = g.order[g.attackerIdx] === pid;
       const isDef = g.order[g.defenderIdx] === pid;
@@ -1619,67 +1276,51 @@ function renderGame(g){
     }
   }
 
-  // === Deck ===
   const deckLeft = (g.deck||[]).length + (g.trumpCard?1:0);
   $('#deckCount').textContent = deckLeft;
   $('#deckStack').style.display = deckLeft > 0 ? '' : 'none';
 
-  // === Trump ===
   const tSlot = $('#trumpSlot');
-  if (g.trumpCard){
-    tSlot.innerHTML = cardHTML(g.trumpCard, g.trumpSuit) + `<div class="trump-suit-badge">${g.trumpSuit}</div>`;
-  } else {
+  if (g.trumpCard) tSlot.innerHTML = cardHTML(g.trumpCard, g.trumpSuit) + `<div class="trump-suit-badge">${g.trumpSuit}</div>`;
+  else {
     const c = RED.has(g.trumpSuit) ? '#ff4d5e' : '#0d2e1a';
-    tSlot.innerHTML = `<div style="width:50px;height:72px;display:grid;place-items:center;font-size:38px;color:${c};font-weight:900;text-shadow:0 0 12px rgba(0,0,0,.4)">${g.trumpSuit}</div><div class="trump-suit-badge">${g.trumpSuit}</div>`;
+    tSlot.innerHTML = `<div style="width:50px;height:72px;display:grid;place-items:center;font-size:38px;color:${c};font-weight:900">${g.trumpSuit}</div><div class="trump-suit-badge">${g.trumpSuit}</div>`;
   }
 
-  // === Table (diff-based: only add new pairs) ===
+  // Table
   const tc = $('#tableCenter');
   const tableSig = (g.table||[]).map(p=>cardKey(p.atk)+(p.def?cardKey(p.def):'')).join('|');
   if (tc.dataset.sig !== tableSig){
-    tc.dataset.sig = tableSig;
-    tc.innerHTML = '';
+    tc.dataset.sig = tableSig; tc.innerHTML = '';
     for (const pair of g.table||[]){
-      const p = document.createElement('div');
-      p.className = 'pair';
-      p.innerHTML = `
-        <div class="atk-card">${cardHTML(pair.atk, g.trumpSuit)}</div>
-        ${pair.def ? `<div class="def-card">${cardHTML(pair.def, g.trumpSuit)}</div>` : ''}
-      `;
+      const p = document.createElement('div'); p.className = 'pair';
+      p.innerHTML = `<div class="atk-card">${cardHTML(pair.atk, g.trumpSuit)}</div>${pair.def ? `<div class="def-card">${cardHTML(pair.def, g.trumpSuit)}</div>` : ''}`;
       tc.appendChild(p);
     }
   }
 
-  // === My hand (diff-based) ===
+  // Hand
   const mh = $('#myHand');
-  let sortedHand = State.settings.sort ? sortHand(me, g.trumpSuit) : me;
+  const sortedHand = State.settings.sort ? sortHand(me, g.trumpSuit) : me;
   const handKeys = sortedHand.map(cardKey);
-
-  // Determine playable
   const ranks = new Set();
   for (const p of g.table||[]){ ranks.add(p.atk.r); if (p.def) ranks.add(p.def.r); }
   const undefended = (g.table||[]).find(p => !p.def);
   const tableLen = (g.table||[]).length;
 
-  // Remove cards no longer in hand
-  const existing = [...mh.children];
-  const existingKeys = existing.map(el => el.dataset.key);
-  for (const el of existing){
-    if (!handKeys.includes(el.dataset.key)){
-      // Leave optimistic remove in place; otherwise fade out
-      if (!el.classList.contains('playing-out')){
-        el.style.transition = 'all .2s';
-        el.style.transform = 'translateY(-20px) scale(.7)';
-        el.style.opacity = '0';
-        setTimeout(()=>el.remove(), 200);
-      }
+  // remove stale
+  for (const el of [...mh.children]){
+    if (!handKeys.includes(el.dataset.key) && !el.classList.contains('playing-out')){
+      el.style.transition = 'all .2s';
+      el.style.transform = 'translateY(-20px) scale(.7)';
+      el.style.opacity = '0';
+      setTimeout(()=>el.remove(), 200);
     }
   }
-  // Add new cards
-  const existingAfter = new Set([...mh.children].map(el => el.dataset.key));
-  sortedHand.forEach((card, idx) => {
+  const existing = new Set([...mh.children].map(el => el.dataset.key));
+  sortedHand.forEach(card => {
     const key = cardKey(card);
-    if (existingAfter.has(key)) return;
+    if (existing.has(key)) return;
     let playable = false;
     if (!g.finished){
       if (amAttacker && g.phase === 'attack' && tableLen === 0) playable = true;
@@ -1690,17 +1331,13 @@ function renderGame(g){
     div.innerHTML = cardHTML(card, g.trumpSuit);
     const cardEl = div.firstElementChild;
     if (g.finished) cardEl.classList.add('disabled');
-    else if (playable){
-      cardEl.classList.add('playable');
-      cardEl.onclick = () => {
-        if (amAttacker && (g.phase==='attack'||g.phase==='throw')) doAttack(card);
-        else if (amDefender && g.phase==='defend') doDefend(card);
-      };
-    } else cardEl.classList.add('disabled');
+    else if (playable) cardEl.classList.add('playable');
+    else cardEl.classList.add('disabled');
     cardEl.classList.add('dealing-in');
     mh.appendChild(cardEl);
+    if (playable) attachDrag(cardEl, card, g);
   });
-  // Update playable state on existing cards
+  // update existing
   for (const el of mh.children){
     if (el.classList.contains('playing-out')) continue;
     const key = el.dataset.key;
@@ -1714,13 +1351,15 @@ function renderGame(g){
     }
     el.classList.toggle('playable', playable);
     el.classList.toggle('disabled', !playable && !g.finished);
-    el.onclick = playable ? () => {
-      if (amAttacker && (g.phase==='attack'||g.phase==='throw')) doAttack(card);
-      else if (amDefender && g.phase==='defend') doDefend(card);
-    } : null;
+    // Re-attach drag on playable (safe: replaces)
+    if (playable && !el.dataset.dragAttached){
+      attachDrag(el, card, g);
+      el.dataset.dragAttached = '1';
+    }
+    if (!playable) el.dataset.dragAttached = '';
   }
 
-  // === My avatar ===
+  // My avatar
   const mp = State.lobby.members?.[USER.id] || {};
   const av = mp.photo
     ? `<img class="opp-av" src="${esc(mp.photo)}" onerror="this.outerHTML='<div class=&quot;opp-av-fb&quot;>${esc((mp.name[0]||'★').toUpperCase())}</div>'">`
@@ -1728,68 +1367,173 @@ function renderGame(g){
   $('#abMe').className = 'ab-me' + (amAttacker&&!g.finished?' attacker':'') + (amDefender&&!g.finished?' defender':'');
   $('#abMe').innerHTML = `${av}<div class="opp-cnt">${me.length}</div>`;
 
-  // === Actions ===
+  // Actions
   const ab = $('#abActions'); ab.innerHTML = '';
   if (g.finished){
     const iLost = g.loserId === USER.id;
     const st = document.createElement('div');
-    st.className = 'ab-status hot';
-    st.textContent = iLost ? '😭 Вы проиграли' : '🏆 Победа!';
+    st.className = 'ab-status hot'; st.textContent = iLost ? '😭 Вы проиграли' : '🏆 Победа!';
     ab.appendChild(st);
     const btn = document.createElement('button');
     btn.className = 'act-btn ' + (iLost?'red':'green');
-    btn.textContent = 'Выйти';
-    btn.onclick = ()=>leaveRoom(false);
+    btn.textContent = 'Выйти'; btn.onclick = ()=>leaveRoom(false);
     ab.appendChild(btn);
   } else if (amDefender && g.phase === 'defend'){
     const st = document.createElement('div');
-    st.className = 'ab-status hot';
-    st.textContent = '🛡 Ваш ход';
+    st.className = 'ab-status hot'; st.textContent = '🛡 Перетащите карту на атакующую';
     ab.appendChild(st);
     const tb = document.createElement('button');
-    tb.className = 'act-btn red';
-    tb.textContent = '🤲 Взять';
-    tb.onclick = doTake;
+    tb.className = 'act-btn red'; tb.textContent = '🤲 Взять'; tb.onclick = doTake;
     ab.appendChild(tb);
     if (tableLen === 1 && !g.table[0].def && g.order.length >= 3){
       const rank = g.table[0].atk.r;
       const idx = me.findIndex(c => c.r === rank);
       if (idx >= 0){
         const tr = document.createElement('button');
-        tr.className = 'act-btn gold';
-        tr.textContent = '↔ Перевод';
+        tr.className = 'act-btn gold'; tr.textContent = '↔ Перевод';
         tr.onclick = () => doTranslate(me[idx]);
         ab.appendChild(tr);
       }
     }
   } else if (amAttacker && g.phase === 'throw'){
     const st = document.createElement('div');
-    st.className = 'ab-status hot';
-    st.textContent = '⚔️ Ваш ход';
+    st.className = 'ab-status hot'; st.textContent = '⚔️ Перетащите карту на стол';
     ab.appendChild(st);
     const bb = document.createElement('button');
-    bb.className = 'act-btn green';
-    bb.textContent = '✓ Бито';
-    bb.onclick = doBito;
+    bb.className = 'act-btn green'; bb.textContent = '✓ Бито'; bb.onclick = doBito;
     ab.appendChild(bb);
   } else if (amAttacker && g.phase === 'attack'){
     const st = document.createElement('div');
-    st.className = 'ab-status hot';
-    st.textContent = '⚔️ Ваш ход — выберите карту';
+    st.className = 'ab-status hot'; st.textContent = '⚔️ Перетащите карту на стол';
     ab.appendChild(st);
   } else {
     const st = document.createElement('div');
-    st.className = 'ab-status';
-    st.textContent = '⏳ Ожидайте хода';
+    st.className = 'ab-status'; st.textContent = '⏳ Ожидайте';
     ab.appendChild(st);
   }
 
   State.myLastGame = g;
 }
 
-/* =========================================================
-   15. UI BINDINGS
-   ========================================================= */
+/* ============ 15. DRAG & DROP ============ */
+function attachDrag(cardEl, card, g){
+  // Remove old handler by cloning? No — use a flag
+  if (cardEl.dataset.dragReady) return;
+  cardEl.dataset.dragReady = '1';
+
+  cardEl.addEventListener('pointerdown', function onDown(ev){
+    if (!cardEl.classList.contains('playable')) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    const startX = ev.clientX, startY = ev.clientY;
+    let dragging = false;
+    let ghost = null;
+    let currentTarget = null;
+    let ghostRaf = null;
+    let pointerX = startX, pointerY = startY;
+
+    const amAttacker = g.order[g.attackerIdx] === USER.id;
+    const amDefender = g.order[g.defenderIdx] === USER.id;
+
+    function moveGhost(){
+      if (!ghost) return;
+      ghost.style.transform = `translate3d(${pointerX - 25}px, ${pointerY - 40}px, 0) scale(1.2) rotate(-4deg)`;
+      ghostRaf = null;
+    }
+
+    function createGhost(){
+      ghost = cardEl.cloneNode(true);
+      ghost.classList.add('ghost-card');
+      ghost.classList.remove('playing-out','dealing-in','playable','disabled');
+      ghost.style.top = '0';
+      ghost.style.left = '0';
+      ghost.style.width = '50px';
+      ghost.style.height = '72px';
+      ghost.style.transform = `translate3d(${pointerX - 25}px, ${pointerY - 40}px, 0) scale(1.2) rotate(-4deg)`;
+      document.body.appendChild(ghost);
+      cardEl.classList.add('dragging');
+      haptic('light');
+    }
+
+    function findTarget(x, y){
+      const under = document.elementFromPoint(x, y);
+      if (!under) return null;
+
+      // Attack target: table center
+      if (amAttacker && (g.phase === 'attack' || g.phase === 'throw')){
+        const tc = document.getElementById('tableCenter');
+        if (tc && (under === tc || tc.contains(under))){
+          return { type: 'attack', el: tc };
+        }
+      }
+
+      // Defense target: undefended pair
+      if (amDefender && g.phase === 'defend'){
+        const pairs = document.querySelectorAll('#tableCenter .pair');
+        for (let i = 0; i < pairs.length; i++){
+          const pair = pairs[i];
+          if (pair.querySelector('.def-card')) continue;
+          const atk = pair.querySelector('.atk-card');
+          if (atk && (under === atk || atk.contains(under))){
+            return { type: 'defend', el: pair };
+          }
+        }
+      }
+      return null;
+    }
+
+    function onMove(e){
+      pointerX = e.clientX; pointerY = e.clientY;
+      const dx = pointerX - startX, dy = pointerY - startY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+
+      if (!dragging && dist > 10){
+        dragging = true;
+        createGhost();
+      }
+      if (dragging){
+        e.preventDefault();
+        if (!ghostRaf) ghostRaf = requestAnimationFrame(moveGhost);
+        const t = findTarget(pointerX, pointerY);
+        if (t !== currentTarget){
+          if (currentTarget) currentTarget.el.classList.remove('drop-target');
+          currentTarget = t;
+          if (t){ t.el.classList.add('drop-target'); haptic('light'); }
+        }
+      }
+    }
+
+    function onUp(e){
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+      document.removeEventListener('pointercancel', onUp);
+      if (ghostRaf) cancelAnimationFrame(ghostRaf);
+      if (ghost) ghost.remove();
+      cardEl.classList.remove('dragging');
+      document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
+
+      if (!dragging){
+        // TAP fallback: auto-play
+        if (amAttacker && (g.phase === 'attack' || g.phase === 'throw')) doAttack(card);
+        else if (amDefender && g.phase === 'defend') doDefend(card);
+        return;
+      }
+
+      if (currentTarget){
+        if (currentTarget.type === 'attack') doAttack(card);
+        else if (currentTarget.type === 'defend') doDefend(card);
+      }
+      currentTarget = null;
+    }
+
+    document.addEventListener('pointermove', onMove, { passive: false });
+    document.addEventListener('pointerup', onUp);
+    document.addEventListener('pointercancel', onUp);
+  });
+}
+
+/* ============ 16. UI BINDINGS ============ */
 function bindUI(){
   $('#toPlay').addEventListener('click', ()=>{ haptic('medium'); showScreen('lobby'); });
   $('#toSettings').addEventListener('click', ()=>{ haptic('light'); showScreen('settings'); });
@@ -1830,7 +1574,6 @@ function bindUI(){
   $('#leaveRoom1').addEventListener('click', ()=>leaveRoom(true));
   $('#btnStart').addEventListener('click', startGame);
 
-  // READY
   $('#btnReady').addEventListener('click', async ()=>{
     if (!State.code || !db){ toast('Нет соединения','err'); return; }
     const me = State.lobby?.members?.[USER.id];
@@ -1845,9 +1588,7 @@ function bindUI(){
     } catch(e){
       if (e.code === 'PERMISSION_DENIED' || /permission/i.test(e.message||'')) rulesHint();
       else toast('Ошибка: ' + (e.message||''),'err',3000);
-    } finally {
-      btn.disabled = false;
-    }
+    } finally { btn.disabled = false; }
   });
 
   $('#gtBack').addEventListener('click', ()=>{
@@ -1857,14 +1598,13 @@ function bindUI(){
     });
   });
   $('#gtSound').addEventListener('click', ()=>{
-    State.settings.sfx = !State.settings.sfx;
-    saveSettings();
+    State.settings.sfx = !State.settings.sfx; saveSettings();
     $('#gtSound').textContent = State.settings.sfx ? '🔊' : '🔇';
     toast(State.settings.sfx?'Звук вкл':'Звук выкл','info',1200);
   });
   $('#gtHelp').addEventListener('click', ()=>{
     modal({ icon:'❓', title:'Как играть',
-      text:'★ Атакующий кладёт карту\n★ Защитник бьёт старшей масти или козырем\n★ Можно подкидывать карты того же ранга\n★ «Взять» — забрать со стола\n★ «Бито» — завершить раунд\n★ «Перевод» — отдать ход дальше\n\nХост = сервер P2P, карты летят напрямую',
+      text:'★ Перетащите карту из руки на цель\n★ Атакующий — на стол\n★ Защитник — на атакующую карту\n★ «Взять» — забрать со стола\n★ «Бито» — завершить раунд\n★ «Перевод» — отдать ход дальше',
       actions:[{label:'Понятно',style:'btn-gold'}]
     });
   });
@@ -1908,9 +1648,7 @@ function bindUI(){
   });
 }
 
-/* =========================================================
-   16. AUTO REJOIN
-   ========================================================= */
+/* ============ 17. AUTO REJOIN ============ */
 async function tryAutoRejoin(){
   if (!db) return false;
   let code = null;
@@ -1929,22 +1667,13 @@ async function tryAutoRejoin(){
   }catch(e){ return false; }
 }
 
-/* =========================================================
-   17. BOOT
-   ========================================================= */
+/* ============ 18. BOOT ============ */
 async function boot(){
-  loadSettings();
-  applySettings();
-  renderProfile();
-  bindUI();
-  bindSettings();
+  loadSettings(); applySettings(); renderProfile(); bindUI(); bindSettings();
   if (db) db.ref('.info/connected').on('value', s=>console.log('🔌', s.val()));
-  await new Promise(r => setTimeout(r, 1000));
+  await new Promise(r => setTimeout(r, 800));
   const rejoined = await tryAutoRejoin();
-  if (!rejoined){
-    showScreen('menu', { push:false });
-    State.history = [];
-  }
+  if (!rejoined){ showScreen('menu', { push:false }); State.history = []; }
   haptic('light');
 }
 window.addEventListener('load', boot);
