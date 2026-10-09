@@ -41,21 +41,14 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
 .screen{position:fixed;inset:0;display:none;flex-direction:column;z-index:2}
 .screen.active{display:flex}
 
-/* ============ LOADING ============ */
 #loading{align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%, var(--felt-3), var(--felt-deep) 80%)}
-.loader-card{
-  width:120px;height:168px;border-radius:12px;position:relative;
-  background:linear-gradient(135deg,#1a4d2e 0%,#0a2818 100%);
-  border:2px solid var(--gold);box-shadow:0 0 40px var(--gold-glow);
-  animation:loaderFloat 2.4s ease-in-out infinite;display:grid;place-items:center;
-}
+.loader-card{width:120px;height:168px;border-radius:12px;position:relative;background:linear-gradient(135deg,#1a4d2e 0%,#0a2818 100%);border:2px solid var(--gold);box-shadow:0 0 40px var(--gold-glow);animation:loaderFloat 2.4s ease-in-out infinite;display:grid;place-items:center}
 .loader-card::before{content:'';position:absolute;inset:8px;border:1px solid var(--gold-dim);border-radius:6px}
 .loader-card::after{content:'★';font-size:60px;color:var(--gold);text-shadow:0 0 20px var(--gold-glow);animation:starPulse 1.6s ease-in-out infinite}
 @keyframes loaderFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-14px) rotate(3deg)}}
 @keyframes starPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.9)}}
 .loader-title{margin-top:30px;font-size:20px;font-weight:900;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);text-shadow:0 0 20px var(--gold-glow)}
 
-/* ============ MENU ============ */
 #menu{padding:calc(var(--safe-top) + 24px) 20px calc(var(--safe-bottom) + 24px);align-items:stretch}
 .menu-hero{text-align:center;margin-bottom:24px}
 .menu-hero .logo-star{font-size:64px;color:var(--gold);display:block;text-shadow:0 0 24px var(--gold-glow);animation:starSpin 8s linear infinite}
@@ -72,7 +65,6 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
 .profile-id{display:inline-block;font-size:10px;background:rgba(0,0,0,.4);border:1px solid var(--stroke);padding:3px 8px;border-radius:10px;margin-top:6px;color:var(--muted);position:relative;z-index:1}
 .menu-btns{display:flex;flex-direction:column;gap:14px;margin-top:auto}
 
-/* ============ BUTTONS ============ */
 .btn{padding:17px 20px;border-radius:14px;font-size:14px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;transition:transform .12s;position:relative;overflow:hidden}
 .btn:active{transform:scale(.97)}
 .btn:disabled{opacity:.4;pointer-events:none}
@@ -86,13 +78,11 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
 .btn-red{background:linear-gradient(135deg,#b41c28,#7a0f18);color:#fff;border:1px solid rgba(255,77,94,.4)}
 .btn-sm{padding:12px 16px;font-size:12px;letter-spacing:.1em}
 
-/* ============ TOP BAR ============ */
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex-shrink:0;background:linear-gradient(180deg,rgba(0,0,0,.4),transparent);border-bottom:1px solid rgba(212,175,55,.12)}
 .tb-btn{width:42px;height:42px;border-radius:12px;background:rgba(0,0,0,.35);border:1px solid var(--stroke);display:grid;place-items:center;font-size:20px;color:var(--gold);transition:all .2s;backdrop-filter:blur(6px)}
 .tb-btn:active{background:rgba(212,175,55,.2);transform:scale(.92)}
 .tb-title{font-size:14px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-bright);text-shadow:0 0 12px var(--gold-glow)}
 
-/* ============ FORMS ============ */
 .form-body{flex:1;overflow-y:auto;padding:20px}
 .form-body::-webkit-scrollbar{display:none}
 .tabs{display:flex;gap:6px;background:rgba(0,0,0,.4);padding:5px;border-radius:14px;margin-bottom:20px;border:1px solid var(--stroke)}
@@ -123,7 +113,6 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
 .switch input:checked+.track{background:linear-gradient(135deg,var(--gold),#a88521)}
 .switch input:checked+.track::before{transform:translateX(20px);background:#0d2e1a}
 
-/* ============ ROOM ============ */
 .room-code-big{text-align:center;margin:18px}
 .room-code-big .lbl{font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.3em;font-weight:800}
 .room-code-big .val{font-size:44px;font-weight:900;letter-spacing:.22em;text-indent:.22em;margin-top:10px;color:var(--gold-bright);font-family:'SF Mono',Menlo,monospace;cursor:pointer;text-shadow:0 0 24px var(--gold-glow);animation:codePulse 3s ease-in-out infinite}
@@ -150,7 +139,6 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
 .rp-slot{padding:14px 6px;border-radius:14px;border:1.5px dashed rgba(212,175,55,.2);display:grid;place-items:center;color:rgba(212,175,55,.3);font-size:22px}
 .room-params{margin:0 20px 20px;background:rgba(0,0,0,.4);border:1px solid var(--stroke);border-radius:14px;overflow:hidden}
 
-/* ============ GAME ============ */
 #game{padding:0;overflow:hidden;background:radial-gradient(ellipse at 50% 45%, #1e5c35 0%, #16492a 40%, #0d2e1a 75%, #08180d 100%)}
 .game-topbar{display:flex;justify-content:space-between;align-items:center;padding:calc(var(--safe-top) + 8px) 12px 8px;flex-shrink:0;gap:6px;z-index:10}
 .gt-left,.gt-right{display:flex;gap:6px;align-items:center}
@@ -191,19 +179,12 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
 .table-center .pair .atk-card{position:absolute;top:0;left:0;z-index:1}
 .table-center .pair .def-card{position:absolute;top:5px;left:5px;z-index:2;transform:rotate(7deg);animation:defendIn .28s cubic-bezier(.34,1.56,.64,1)}
 @keyframes defendIn{0%{opacity:0;transform:translate(-30px,-30px) scale(.6)}60%{opacity:1;transform:translate(8px,8px) rotate(10deg) scale(1.05)}100%{transform:translate(0,0) rotate(7deg) scale(1)}}
-
-/* DROP TARGETS */
-.table-center.drop-target{
-  background:radial-gradient(ellipse at center, rgba(255,217,102,.2) 0%, rgba(255,217,102,.08) 40%, transparent 70%);
-  box-shadow:inset 0 0 60px rgba(255,217,102,.25), 0 0 40px rgba(255,217,102,.3);
-  animation:dropGlow 1s ease-in-out infinite;
-}
-@keyframes dropGlow{0%,100%{box-shadow:inset 0 0 60px rgba(255,217,102,.25), 0 0 40px rgba(255,217,102,.3)}50%{box-shadow:inset 0 0 80px rgba(255,217,102,.4), 0 0 60px rgba(255,217,102,.5)}}
+.table-center.drop-target{background:radial-gradient(ellipse at center, rgba(255,217,102,.2) 0%, rgba(255,217,102,.08) 40%, transparent 70%);box-shadow:inset 0 0 60px rgba(255,217,102,.25), 0 0 40px rgba(255,217,102,.3);animation:dropGlow 1s ease-in-out infinite}
+@keyframes dropGlow{0%,100%{box-shadow:inset 0 0 60px rgba(255,217,102,.25)}50%{box-shadow:inset 0 0 80px rgba(255,217,102,.4)}}
 .pair.drop-target{transform:scale(1.1);z-index:5}
 .pair.drop-target::before{content:'';position:absolute;inset:-8px;border:2.5px dashed var(--gold-bright);border-radius:12px;animation:dashPulse .9s ease-in-out infinite;pointer-events:none;box-shadow:0 0 24px var(--gold-bright)}
 @keyframes dashPulse{0%,100%{opacity:1}50%{opacity:.45}}
 
-/* CARD */
 .card{width:50px;height:72px;border-radius:6px;position:relative;flex-shrink:0;font-family:'Times New Roman',Georgia,serif;transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .18s,opacity .2s;border:1px solid rgba(0,0,0,.4);box-shadow:1px 2px 6px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.5);background:#fdfcf7;will-change:transform}
 .card.red{color:var(--card-red)}
 .card:not(.red){color:var(--card-black)}
@@ -218,7 +199,6 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
 .card.back::after{content:"★";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--gold);font-size:26px;line-height:1;text-shadow:0 0 10px var(--gold-glow)}
 .card.back .cn,.card.back .cs,.card.back .cn-b,.card.back .cs-b,.card.back .mid{display:none}
 
-/* HAND */
 .hand-area{flex-shrink:0;padding:0 8px 8px;background:linear-gradient(to top,rgba(0,0,0,.4),transparent 60%);position:relative;z-index:5}
 .hand-outer{display:flex;justify-content:center;align-items:flex-end;min-height:104px;padding:16px 8px 6px;gap:0;overflow-x:auto;overflow-y:visible;scrollbar-width:none}
 .hand-outer::-webkit-scrollbar{display:none}
@@ -232,10 +212,8 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
 @keyframes cardDealIn{from{opacity:0;transform:translateY(-120px) scale(.4) rotate(20deg)}to{opacity:1;transform:translateY(0) scale(1) rotate(0)}}
 .hand-outer .card.dragging{opacity:.25}
 
-/* GHOST CARD (during drag) */
 .ghost-card{position:fixed;pointer-events:none;z-index:9999;will-change:transform;filter:drop-shadow(0 20px 32px rgba(0,0,0,.8)) drop-shadow(0 0 24px rgba(255,217,102,.7))}
 
-/* ACTION BAR */
 .action-bar{flex-shrink:0;padding:10px 12px calc(var(--safe-bottom) + 10px);background:linear-gradient(to top,rgba(0,0,0,.6),rgba(0,0,0,.2) 60%,transparent);display:flex;align-items:center;gap:10px;position:relative;z-index:5}
 .ab-me{width:56px;height:56px;border-radius:12px;position:relative;flex-shrink:0}
 .ab-me .opp-av,.ab-me .opp-av-fb{width:56px;height:56px;border-radius:12px}
@@ -251,20 +229,17 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
 .ab-status{flex:1;text-align:center;font-size:12px;font-weight:700;color:var(--text);padding:10px 14px;background:rgba(0,0,0,.55);border-radius:12px;border:1px solid var(--stroke)}
 .ab-status.hot{background:linear-gradient(135deg,rgba(212,175,55,.35),rgba(212,175,55,.15));color:var(--gold-bright);border-color:var(--gold)}
 
-/* Emotes */
 .emotes{display:flex;gap:5px;justify-content:center;padding:4px 0;flex-shrink:0;z-index:5}
 .emote-btn{width:40px;height:40px;border-radius:12px;background:rgba(0,0,0,.5);border:1px solid var(--stroke);display:grid;place-items:center;font-size:20px;transition:transform .12s}
 .emote-btn:active{transform:scale(.85);background:rgba(212,175,55,.25)}
-.float-emote{position:fixed;font-size:56px;pointer-events:none;z-index:999;animation:floatUp 2.5s ease-out forwards;filter:drop-shadow(0 4px 12px rgba(0,0,0,.7))}
+.float-emote{position:fixed;font-size:56px;pointer-events:none;z-index:9999;animation:floatUp 2.5s ease-out forwards;filter:drop-shadow(0 4px 12px rgba(0,0,0,.7))}
 @keyframes floatUp{0%{opacity:0;transform:translateY(0) scale(.4)}12%{opacity:1;transform:translateY(-30px) scale(1.3)}100%{opacity:0;transform:translateY(-220px) scale(.85)}}
 
-/* TOAST */
 #toast-wrap{position:fixed;top:calc(var(--safe-top) + 70px);left:0;right:0;z-index:999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 20px}
 .toast{padding:13px 20px;border-radius:14px;font-size:13px;font-weight:700;background:linear-gradient(135deg,rgba(13,46,26,.98),rgba(8,24,13,.98));border:1px solid var(--gold);color:var(--text);backdrop-filter:blur(14px);animation:toastIn .35s cubic-bezier(.34,1.56,.64,1);max-width:100%;box-shadow:0 8px 28px -8px rgba(0,0,0,.9),0 0 20px -8px var(--gold-glow)}
 @keyframes toastIn{from{opacity:0;transform:translateY(-20px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
 .toast.ok{border-color:#4ade80}.toast.err{border-color:#ff4d5e}
 
-/* MODAL */
 #modal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(8px)}
 #modal.show{display:flex}
 .modal-box{width:100%;max-width:340px;background:linear-gradient(160deg,#16492a,#0d2e1a);border:1px solid var(--gold);border-radius:22px;padding:26px 22px;text-align:center;box-shadow:0 24px 60px -12px rgba(0,0,0,.9),0 0 40px -12px var(--gold-glow);animation:modalIn .35s cubic-bezier(.34,1.56,.64,1)}
@@ -317,7 +292,7 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:n
       <div class="field"><label class="field-lbl">Название</label><input class="input" id="lobbyName" maxlength="24" placeholder="Космический дурак"></div>
       <div class="field"><label class="field-lbl">Игроков</label><div class="seg" data-seg="maxp"><button data-val="2">2</button><button data-val="3" class="active">3</button><button data-val="4">4</button></div></div>
       <div class="field"><label class="field-lbl">Колода</label><div class="seg" data-seg="deck"><button data-val="36" class="active">36</button><button data-val="52">52</button></div></div>
-      <div class="field"><label class="field-lbl">Режим</label><div class="seg" data-seg="mode"><button data-val="classic" class="active">Классика</button><button data-val="podkidnoy">Подкидной</button></div></div>
+      <div class="field"><label class="field-lbl">Режим</label><div class="seg" data-seg="mode"><button data-val="podkidnoy" class="active">Подкидной</button><button data-val="perevod">Переводной</button></div></div>
       <div class="field"><label class="field-lbl">Приватность</label><div class="seg" data-seg="privacy"><button data-val="private" class="active">По коду</button><button data-val="public">Публичное</button></div></div>
       <button class="btn btn-gold" id="btnCreate" style="margin-top:24px">★ Создать лобби</button>
     </div>
@@ -448,7 +423,7 @@ let db = null;
 try { firebase.initializeApp(firebaseConfig); db = firebase.database(); }
 catch(e){ console.error('FB init:', e); }
 
-/* ============ 3. ICE CONFIG (minimal for fast gathering) ============ */
+/* ============ 3. ICE CONFIG ============ */
 const ICE_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -462,15 +437,20 @@ const ICE_CONFIG = {
 const State = {
   screen:'loading', history:[],
   code:null, isHost:false,
-  lobbyRef:null, playerRef:null,
+  lobbyRef:null, playerRef:null, emotesRef:null,
   peers:{}, hostPeerId:null,
   lobby:null, gameState:null,
   settings:{}, heartbeat:null,
   connectedPeers:new Set(),
-  signalsListener:null,
+  signalsListener:null, signalsHandler:null,
   processedSignals:new Set(),
+  pendingIce:{},
   myLastGame:null,
-  pendingIce:{}       // peerId -> queued ICE candidates
+  // Anti-spam / race prevention
+  actionPending:false,
+  actionTimeout:null,
+  // Emote dedup
+  seenEmotes:new Set()
 };
 const DEFAULTS = { sfx:true, vibe:true, sort:true, showId:true };
 const LS_CODE = 'dnz_code';
@@ -562,28 +542,46 @@ function createGame(lobby){
   const di = (ai + 1) % pids.length;
   return { deck, trumpCard, trumpSuit, hands, order:pids, table:[], discardCount:0,
     attackerIdx:ai, defenderIdx:di, phase:'attack', round:1,
+    mode: lobby.mode || 'podkidnoy',
     turnStartedAt:Date.now(), finished:false, loserId:null, winnerId:null,
     lastAction:{ type:'start', at:Date.now() } };
 }
 const gAttackerId = g => g.order[g.attackerIdx];
 const gDefenderId = g => g.order[g.defenderIdx];
+
+// === FIXED: soft throw rules — only 6 total limit, no strict defHand check ===
 function gAttack(g, pid, card){
   if (g.finished || (g.phase!=='attack' && g.phase!=='throw') || gAttackerId(g)!==pid) return false;
   if (g.table.some(p => !p.def)) return false;
   const hand = g.hands[pid] || [];
   const idx = hand.findIndex(c => cardEq(c, card));
-  if (idx < 0 || g.table.length >= 6) return false;
-  if (g.phase === 'throw'){
+  if (idx < 0) return false;
+  // Only rule: total cards on table < 6
+  if (g.table.length >= 6) return false;
+
+  // First attack — any card
+  if (g.phase === 'attack' && g.table.length === 0){
+    hand.splice(idx, 1);
+    g.table.push({ atk: card, def: null });
+    g.phase = 'defend';
+    g.turnStartedAt = Date.now();
+    g.lastAction = { type:'attack', by:pid, card, at:Date.now() };
+    return true;
+  }
+
+  // Throw-in — rank must match something on table
+  if (g.phase === 'throw' || (g.phase === 'attack' && g.table.length > 0)){
     const ranks = new Set();
     for (const p of g.table){ ranks.add(p.atk.r); if (p.def) ranks.add(p.def.r); }
     if (!ranks.has(card.r)) return false;
-    const defHand = (g.hands[gDefenderId(g)] || []).length;
-    if (g.table.filter(p=>p.def).length >= defHand) return false;
+    hand.splice(idx, 1);
+    g.table.push({ atk: card, def: null });
+    g.phase = 'defend';
+    g.turnStartedAt = Date.now();
+    g.lastAction = { type:'attack', by:pid, card, at:Date.now() };
+    return true;
   }
-  hand.splice(idx, 1); g.table.push({ atk: card, def: null });
-  g.phase = 'defend'; g.turnStartedAt = Date.now();
-  g.lastAction = { type:'attack', by:pid, card, at:Date.now() };
-  return true;
+  return false;
 }
 function gDefend(g, pid, card){
   if (g.finished || g.phase !== 'defend' || gDefenderId(g) !== pid) return false;
@@ -612,16 +610,25 @@ function gBito(g, pid){
   g.lastAction = { type:'bito', by:pid, at:Date.now() };
   endRound(g, 'defended'); return true;
 }
+// === FIXED: translate only in perevod mode, only on first move of round ===
 function gTranslate(g, pid, card){
   if (g.finished || g.phase !== 'defend' || gDefenderId(g) !== pid) return false;
-  if (g.table.length !== 1 || g.table[0].def || g.order.length < 3) return false;
+  if (g.mode !== 'perevod') return false;                        // only переводной
+  if (g.table.length !== 1 || g.table[0].def) return false;      // only first undefended
+  if (g.round !== 1 && g.discardCount === 0 && g.table.length === 1){
+    // Additional strictness: only very first move of the game (round 1)
+  }
+  if (g.round !== 1) return false;                                // only round 1
+  if (g.order.length < 3) return false;                           // need 3+ players
   const matchIdx = (g.hands[pid]||[]).findIndex(c => c.r === g.table[0].atk.r);
   if (matchIdx < 0) return false;
   const nextDefIdx = (g.defenderIdx + 1) % g.order.length;
   if (nextDefIdx === g.attackerIdx) return false;
   const c = g.hands[pid].splice(matchIdx, 1)[0];
-  g.attackerIdx = g.defenderIdx; g.defenderIdx = nextDefIdx;
-  g.table.push({ atk:c, def:null }); g.phase = 'defend'; g.turnStartedAt = Date.now();
+  g.attackerIdx = g.defenderIdx;
+  g.defenderIdx = nextDefIdx;
+  g.table.push({ atk:c, def:null });
+  g.phase = 'defend'; g.turnStartedAt = Date.now();
   g.lastAction = { type:'translate', by:pid, card:c, at:Date.now() };
   return true;
 }
@@ -658,9 +665,8 @@ function endRound(g, result){
   g.phase = 'attack'; g.round++; g.turnStartedAt = Date.now();
 }
 
-/* ============ 7. NET LAYER (optimized P2P) ============ */
+/* ============ 7. NET LAYER ============ */
 const Net = {
-  // --- HOST: handle incoming offer ---
   async hostHandleOffer(guestId, offer){
     let entry = State.peers[guestId];
     if (!entry){
@@ -671,42 +677,29 @@ const Net = {
       pc.onconnectionstatechange = () => {
         if (pc.connectionState==='failed' || pc.connectionState==='disconnected') Net.dropPeer(guestId);
       };
-      pc.ondatachannel = e => {
-        entry.dc = e.channel;
-        Net.setupChannel(guestId, entry.dc);
-      };
+      pc.ondatachannel = e => { entry.dc = e.channel; Net.setupChannel(guestId, entry.dc); };
     }
     try {
       await entry.pc.setRemoteDescription({ type:'offer', sdp:offer });
-      // Flush any queued ICE candidates
       if (State.pendingIce[guestId]?.length){
-        for (const c of State.pendingIce[guestId]){
-          try { await entry.pc.addIceCandidate(c); } catch(e){}
-        }
+        for (const c of State.pendingIce[guestId]){ try{ await entry.pc.addIceCandidate(c); }catch(e){} }
         State.pendingIce[guestId] = [];
       }
       const answer = await entry.pc.createAnswer();
       await entry.pc.setLocalDescription(answer);
-      // Push answer IMMEDIATELY — don't wait for ICE
       db.ref(`lobbies/${State.code}/signals`).push({
         from:USER.id, to:guestId, kind:'answer', sdp:entry.pc.localDescription.sdp, at:Date.now()
       }).catch(()=>{});
     } catch(e){ console.warn('hostHandleOffer:', e); }
   },
-
   async hostHandleIceBatch(guestId, cands){
     const entry = State.peers[guestId];
     if (!entry || !entry.pc.remoteDescription){
-      // Queue until remote desc is set
       State.pendingIce[guestId] = (State.pendingIce[guestId] || []).concat(cands);
       return;
     }
-    for (const c of cands){
-      try { await entry.pc.addIceCandidate(c); } catch(e){}
-    }
+    for (const c of cands){ try{ await entry.pc.addIceCandidate(c); }catch(e){} }
   },
-
-  // --- GUEST: create offer, connect to host ---
   async guestConnectToHost(){
     const hostId = State.hostPeerId;
     if (!hostId || State.peers[hostId]) return;
@@ -733,46 +726,33 @@ const Net = {
       }).catch(()=>{});
     } catch(e){ console.warn('guest offer:', e); }
   },
-
   async guestHandleSignal(msg){
     const entry = State.peers[State.hostPeerId];
     if (!entry) return;
     try {
       if (msg.kind==='answer' && entry.pc.signalingState==='have-local-offer'){
         await entry.pc.setRemoteDescription({ type:'answer', sdp:msg.sdp });
-        // Flush queued ICE
         if (State.pendingIce[State.hostPeerId]?.length){
-          for (const c of State.pendingIce[State.hostPeerId]){
-            try { await entry.pc.addIceCandidate(c); } catch(e){}
-          }
+          for (const c of State.pendingIce[State.hostPeerId]){ try{ await entry.pc.addIceCandidate(c); }catch(e){} }
           State.pendingIce[State.hostPeerId] = [];
         }
       } else if (msg.kind==='ice-batch'){
         if (!entry.pc.remoteDescription){
           State.pendingIce[State.hostPeerId] = (State.pendingIce[State.hostPeerId] || []).concat(msg.cands);
         } else {
-          for (const c of msg.cands){ try { await entry.pc.addIceCandidate(c); } catch(e){} }
+          for (const c of msg.cands){ try{ await entry.pc.addIceCandidate(c); }catch(e){} }
         }
       }
     } catch(e){ console.warn('guest signal:', e); }
   },
-
-  // --- ICE batching ---
   onIce(peerId, e){
     const entry = State.peers[peerId];
     if (!entry) return;
     if (e.candidate){
       entry.iceBuf.push(e.candidate.toJSON());
-      // Send first candidate alone for fastest start
-      if (entry.iceBuf.length === 1){
-        Net.pushIceBatch(peerId, [entry.iceBuf.shift()]);
-      }
-      // Buffer the rest, flush after 250ms
-      if (!entry.iceTimer){
-        entry.iceTimer = setTimeout(()=>{ entry.iceTimer = null; Net.flushIce(peerId); }, 250);
-      }
+      if (entry.iceBuf.length === 1) Net.pushIceBatch(peerId, [entry.iceBuf.shift()]);
+      if (!entry.iceTimer) entry.iceTimer = setTimeout(()=>{ entry.iceTimer = null; Net.flushIce(peerId); }, 250);
     } else {
-      // gathering complete
       if (entry.iceTimer){ clearTimeout(entry.iceTimer); entry.iceTimer = null; }
       Net.flushIce(peerId);
     }
@@ -789,17 +769,13 @@ const Net = {
       from:USER.id, to:peerId, kind:'ice-batch', cands, at:Date.now()
     }).catch(()=>{});
   },
-
   setupChannel(peerId, dc){
     dc.binaryType = 'arraybuffer';
     dc.onopen = () => {
       State.connectedPeers.add(peerId);
       Net.updateP2PStatus('on');
-      if (State.isHost && State.gameState){
-        Net.sendTo(peerId, { t:'state', state: State.gameState });
-      } else if (!State.isHost){
-        Net.sendTo(peerId, { t:'hello', id:USER.id, name:USER.name });
-      }
+      if (State.isHost && State.gameState) Net.sendTo(peerId, { t:'state', state: State.gameState });
+      else if (!State.isHost) Net.sendTo(peerId, { t:'hello', id:USER.id, name:USER.name });
       renderRoom();
       haptic('success');
     };
@@ -814,7 +790,6 @@ const Net = {
       Net.onMessage(peerId, msg);
     };
   },
-
   onMessage(fromId, msg){
     if (State.isHost){
       if (msg.t==='hello'){
@@ -822,15 +797,33 @@ const Net = {
       } else if (msg.t==='action'){
         Net.hostApplyAction(fromId, msg);
       } else if (msg.t==='chat'){
-        Net.broadcast({ t:'chat', from:fromId, e:msg.e }, fromId);
+        Net.broadcast({ t:'chat', from:fromId, e:msg.e, mid: msg.mid }, fromId);
+        if (msg.mid) State.seenEmotes.add(msg.mid);
       }
     } else {
-      if (msg.t==='state'){ State.gameState = msg.state; route(); }
-      else if (msg.t==='chat'){ Net.showEmote(msg.e); }
-      else if (msg.t==='err'){ toast(msg.msg || 'Ход не принят','err',1500); renderGame(State.gameState); }
+      if (msg.t==='state'){
+        State.gameState = msg.state;
+        // Clear pending flag — action confirmed
+        if (State.actionPending){
+          State.actionPending = false;
+          if (State.actionTimeout){ clearTimeout(State.actionTimeout); State.actionTimeout = null; }
+        }
+        route();
+      }
+      else if (msg.t==='chat'){
+        if (!msg.mid || !State.seenEmotes.has(msg.mid)){
+          if (msg.mid) State.seenEmotes.add(msg.mid);
+          showFloatEmote(msg.e, msg.from);
+        }
+      }
+      else if (msg.t==='err'){
+        State.actionPending = false;
+        if (State.actionTimeout){ clearTimeout(State.actionTimeout); State.actionTimeout = null; }
+        toast(msg.msg || 'Ход не принят','err',1500);
+        renderGame(State.gameState);
+      }
     }
   },
-
   hostApplyAction(pid, msg){
     const g = State.gameState;
     if (!g) return;
@@ -840,7 +833,11 @@ const Net = {
     else if (msg.a==='take') ok = gTake(g, pid);
     else if (msg.a==='bito') ok = gBito(g, pid);
     else if (msg.a==='translate') ok = gTranslate(g, pid, msg.card);
-    if (!ok){ Net.sendTo(pid, { t:'err', msg:'Ход не принят' }); return; }
+    if (!ok){
+      Net.sendTo(pid, { t:'err', msg:'Ход не принят' });
+      return;
+    }
+    // Broadcast FIRST (fastest delivery to peers), then apply locally
     Net.broadcast({ t:'state', state: g });
     State.gameState = g;
     route();
@@ -882,16 +879,8 @@ const Net = {
       else { gt.textContent = '● ...'; }
     }
   },
-  showEmote(e){
-    const el = document.createElement('div'); el.className = 'float-emote'; el.textContent = e;
-    el.style.left = (Math.random()*50+25)+'%'; el.style.bottom = '180px';
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(), 2500);
-  },
-
-  // FAST signals — use on('value') and process whole snapshot
   setupSignaling(){
-    if (State.signalsListener){ try{ State.signalsListener.off(); }catch{} }
+    if (State.signalsListener){ try{ State.signalsListener.off('value', State.signalsHandler); }catch{} }
     State.processedSignals.clear();
     const ref = db.ref(`lobbies/${State.code}/signals`);
     const handler = snap => {
@@ -904,7 +893,6 @@ const Net = {
         if (String(msg.from) === USER.id) return;
         State.processedSignals.add(key);
         child.ref.remove().catch(()=>{});
-        // Process
         if (State.isHost){
           if (msg.kind==='offer') Net.hostHandleOffer(msg.from, msg.sdp).catch(()=>{});
           else if (msg.kind==='ice-batch') Net.hostHandleIceBatch(msg.from, msg.cands).catch(()=>{});
@@ -918,10 +906,7 @@ const Net = {
     State.signalsHandler = handler;
   },
   cleanup(){
-    if (State.signalsListener){
-      try{ State.signalsListener.off('value', State.signalsHandler); }catch{}
-      State.signalsListener = null;
-    }
+    if (State.signalsListener){ try{ State.signalsListener.off('value', State.signalsHandler); }catch{} State.signalsListener = null; }
     State.processedSignals.clear();
     State.pendingIce = {};
     for (const pid of Object.keys(State.peers)){
@@ -931,6 +916,54 @@ const Net = {
     State.connectedPeers.clear();
   }
 };
+
+/* ============ EMOTE (P2P + Firebase fallback) ============ */
+function showFloatEmote(emoji, fromId){
+  const el = document.createElement('div');
+  el.className = 'float-emote';
+  el.textContent = emoji;
+  // Position near sender
+  const senderEl = fromId ? document.querySelector(`[data-pid="${fromId}"]`) : null;
+  if (senderEl){
+    const r = senderEl.getBoundingClientRect();
+    el.style.left = (r.left + r.width/2 - 28) + 'px';
+    el.style.top = (r.top - 10) + 'px';
+  } else {
+    el.style.left = (Math.random()*50 + 25) + '%';
+    el.style.top = (30 + Math.random()*20) + '%';
+  }
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 2500);
+}
+function sendEmote(emoji){
+  haptic('light');
+  const mid = 'e' + Date.now() + Math.random().toString(36).slice(2,6);
+  State.seenEmotes.add(mid);
+  showFloatEmote(emoji, USER.id);
+  // P2P
+  if (State.isHost){
+    Net.broadcast({ t:'chat', from:USER.id, e:emoji, mid });
+  } else {
+    Net.sendToHost({ t:'chat', e:emoji, mid });
+  }
+  // Firebase fallback — for cases when P2P not established yet
+  if (State.code && db && State.connectedPeers.size === 0){
+    db.ref(`lobbies/${State.code}/emotes`).push({ e:emoji, from:USER.id, mid, at:Date.now() });
+  }
+}
+function listenEmotesFirebase(){
+  if (!State.code || !db) return;
+  if (State.emotesRef){ try{ State.emotesRef.off('child_added'); }catch{} }
+  State.emotesRef = db.ref(`lobbies/${State.code}/emotes`).limitToLast(1);
+  State.emotesRef.on('child_added', snap => {
+    const d = snap.val();
+    if (!d || d.from === USER.id) return;
+    if (Date.now() - d.at > 4000) return;                       // ignore stale
+    if (d.mid && State.seenEmotes.has(d.mid)) return;           // dedupe from P2P
+    if (d.mid) State.seenEmotes.add(d.mid);
+    showFloatEmote(d.e, d.from);
+  });
+}
 
 /* ============ 8. NAV ============ */
 function showScreen(id, { push=true } = {}){
@@ -988,7 +1021,7 @@ async function createLobby(){
       name: $('#lobbyName').value.trim() || (USER.name+' ★'),
       createdAt:Date.now(), status:'waiting',
       maxPlayers:Number(segVal('maxp')||3), deck:Number(segVal('deck')||36),
-      mode:segVal('mode')||'classic', privacy:segVal('privacy')||'private' };
+      mode:segVal('mode')||'podkidnoy', privacy:segVal('privacy')||'private' };
     await db.ref('lobbies/'+code+'/meta').set(lobby);
     await db.ref(`lobbies/${code}/members/${USER.id}`).set({
       id:USER.id, name:USER.name, username:USER.username, photo:USER.photo,
@@ -1063,6 +1096,9 @@ function enterRoom(code, isHost){
   State.lobbyRef = db.ref('lobbies/'+code);
   State.playerRef = db.ref(`lobbies/${code}/members/${USER.id}`);
   State.hostPeerId = null; State.gameState = null; State.myLastGame = null;
+  State.actionPending = false;
+  if (State.actionTimeout){ clearTimeout(State.actionTimeout); State.actionTimeout = null; }
+  State.seenEmotes.clear();
 
   try{ localStorage.setItem(LS_CODE, code); }catch{}
   $('#roomCode').textContent = code;
@@ -1084,8 +1120,6 @@ function enterRoom(code, isHost){
     const v = snap.val();
     State.lobby = { ...(v.meta||{}), members: v.members||{}, status: v.meta?.status||'waiting' };
     State.hostPeerId = String(v.meta?.host || '');
-
-    // === Guest: connect immediately, no delay ===
     if (!State.isHost && State.hostPeerId && !State.peers[State.hostPeerId]){
       Net.guestConnectToHost();
     }
@@ -1093,6 +1127,7 @@ function enterRoom(code, isHost){
   }, err=>{ if (err.code==='PERMISSION_DENIED') rulesHint(); });
 
   Net.setupSignaling();
+  listenEmotesFirebase();
 
   State.history = ['menu','lobby'];
   showScreen('room', { push:false });
@@ -1121,6 +1156,7 @@ function renderRoom(){
     const off = p.online === false;
     const p2p = State.connectedPeers.has(String(p.id));
     const el = document.createElement('div');
+    el.dataset.pid = p.id;
     el.className = 'rp' + (p.host?' host':'') + (p.ready&&!p.host?' ready':'') + (me?' me':'') + (p2p?' p2p':'') + (off?' offline':'');
     const av = p.photo
       ? `<img src="${esc(p.photo)}" onerror="this.outerHTML='<div class=&quot;fb&quot;>${esc((p.name[0]||'★').toUpperCase())}</div>'">`
@@ -1135,11 +1171,11 @@ function renderRoom(){
     const el = document.createElement('div'); el.className = 'rp-slot'; el.textContent = '+'; g.appendChild(el);
   }
 
-  const modes = { classic:'Классика', podkidnoy:'Подкидной' };
+  const modes = { podkidnoy:'Подкидной', perevod:'Переводной' };
   $('#roomParams').innerHTML = `
     <div class="set-row"><div class="set-ic">★</div><div class="set-info"><div class="set-name">${esc(l.name||'—')}</div><div class="set-desc">Название</div></div></div>
     <div class="set-row"><div class="set-ic">👑</div><div class="set-info"><div class="set-name">${esc(l.hostName||'—')}</div><div class="set-desc">Хост = P2P сервер</div></div></div>
-    <div class="set-row"><div class="set-ic">🎴</div><div class="set-info"><div class="set-name">${l.deck} карт • ${modes[l.mode]||'Классика'}</div><div class="set-desc">${l.privacy==='public'?'Публичное':'Приватное'}</div></div></div>
+    <div class="set-row"><div class="set-ic">🎴</div><div class="set-info"><div class="set-name">${l.deck} карт • ${modes[l.mode]||'Подкидной'}</div><div class="set-desc">${l.privacy==='public'?'Публичное':'Приватное'}</div></div></div>
   `;
 
   const amHost = String(l.host) === USER.id;
@@ -1170,12 +1206,16 @@ function renderRoom(){
 function leaveRoom(confirm=true){
   const doLeave = ()=>{
     if (State.heartbeat){ clearInterval(State.heartbeat); State.heartbeat = null; }
+    if (State.actionTimeout){ clearTimeout(State.actionTimeout); State.actionTimeout = null; }
+    State.actionPending = false;
     Net.cleanup();
+    if (State.emotesRef){ try{ State.emotesRef.off(); }catch{} State.emotesRef = null; }
     if (State.lobbyRef){ try{ State.lobbyRef.off(); }catch{} State.lobbyRef = null; }
     if (State.playerRef){ try{ State.playerRef.onDisconnect().cancel(); }catch{} State.playerRef.remove().catch(()=>{}); State.playerRef = null; }
     if (State.code && State.isHost && db) db.ref('lobbies/'+State.code).remove().catch(()=>{});
     try{ localStorage.removeItem(LS_CODE); }catch{}
     State.code = null; State.lobby = null; State.isHost = false; State.gameState = null;
+    State.seenEmotes.clear();
     haptic('light'); showScreen('lobby', { push:false }); State.history = ['menu'];
   };
   if (!confirm) return doLeave();
@@ -1205,13 +1245,24 @@ async function startGame(){
   finally{ btn.disabled = false; btn.textContent = '🚀 Начать игру'; }
 }
 
-/* ============ 13. GAME ACTIONS ============ */
+/* ============ 13. GAME ACTIONS (with anti-spam) ============ */
 function sendAction(a, card){
+  if (State.actionPending){
+    toast('Подождите...','info',800);
+    return false;
+  }
   const msg = { t:'action', a };
   if (card) msg.card = card;
   const ok = Net.sendToHost(msg);
-  if (!ok) toast('Нет связи с хостом','err',1500);
-  return ok;
+  if (!ok){ toast('Нет связи с хостом','err',1500); return false; }
+  State.actionPending = true;
+  if (State.actionTimeout) clearTimeout(State.actionTimeout);
+  State.actionTimeout = setTimeout(()=>{
+    State.actionPending = false;
+    State.actionTimeout = null;
+    toast('Превышено время ожидания','err',1500);
+  }, 3000);
+  return true;
 }
 function animateCardOut(card){
   const key = cardKey(card);
@@ -1247,6 +1298,7 @@ function renderGame(g){
   const me = g.hands?.[USER.id] || [];
   const amAttacker = g.order[g.attackerIdx] === USER.id;
   const amDefender = g.order[g.defenderIdx] === USER.id;
+  const mode = g.mode || 'podkidnoy';
 
   // Opponents
   const opps = $('#oppsRow');
@@ -1264,6 +1316,7 @@ function renderGame(g){
       const isDef = g.order[g.defenderIdx] === pid;
       const off = p.online === false;
       const el = document.createElement('div');
+      el.dataset.pid = pid;
       el.className = 'opp' + (isAtk?' attacker':'') + (isDef?' defender':'') + (off?' offline':'');
       const av = p.photo
         ? `<img class="opp-av" src="${esc(p.photo)}" onerror="this.outerHTML='<div class=&quot;opp-av-fb&quot;>${esc((p.name[0]||'★').toUpperCase())}</div>'">`
@@ -1287,7 +1340,6 @@ function renderGame(g){
     tSlot.innerHTML = `<div style="width:50px;height:72px;display:grid;place-items:center;font-size:38px;color:${c};font-weight:900">${g.trumpSuit}</div><div class="trump-suit-badge">${g.trumpSuit}</div>`;
   }
 
-  // Table
   const tc = $('#tableCenter');
   const tableSig = (g.table||[]).map(p=>cardKey(p.atk)+(p.def?cardKey(p.def):'')).join('|');
   if (tc.dataset.sig !== tableSig){
@@ -1299,7 +1351,6 @@ function renderGame(g){
     }
   }
 
-  // Hand
   const mh = $('#myHand');
   const sortedHand = State.settings.sort ? sortHand(me, g.trumpSuit) : me;
   const handKeys = sortedHand.map(cardKey);
@@ -1308,7 +1359,6 @@ function renderGame(g){
   const undefended = (g.table||[]).find(p => !p.def);
   const tableLen = (g.table||[]).length;
 
-  // remove stale
   for (const el of [...mh.children]){
     if (!handKeys.includes(el.dataset.key) && !el.classList.contains('playing-out')){
       el.style.transition = 'all .2s';
@@ -1337,7 +1387,6 @@ function renderGame(g){
     mh.appendChild(cardEl);
     if (playable) attachDrag(cardEl, card, g);
   });
-  // update existing
   for (const el of mh.children){
     if (el.classList.contains('playing-out')) continue;
     const key = el.dataset.key;
@@ -1351,7 +1400,6 @@ function renderGame(g){
     }
     el.classList.toggle('playable', playable);
     el.classList.toggle('disabled', !playable && !g.finished);
-    // Re-attach drag on playable (safe: replaces)
     if (playable && !el.dataset.dragAttached){
       attachDrag(el, card, g);
       el.dataset.dragAttached = '1';
@@ -1359,7 +1407,6 @@ function renderGame(g){
     if (!playable) el.dataset.dragAttached = '';
   }
 
-  // My avatar
   const mp = State.lobby.members?.[USER.id] || {};
   const av = mp.photo
     ? `<img class="opp-av" src="${esc(mp.photo)}" onerror="this.outerHTML='<div class=&quot;opp-av-fb&quot;>${esc((mp.name[0]||'★').toUpperCase())}</div>'">`
@@ -1367,7 +1414,6 @@ function renderGame(g){
   $('#abMe').className = 'ab-me' + (amAttacker&&!g.finished?' attacker':'') + (amDefender&&!g.finished?' defender':'');
   $('#abMe').innerHTML = `${av}<div class="opp-cnt">${me.length}</div>`;
 
-  // Actions
   const ab = $('#abActions'); ab.innerHTML = '';
   if (g.finished){
     const iLost = g.loserId === USER.id;
@@ -1385,7 +1431,8 @@ function renderGame(g){
     const tb = document.createElement('button');
     tb.className = 'act-btn red'; tb.textContent = '🤲 Взять'; tb.onclick = doTake;
     ab.appendChild(tb);
-    if (tableLen === 1 && !g.table[0].def && g.order.length >= 3){
+    // === Translate button ONLY in perevod mode, ONLY first round, ONLY 1 undefended card ===
+    if (mode === 'perevod' && g.round === 1 && tableLen === 1 && !g.table[0].def && g.order.length >= 3){
       const rank = g.table[0].atk.r;
       const idx = me.findIndex(c => c.r === rank);
       if (idx >= 0){
@@ -1397,7 +1444,7 @@ function renderGame(g){
     }
   } else if (amAttacker && g.phase === 'throw'){
     const st = document.createElement('div');
-    st.className = 'ab-status hot'; st.textContent = '⚔️ Перетащите карту на стол';
+    st.className = 'ab-status hot'; st.textContent = '⚔️ Подкиньте или «Бито»';
     ab.appendChild(st);
     const bb = document.createElement('button');
     bb.className = 'act-btn green'; bb.textContent = '✓ Бито'; bb.onclick = doBito;
@@ -1417,7 +1464,6 @@ function renderGame(g){
 
 /* ============ 15. DRAG & DROP ============ */
 function attachDrag(cardEl, card, g){
-  // Remove old handler by cloning? No — use a flag
   if (cardEl.dataset.dragReady) return;
   cardEl.dataset.dragReady = '1';
 
@@ -1441,57 +1487,40 @@ function attachDrag(cardEl, card, g){
       ghost.style.transform = `translate3d(${pointerX - 25}px, ${pointerY - 40}px, 0) scale(1.2) rotate(-4deg)`;
       ghostRaf = null;
     }
-
     function createGhost(){
       ghost = cardEl.cloneNode(true);
       ghost.classList.add('ghost-card');
       ghost.classList.remove('playing-out','dealing-in','playable','disabled');
-      ghost.style.top = '0';
-      ghost.style.left = '0';
-      ghost.style.width = '50px';
-      ghost.style.height = '72px';
+      ghost.style.top = '0'; ghost.style.left = '0';
+      ghost.style.width = '50px'; ghost.style.height = '72px';
       ghost.style.transform = `translate3d(${pointerX - 25}px, ${pointerY - 40}px, 0) scale(1.2) rotate(-4deg)`;
       document.body.appendChild(ghost);
       cardEl.classList.add('dragging');
       haptic('light');
     }
-
     function findTarget(x, y){
       const under = document.elementFromPoint(x, y);
       if (!under) return null;
-
-      // Attack target: table center
       if (amAttacker && (g.phase === 'attack' || g.phase === 'throw')){
         const tc = document.getElementById('tableCenter');
-        if (tc && (under === tc || tc.contains(under))){
-          return { type: 'attack', el: tc };
-        }
+        if (tc && (under === tc || tc.contains(under))) return { type: 'attack', el: tc };
       }
-
-      // Defense target: undefended pair
       if (amDefender && g.phase === 'defend'){
         const pairs = document.querySelectorAll('#tableCenter .pair');
         for (let i = 0; i < pairs.length; i++){
           const pair = pairs[i];
           if (pair.querySelector('.def-card')) continue;
           const atk = pair.querySelector('.atk-card');
-          if (atk && (under === atk || atk.contains(under))){
-            return { type: 'defend', el: pair };
-          }
+          if (atk && (under === atk || atk.contains(under))) return { type: 'defend', el: pair };
         }
       }
       return null;
     }
-
     function onMove(e){
       pointerX = e.clientX; pointerY = e.clientY;
       const dx = pointerX - startX, dy = pointerY - startY;
       const dist = Math.sqrt(dx*dx + dy*dy);
-
-      if (!dragging && dist > 10){
-        dragging = true;
-        createGhost();
-      }
+      if (!dragging && dist > 10){ dragging = true; createGhost(); }
       if (dragging){
         e.preventDefault();
         if (!ghostRaf) ghostRaf = requestAnimationFrame(moveGhost);
@@ -1503,7 +1532,6 @@ function attachDrag(cardEl, card, g){
         }
       }
     }
-
     function onUp(e){
       document.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerup', onUp);
@@ -1512,21 +1540,18 @@ function attachDrag(cardEl, card, g){
       if (ghost) ghost.remove();
       cardEl.classList.remove('dragging');
       document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
-
       if (!dragging){
-        // TAP fallback: auto-play
+        // Tap fallback
         if (amAttacker && (g.phase === 'attack' || g.phase === 'throw')) doAttack(card);
         else if (amDefender && g.phase === 'defend') doDefend(card);
         return;
       }
-
       if (currentTarget){
         if (currentTarget.type === 'attack') doAttack(card);
         else if (currentTarget.type === 'defend') doDefend(card);
       }
       currentTarget = null;
     }
-
     document.addEventListener('pointermove', onMove, { passive: false });
     document.addEventListener('pointerup', onUp);
     document.addEventListener('pointercancel', onUp);
@@ -1603,19 +1628,18 @@ function bindUI(){
     toast(State.settings.sfx?'Звук вкл':'Звук выкл','info',1200);
   });
   $('#gtHelp').addEventListener('click', ()=>{
-    modal({ icon:'❓', title:'Как играть',
-      text:'★ Перетащите карту из руки на цель\n★ Атакующий — на стол\n★ Защитник — на атакующую карту\n★ «Взять» — забрать со стола\n★ «Бито» — завершить раунд\n★ «Перевод» — отдать ход дальше',
+    const mode = State.gameState?.mode || 'podkidnoy';
+    const modeName = mode === 'perevod' ? 'Переводной' : 'Подкидной';
+    modal({ icon:'❓', title:'Режим: ' + modeName,
+      text: mode === 'perevod'
+        ? '★ Перетащите карту на цель\n★ Отбиться — старшей или козырем\n★ Забрать — «Взять»\n★ Подкидывать до 6 карт\n★ Перевод — только первым ходом, если есть пара\n★ Максимум в бито 6 карт'
+        : '★ Перетащите карту на цель\n★ Отбиться — старшей или козырем\n★ Забрать — «Взять»\n★ Подкидывать до 6 карт\n★ Перевод НЕ доступен в этом режиме\n★ Максимум в бито 6 карт',
       actions:[{label:'Понятно',style:'btn-gold'}]
     });
   });
 
   $$('.emote-btn').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      const e = b.dataset.emote;
-      haptic('light');
-      Net.showEmote(e);
-      if (State.code && db) db.ref(`lobbies/${State.code}/emotes`).push({ e, from:USER.id, at:Date.now() }).catch(()=>{});
-    });
+    b.addEventListener('click', ()=> sendEmote(b.dataset.emote));
   });
 
   let tx=0,ty=0;
